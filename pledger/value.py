@@ -1,4 +1,5 @@
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
+import re
 
 class Value(object):
     def __init__(self, values):
@@ -53,5 +54,16 @@ class Value(object):
                           curr, value in self.values.iteritems()])
 
     def __repr__(self): return str(self)
+
+    @classmethod
+    def parse(cls, str):
+        elements = re.split(r"\s+", str)
+        if len(elements) == 2:
+            try:
+                amount = Decimal(elements[0])
+                currency = elements[1]
+                return Value({ currency: amount })
+            except InvalidOperation:
+                return None
 
 ZERO = Value({})
