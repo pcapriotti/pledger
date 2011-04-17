@@ -1,3 +1,5 @@
+import util
+
 class Ledger(object):
     def __init__(self):
         self.transactions = []
@@ -11,3 +13,8 @@ class Ledger(object):
     @property
     def entries(self):
         return itertools.chain(*self.transactions)
+
+    @classmethod
+    def parse(self, str):
+        lines = str.split("\n")
+        return [Transaction.parse(group) for group in util.itersplit(lines)]

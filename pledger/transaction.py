@@ -40,7 +40,10 @@ class Transaction(object):
 
     @classmethod
     def parse(cls, str):
-        lines = iter(str.split("\n"))
+        if hasattr(str, "split"):
+            lines = iter(str.split("\n"))
+        else:
+            lines = iter(str)
         header = lines.next()
         entries = [Entry.parse(line) for line in lines]
         return Transaction(entries)
