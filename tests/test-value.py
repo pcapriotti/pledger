@@ -1,6 +1,6 @@
 import unittest
 from decimal import Decimal
-from pledger import Value, ZERO
+from pledger.value import Value, ZERO
 
 class SingleCurrency(unittest.TestCase):
     def testSumNull(self):
