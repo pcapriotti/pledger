@@ -5,6 +5,9 @@ class Value(object):
     def __init__(self, values):
         self.values = values
 
+    def __eq__(self, other):
+        return self.values == other.values
+
     def __add__(self, other):
         result = dict(self.values)
         for currency in other.values:
@@ -49,6 +52,8 @@ class Value(object):
     def __str__(self, places=2):
         return ", ".join([self.format_value(curr, value) for
                           curr, value in self.values.iteritems()])
+
+    def __repr__(self): return str(self)
 
 ZERO = Value({})
 
@@ -111,14 +116,15 @@ class BalanceReport(Report):
         return result
 
 # example
-business = TopLevelAccount()
-business.expenses = Account()
-business.assets = Account()
+if __name__ == '__main__':
+    business = TopLevelAccount()
+    business.expenses = Account()
+    business.assets = Account()
 
-ledger = Ledger()
-entry1 = business.assets - Value({'EUR': Decimal("10.02") })
-entry2 = business.expenses + Value({'EUR': Decimal("10.002") })
-ledger.add(Transaction([entry1, entry2]))
+    ledger = Ledger()
+    entry1 = business.assets - Value({'EUR': Decimal("10.02") })
+    entry2 = business.expenses + Value({'EUR': Decimal("10.002") })
+    ledger.add(Transaction([entry1, entry2]))
 
-report = BalanceReport(ledger, lambda e: e.account == business.expenses)
-print report.value
+    report = BalanceReport(ledger, lambda e: e.account == business.expenses)
+    print report.value
