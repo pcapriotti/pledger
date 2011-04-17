@@ -14,8 +14,10 @@ class Entry(object):
     @classmethod
     def parse(cls, str):
         elements = [e for e in re.split(r"  +", str) if e]
-        if len(elements) == 2:
+        if len(elements) >= 1:
             account = Account.parse(elements[0])
-            amount = Value.parse(elements[1])
-            if account and amount:
+            amount = None
+            if len(elements) >= 2:
+                amount = Value.parse(elements[1])
+            if account:
                 return cls(account, amount)

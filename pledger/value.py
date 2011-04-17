@@ -5,8 +5,16 @@ class Value(object):
     def __init__(self, values):
         self.values = values
 
+    def null(self):
+        for currency, amount in self.values.iteritems():
+            if amount != 0: return False
+        return True
+
     def __eq__(self, other):
-        return self.values == other.values
+        if other is None:
+            return False
+        else:
+            return (self - other).null()
 
     def __add__(self, other):
         result = dict(self.values)
