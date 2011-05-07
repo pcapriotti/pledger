@@ -31,3 +31,5 @@ class AccountDirective(Directive):
     def __init__(self, account):
         self.account = account
 
+    def execute(self, processor):
+        processor.add_account_prefix(self.account)

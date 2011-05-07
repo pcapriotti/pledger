@@ -26,6 +26,9 @@ class Transaction(object):
         elif not balance.null():
             raise UnbalancedTransaction(self)
 
+    def execute(self, processor):
+        pass
+
     @property
     def amount(self):
         result = ZERO

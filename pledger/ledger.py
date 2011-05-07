@@ -1,4 +1,5 @@
 from pledger.transaction import Transaction
+from pledger.ledger_processor import LedgerProcessor
 import util
 
 class Ledger(object):
@@ -10,6 +11,10 @@ class Ledger(object):
 
     def add(self, transaction):
         self.transactions.append(transaction)
+
+    def process(self):
+        processor = LedgerProcessor(self)
+        return processor.run()
 
     @property
     def entries(self):
