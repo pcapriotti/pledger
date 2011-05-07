@@ -11,6 +11,9 @@ class Entry(object):
         return self.account == other.account and \
                self.amount == other.amount
 
+    def __str__(self):
+        return "%s (%s)" % (self.account, self.amount)
+
     @classmethod
     def parse(cls, str):
         elements = [e for e in re.split(r"  +", str) if e]

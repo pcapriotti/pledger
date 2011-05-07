@@ -51,9 +51,6 @@ class Value(object):
         while digits:
             build(next())
             i += 1
-            if i == 3 and digits:
-                i = 0
-                build(sep)
         if sign: build('-')
         return ''.join(reversed(result))
 

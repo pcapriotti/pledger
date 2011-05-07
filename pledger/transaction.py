@@ -1,5 +1,6 @@
 from pledger.entry import Entry
 from pledger.value import ZERO
+from pledger.directive import Directive
 
 class UnbalancedTransaction(Exception):
     def __init__(self, tr):
@@ -45,5 +46,9 @@ class Transaction(object):
         else:
             lines = iter(str)
         header = lines.next()
+
+        directive = Directive.parse(header)
+        if directive: return directive
+
         entries = [Entry.parse(line) for line in lines]
         return Transaction(entries)

@@ -15,3 +15,6 @@ class NamedAccount(Account):
 
     def __eq__(self, other):
         return self.name == other.name
+
+    def __str__(self):
+        return "'%s'" % self.name
