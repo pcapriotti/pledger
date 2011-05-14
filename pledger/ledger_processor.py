@@ -1,4 +1,5 @@
 from pledger.value import ZERO
+from pledger.entry import Entry
 
 class LedgerProcessor(object):
     def __init__(self, ledger, filters = None):
@@ -18,10 +19,18 @@ class LedgerProcessor(object):
         entries = self.filter(transaction)
         for entry in entries:
             self.total += entry.amount
-        self.process_entries(entries)
+        self.process_entries(transaction, entries)
 
-    def process_entries(self, entries):
+    def process_entries(self, transaction, entries):
         pass
 
     def filter(self, transaction):
-        return transaction.entries
+        result = []
+        for entry in transaction.entries:
+            account = entry.account.add_prefix(self.account_prefix)
+            amount = entry.amount
+            if self.filters:
+                result += self.filters.apply(transaction, account, amount)
+            else:
+                result.append(Entry(account, amount))
+        return result
