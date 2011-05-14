@@ -14,7 +14,8 @@ class Ledger(object):
 
     def process(self):
         processor = LedgerProcessor(self)
-        return processor.run()
+        processor.run()
+        return processor
 
     @property
     def entries(self):

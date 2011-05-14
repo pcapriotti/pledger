@@ -27,7 +27,7 @@ class Transaction(object):
             raise UnbalancedTransaction(self)
 
     def execute(self, processor):
-        pass
+        processor.add_transaction(self)
 
     @property
     def amount(self):
