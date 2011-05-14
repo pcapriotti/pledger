@@ -1,12 +1,13 @@
 from pledger.value import ZERO
 from pledger.entry import Entry
+from pledger.filters import FilterCollection
 
 class LedgerProcessor(object):
     def __init__(self, ledger, filters = None):
         self.ledger = ledger
         self.account_prefix = ""
         self.total = ZERO
-        self.filters = filters
+        self.filters = filters or FilterCollection()
 
     def run(self):
         for transaction in self.ledger.transactions:
@@ -31,6 +32,4 @@ class LedgerProcessor(object):
             amount = entry.amount
             if self.filters:
                 result += self.filters.apply(transaction, account, amount)
-            else:
-                result.append(Entry(account, amount))
         return result
