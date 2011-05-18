@@ -12,10 +12,8 @@ class Ledger(object):
     def add(self, transaction):
         self.transactions.append(transaction)
 
-    def process(self, filters = None):
-        processor = LedgerProcessor(self, filters)
-        processor.run()
-        return processor
+    def create_processor(self, filters = None):
+        return LedgerProcessor(self, filters)
 
     @property
     def entries(self):

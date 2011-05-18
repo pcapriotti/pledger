@@ -1,14 +1,15 @@
+from pledger.listeners import BalanceListener
+
 class Report(object):
     pass
 
 class BalanceReport(Report):
     def __init__(self, ledger, filters):
-        self.processor = ledger.process(filters)
-        self.processor.add_listener(self)
+        self.processor = ledger.create_processor(filters)
+        self.balance = BalanceListener()
 
-    def on_transaction(self, transaction, entries):
-        pass
+        self.processor.add_listener(self.balance)
 
     def generate(self):
         self.processor.run()
-        return self.processor.total
+        return self.balance.total

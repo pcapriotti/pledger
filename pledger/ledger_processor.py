@@ -21,8 +21,6 @@ class LedgerProcessor(Observable):
     def add_transaction(self, transaction):
         entries = self.filter(transaction)
         self.fire("transaction", transaction, entries)
-        for entry in entries:
-            self.total += entry.amount
 
     def filter(self, transaction):
         result = []
