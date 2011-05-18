@@ -2,13 +2,13 @@ class Report(object):
     pass
 
 class BalanceReport(Report):
-    def __init__(self, ledger, predicate):
-        self.ledger = ledger
-        self.predicate = predicate
+    def __init__(self, ledger, filters):
+        self.processor = ledger.process(filters)
+        self.processor.add_listener(self)
 
-    @property
-    def value(self):
-        result = ZERO
-        for transaction in ledger.all_matching(self.predicate):
-            result += transaction.amount
-        return result
+    def on_transaction(self, transaction, entries):
+        pass
+
+    def generate(self):
+        self.processor.run()
+        return self.processor.total

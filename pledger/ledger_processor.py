@@ -1,9 +1,11 @@
 from pledger.value import ZERO
 from pledger.entry import Entry
 from pledger.filters import FilterCollection
+from pledger.util import Observable
 
-class LedgerProcessor(object):
+class LedgerProcessor(Observable):
     def __init__(self, ledger, filters = None):
+        super(LedgerProcessor, self).__init__()
         self.ledger = ledger
         self.account_prefix = ""
         self.total = ZERO
@@ -18,12 +20,9 @@ class LedgerProcessor(object):
 
     def add_transaction(self, transaction):
         entries = self.filter(transaction)
+        self.fire("transaction", transaction, entries)
         for entry in entries:
             self.total += entry.amount
-        self.process_entries(transaction, entries)
-
-    def process_entries(self, transaction, entries):
-        pass
 
     def filter(self, transaction):
         result = []
