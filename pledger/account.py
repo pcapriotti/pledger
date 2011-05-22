@@ -20,5 +20,5 @@ class NamedAccount(Account):
         return "'%s'" % self.name
 
     def add_prefix(self, prefix):
-        name = prefix + ":" + self.name
+        name = ":".join(prefix + [self.name])
         return NamedAccount(name)

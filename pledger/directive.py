@@ -45,3 +45,9 @@ class IncludeDirective(Directive):
 
     def execute(self, processor):
         """not implemented"""
+
+class EndAccountDirective(Directive):
+    keyword = 'end'
+
+    def execute(self, processor):
+        processor.remove_account_prefix()

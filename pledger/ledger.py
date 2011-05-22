@@ -26,4 +26,4 @@ class Ledger(object):
 
         lines = itertools.izip(itertools.count(1), str.split("\n"))
         transactions = [Transaction.parse(group) for group in util.itersplit(f, lines)]
-        return Ledger(transactions)
+        return Ledger([t for t in transactions if t])

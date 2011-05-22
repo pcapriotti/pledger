@@ -53,7 +53,10 @@ class Transaction(object):
         else:
             lines = iter(str)
         lines = ((n, line) for (n, line) in lines if not re.match("\s*;", line))
-        n, header = lines.next()
+        try:
+            n, header = lines.next()
+        except StopIteration:
+            return None
 
         directive = Directive.parse(header)
         if directive: return directive
