@@ -9,6 +9,9 @@ class UnsupportedDirective(Exception):
     def __init__(self, name):
         self.name = name
 
+    def __str__(self):
+        return self.name
+
 class Directive(object):
     __metaclass__ = DirectiveMetaclass
 
@@ -18,7 +21,7 @@ class Directive(object):
             args = str[1:].split(' ')
             name = args[0]
             args = args[1:]
-            directive_class = cls.directives[name]
+            directive_class = cls.directives.get(name)
             if directive_class:
                 return directive_class(*args)
             else:
@@ -33,3 +36,12 @@ class AccountDirective(Directive):
 
     def execute(self, processor):
         processor.add_account_prefix(self.account)
+
+class IncludeDirective(Directive):
+    keyword = 'include'
+
+    def __init__(self, filename):
+        self.filename = filename
+
+    def execute(self, processor):
+        """not implemented"""
