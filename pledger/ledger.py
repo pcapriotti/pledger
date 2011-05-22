@@ -1,5 +1,6 @@
 from pledger.transaction import Transaction
 from pledger.ledger_processor import LedgerProcessor
+import itertools
 import util
 
 class Ledger(object):
@@ -21,7 +22,8 @@ class Ledger(object):
 
     @classmethod
     def parse(self, str):
-        f = lambda line: line == ""
-        lines = str.split("\n")
+        f = lambda (number, line): line == ""
+
+        lines = itertools.izip(itertools.count(1), str.split("\n"))
         transactions = [Transaction.parse(group) for group in util.itersplit(f, lines)]
         return Ledger(transactions)

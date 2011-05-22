@@ -1,11 +1,13 @@
 def itersplit(p, it):
     elems = []
     for x in it:
-        if p(x):
+        if p(x) and len(elems) > 0:
             yield elems
             elems = []
         else:
             elems.append(x)
+    if len(elems) > 0:
+        yield elems
 
 class Observable(object):
     def __init__(self):
