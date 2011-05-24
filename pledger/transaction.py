@@ -1,4 +1,5 @@
 import re
+import itertools
 from pledger.entry import Entry
 from pledger.value import ZERO
 from pledger.directive import Directive
