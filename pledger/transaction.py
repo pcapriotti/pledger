@@ -12,9 +12,14 @@ class UndefinedTransaction(Exception):
         self.tr = tr
         self.index = index
 
+class MalformedHeader(Exception):
+    pass
+
 class Transaction(object):
-    def __init__(self, entries):
+    def __init__(self, entries, date = None, label = ""):
         self.entries = entries
+        self.date = date
+        self.label = label
         undef = None
         balance = ZERO
         i = 0
@@ -32,6 +37,9 @@ class Transaction(object):
 
     def execute(self, processor):
         processor.add_transaction(self)
+
+    def __repr__(self):
+        return "Transaction (%s)" % self.date
 
     @property
     def amount(self):
@@ -61,11 +69,22 @@ class Transaction(object):
         directive = Directive.parse(header)
         if directive: return directive
 
-        entries = [Entry.parse(line) for n, line in lines]
-        line_numbers = [n for n, line in lines]
         try:
-            return Transaction(entries)
+            date, label = cls.parse_header(header)
+            entries = [Entry.parse(line) for n, line in lines]
+            line_numbers = [n for n, line in lines]
+            return Transaction(entries, date, label)
         except UnbalancedTransaction, e:
             e.line_number = n
         except UndefinedTransaction, e:
             e.line_number = line_numbers[e.index]
+        except MalformedHeader, e:
+            e.line_number = n
+
+    @classmethod
+    def parse_header(cls, str):
+        m = re.match(r'^(\S+)\s+(\*?\s+)(.*)$', str)
+        if m:
+            return m.group(1), m.group(3)
+        else:
+            raise MalformedHeader()
