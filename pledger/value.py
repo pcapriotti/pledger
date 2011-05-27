@@ -35,6 +35,12 @@ class Value(object):
             result[currency] = -self.values[currency]
         return Value(result)
 
+    def __mul__(self, num):
+        result = { }
+        for currency in self.values:
+            result[currency] = self.values[currency] * num
+        return Value(result)
+
     def format_value(self, curr, value, places=2):
         q = Decimal(10) ** -places      # 2 places --> '0.01'
         sign, digits, exp = value.quantize(q).as_tuple()
