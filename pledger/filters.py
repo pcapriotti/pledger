@@ -24,9 +24,6 @@ class FilterCollection(object):
 
         return entries
 
-class Filter(object):
-    pass
-
 class Predicate(object):
     def __init__(self, predicate):
         self.predicate = predicate
@@ -46,6 +43,13 @@ class Predicate(object):
             return self(*args) or other(*args)
         return result
 
+    @classmethod
+    def has_account(cls, account):
+        @cls
+        def result(transaction, entry):
+            return entry.account == account
+        return result
+
 class Generator(object):
     def __init__(self, generator):
         self.generator = generator
@@ -61,7 +65,7 @@ class Generator(object):
 Generator.identity = Generator(lambda x: [x])
 Generator.null = Generator(lambda x: [])
 
-class RuleFilter(Filter):
+class RuleFilter(object):
     def __init__(self, predicate, generator, complement = Generator.identity):
         self.predicate = predicate
         self.generators = {
@@ -72,9 +76,7 @@ class RuleFilter(Filter):
         gen = self.generators[self.predicate(transaction, entry)]
         return gen(entry)
 
-class AccountFilter(RuleFilter):
-    def __init__(self, account):
-        @Predicate
-        def predicate(transaction, entry):
-            return entry.account == account
-        super(AccountFilter, self).__init__(predicate, Generator.identity, Generator.null)
+class Filter(RuleFilter):
+    def __init__(self, predicate):
+        super(Filter, self).__init__(predicate, Generator.identity, Generator.null)
+
