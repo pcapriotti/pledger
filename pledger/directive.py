@@ -14,18 +14,6 @@ class UnsupportedDirective(Exception):
 
 class Directive(object):
     __metaclass__ = DirectiveMetaclass
-
-    @classmethod
-    def parse(cls, str):
-        if str[0] == '!':
-            args = str[1:].split(' ')
-            name = args[0]
-            args = args[1:]
-            directive_class = cls.directives.get(name)
-            if directive_class:
-                return directive_class(*args)
-            else:
-                raise UnsupportedDirective(name)
 Directive.directives = {}
 
 class AccountDirective(Directive):

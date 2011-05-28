@@ -19,11 +19,3 @@ class Ledger(object):
     @property
     def entries(self):
         return itertools.chain(*self.transactions)
-
-    @classmethod
-    def parse(self, str):
-        f = lambda (number, line): line == ""
-
-        lines = itertools.izip(itertools.count(1), str.split("\n"))
-        transactions = [Transaction.parse(group) for group in util.itersplit(f, lines)]
-        return Ledger([t for t in transactions if t])

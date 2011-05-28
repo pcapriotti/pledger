@@ -1,21 +1,6 @@
-import re
-import itertools
-from datetime import datetime
 from pledger.entry import Entry
 from pledger.value import ZERO
 from pledger.directive import Directive
-
-class UnbalancedTransaction(Exception):
-    def __init__(self, tr):
-        self.tr = tr
-
-class UndefinedTransaction(Exception):
-    def __init__(self, tr, index):
-        self.tr = tr
-        self.index = index
-
-class MalformedHeader(Exception):
-    pass
 
 class Transaction(object):
     def __init__(self, entries, date = None, label = ""):
@@ -55,47 +40,3 @@ class Transaction(object):
 
     def __eq__(self, other):
         return self.entries == other.entries
-
-    @classmethod
-    def parse(cls, str):
-        if hasattr(str, "split"):
-            lines = itertools.izip(itertools.count(1), iter(str.split("\n")))
-        else:
-            lines = iter(str)
-        lines = ((n, line) for (n, line) in lines if not re.match("\s*;", line))
-        try:
-            n, header = lines.next()
-        except StopIteration:
-            return None
-
-        directive = Directive.parse(header)
-        if directive: return directive
-
-        try:
-            date, label = cls.parse_header(header)
-            date = datetime.strptime(date, "%Y/%m/%d")
-            entries = [Entry.parse(line) for n, line in lines]
-            line_numbers = [n for n, line in lines]
-            return Transaction(entries, date, label)
-        except UnbalancedTransaction, e:
-            e.line_number = n
-            raise e
-        except UndefinedTransaction, e:
-            e.line_number = line_numbers[e.index]
-            raise e
-        except MalformedHeader, e:
-            e.line_number = n
-            print n
-            raise e
-        except ValueError, e:
-            e = MalformedHeader()
-            e.line_number = n
-            raise e
-
-    @classmethod
-    def parse_header(cls, str):
-        m = re.match(r'^(\S+)\s+(\*\s+)?(.*)$', str)
-        if m:
-            return m.group(1), m.group(3)
-        else:
-            raise MalformedHeader()

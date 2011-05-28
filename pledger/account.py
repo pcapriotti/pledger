@@ -5,10 +5,6 @@ class Account(object):
     def __sub__(self, value):
         return Entry(self, -value)
 
-    @classmethod
-    def parse(cls, str):
-        return NamedAccount(str)
-
 class NamedAccount(Account):
     def __init__(self, name):
         self.name = name
