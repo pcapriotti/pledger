@@ -1,5 +1,6 @@
 import re
 import itertools
+from datetime import datetime
 from pledger.entry import Entry
 from pledger.value import ZERO
 from pledger.directive import Directive
@@ -72,19 +73,28 @@ class Transaction(object):
 
         try:
             date, label = cls.parse_header(header)
+            date = datetime.strptime(date, "%Y/%m/%d")
             entries = [Entry.parse(line) for n, line in lines]
             line_numbers = [n for n, line in lines]
             return Transaction(entries, date, label)
         except UnbalancedTransaction, e:
             e.line_number = n
+            raise e
         except UndefinedTransaction, e:
             e.line_number = line_numbers[e.index]
+            raise e
         except MalformedHeader, e:
             e.line_number = n
+            print n
+            raise e
+        except ValueError, e:
+            e = MalformedHeader()
+            e.line_number = n
+            raise e
 
     @classmethod
     def parse_header(cls, str):
-        m = re.match(r'^(\S+)\s+(\*?\s+)(.*)$', str)
+        m = re.match(r'^(\S+)\s+(\*\s+)?(.*)$', str)
         if m:
             return m.group(1), m.group(3)
         else:
