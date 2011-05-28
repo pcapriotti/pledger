@@ -50,6 +50,13 @@ class Predicate(object):
             return entry.account == account
         return result
 
+    @classmethod
+    def matches(cls, regexp):
+        @cls
+        def result(transaction, entry):
+            return regexp.search(entry.account.name) is not None
+        return result
+
 class Generator(object):
     def __init__(self, generator):
         self.generator = generator
