@@ -1,0 +1,51 @@
+from pledger.entry import Entry
+
+class RuleCollection(object):
+    def __init__(self):
+        self.rules = { }
+
+    def add_rule(self, rule, level = 0):
+        self.rules.setdefault(level, [])
+        self.rules[level].append(rule)
+
+    def apply(self, transaction, account, amount):
+        entries = [Entry(account, amount)]
+
+        levels = self.rules.keys()
+        levels.sort()
+
+        for level in levels:
+            rules = self.rules[level]
+            new_entries = []
+            for rule in rules:
+                for entry in entries:
+                    new_entries += list(rule.apply(transaction, entry))
+            entries = new_entries
+
+        return entries
+
+class Generator(object):
+    def __init__(self, generator):
+        self.generator = generator
+
+    def __call__(self, *args):
+        return self.generator(*args)
+
+    def __add__(self, other):
+        @Generator
+        def result(*args):
+            return itertools.chain(self(*args), other(*args))
+        return result
+Generator.identity = Generator(lambda x: [x])
+Generator.null = Generator(lambda x: [])
+
+class Rule(object):
+    def __init__(self, filter, generator):
+        self.filter = filter
+        self.generator = generator
+
+    def apply(self, transaction, entry):
+        if self.filter(transaction, entry):
+            return self.generator(entry)
+        else:
+            return [entry]
