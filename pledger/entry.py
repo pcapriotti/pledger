@@ -1,5 +1,4 @@
 import re
-from pledger.account import Account
 from pledger.value import Value
 
 class Entry(object):

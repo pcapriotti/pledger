@@ -1,3 +1,5 @@
+from pledger.entry import Entry
+
 class Account(object):
     def __init__(self):
         self.meta = { }
