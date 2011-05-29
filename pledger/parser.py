@@ -2,7 +2,7 @@ import itertools
 import re
 import util
 from datetime import datetime
-from pledger.account import NamedAccount
+from pledger.account import AccountRepository, NamedAccount
 from pledger.value import Value
 from pledger.ledger import Ledger
 from pledger.transaction import Transaction
@@ -23,6 +23,9 @@ class MalformedHeader(Exception):
 
 
 class Parser(object):
+    def __init__(self):
+        self.accounts = AccountRepository()
+
     def parse_account(self, str):
         return NamedAccount(str)
 
@@ -34,7 +37,7 @@ class Parser(object):
 
         lines = itertools.izip(itertools.count(1), str.split("\n"))
         transactions = [self.parse_transaction(group) for group in util.itersplit(f, lines)]
-        return Ledger([t for t in transactions if t])
+        return Ledger([t for t in transactions if t], self.accounts)
 
     def parse_entry(self, str):
         elements = [e for e in re.split(r"  +", str) if e]

@@ -28,8 +28,8 @@ class LedgerProcessor(Observable):
     def filter(self, transaction):
         result = []
         for entry in transaction.entries:
-            account = entry.account.add_prefix(self.account_prefix)
+            name = ":".join(self.account_prefix + [entry.account.name])
+            account = self.ledger.accounts.get_account(name)
             amount = entry.amount
-            if self.filters:
-                result += self.filters.apply(transaction, account, amount)
+            result += self.filters.apply(transaction, account, amount)
         return result
