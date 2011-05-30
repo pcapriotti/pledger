@@ -17,8 +17,9 @@ class RuleCollection(object):
         for level in levels:
             rules = self.rules[level]
             new_entries = []
-            for rule in rules:
-                for entry in entries:
+            for entry in entries:
+                new_entries.append(entry)
+                for rule in rules:
                     new_entries += list(rule.apply(transaction, entry))
             entries = new_entries
 
@@ -36,7 +37,6 @@ class Generator(object):
         def result(*args):
             return itertools.chain(self(*args), other(*args))
         return result
-Generator.identity = Generator(lambda x: [x])
 Generator.null = Generator(lambda x: [])
 
 class Rule(object):
@@ -48,4 +48,4 @@ class Rule(object):
         if self.filter(transaction, entry):
             return self.generator(entry)
         else:
-            return [entry]
+            return []

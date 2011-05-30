@@ -1,8 +1,9 @@
-import re
 from pledger.value import Value
+from pledger.tags import Taggable
 
-class Entry(object):
+class Entry(Taggable):
     def __init__(self, account, amount):
+        super(Entry, self).__init__()
         self.account = account
         self.amount = amount
 
