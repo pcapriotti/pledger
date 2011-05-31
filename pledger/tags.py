@@ -4,6 +4,6 @@ class Taggable(object):
 
     def has_tag(self, tag, value = None):
         if value is None:
-            return self.tags.get(tag)
+            return tag in self.tags
         else:
             return self.tags.get(tag) == value

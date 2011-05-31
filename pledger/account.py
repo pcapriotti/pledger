@@ -1,6 +1,7 @@
 from pledger.entry import Entry
 from pledger.tags import Taggable
 from pledger.filter import Filter
+from pledger.rule import Rule, Generator
 
 class Account(Taggable):
     def __init__(self):
@@ -13,11 +14,18 @@ class Account(Taggable):
         return Entry(self, -value)
 
     @classmethod
-    def tag_filter(self, tag, value = None):
+    def tag_filter(cls, tag, value = None):
         @Filter
         def result(transaction, entry):
             return entry.account.has_tag(tag, value)
         return result
+
+    @classmethod
+    def tag_rule(cls, tag):
+        @Generator
+        def generator(entry):
+            return entry.account.tags[tag](entry)
+        return Rule(cls.tag_filter(tag), generator)
 
 class AccountRepository(object):
     def __init__(self):
@@ -42,7 +50,7 @@ class NamedAccount(Account):
         return self.name == other.name
 
     def __str__(self):
-        return "'%s' (%s)" % (self.name, self.tags)
+        return self.name
 
     def add_prefix(self, prefix):
         name = ":".join(prefix + [self.name])
