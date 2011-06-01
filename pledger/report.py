@@ -16,9 +16,10 @@ class RegisterEntryProcessor(object):
             self.amount = amount
             self.total = total
 
-    def __init__(self):
-        self.result = []
+    def __init__(self, sorting):
+        self.unsorted_result = []
         self.balance = BalanceEntryProcessor()
+        self.sorting = sorting
 
     def process_entry(self, transaction, entry):
         self.balance.process_entry(transaction, entry)
@@ -28,7 +29,13 @@ class RegisterEntryProcessor(object):
                 entry.account,
                 entry.amount,
                 self.balance.result)
-        self.result.append(e)
+        self.unsorted_result.append(e)
+
+    @property
+    def result(self):
+        l = list(self.unsorted_result)
+        self.sorting.apply_to(l)
+        return l
 
 class Report(object):
     def __init__(self, ledger, rules, filter, entry_processor):
@@ -54,5 +61,5 @@ class Report(object):
         return cls(ledger, rules, filter, BalanceEntryProcessor())
 
     @classmethod
-    def register(cls, ledger, rules, filter):
-        return cls(ledger, rules, filter, RegisterEntryProcessor())
+    def register(cls, ledger, rules, filter, sorting):
+        return cls(ledger, rules, filter, RegisterEntryProcessor(sorting))
