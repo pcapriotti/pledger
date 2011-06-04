@@ -49,6 +49,9 @@ class AccountRepository(object):
     def create_subaccount(self, name):
         return NamedAccount(name, self)
 
+    def get_tag(self, tag):
+        pass
+
     @property
     def name(self):
         pass
