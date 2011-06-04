@@ -30,21 +30,34 @@ class Account(Taggable):
 class AccountRepository(object):
     def __init__(self):
         self.accounts = { }
+        super(AccountRepository, self).__init__()
 
-    def get_account(self, name):
+    def get_account(self, name, *args):
         account = self.accounts.get(name)
         if account is None:
-            account = NamedAccount(name)
+            account = self.create_subaccount(name)
             self.accounts[name] = account
-        return account
+        if len(args):
+            return account.get_account(*args)
+        else:
+            return account
 
     def __getitem__(self, name):
-        return self.get_account(name)
+        components = name.split(":")
+        return self.get_account(*components)
 
-class NamedAccount(Account):
-    def __init__(self, name):
+    def create_subaccount(self, name):
+        return NamedAccount(name, self)
+
+    @property
+    def name(self):
+        pass
+
+class NamedAccount(Account, AccountRepository):
+    def __init__(self, name, parent = None):
         super(NamedAccount, self).__init__()
-        self.name = name
+        self.base_name = name
+        self.parent = parent
 
     def __eq__(self, other):
         return self.name == other.name
@@ -52,6 +65,13 @@ class NamedAccount(Account):
     def __str__(self):
         return self.name
 
-    def add_prefix(self, prefix):
-        name = ":".join(prefix + [self.name])
-        return NamedAccount(name)
+    @property
+    def name(self):
+        parent_name = None
+        if self.parent is not None:
+            parent_name = self.parent.name
+
+        if parent_name is None:
+            return self.base_name
+        else:
+            return parent_name + ":" + self.base_name

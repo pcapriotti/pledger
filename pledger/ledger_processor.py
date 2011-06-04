@@ -7,7 +7,7 @@ class LedgerProcessor(Observable):
     def __init__(self, ledger, filters = None):
         super(LedgerProcessor, self).__init__()
         self.ledger = ledger
-        self.account_prefix = []
+        self.account = self.ledger.accounts
         self.total = ZERO
         self.filters = filters or FilterCollection()
 
@@ -16,10 +16,10 @@ class LedgerProcessor(Observable):
             transaction.execute(self)
 
     def add_account_prefix(self, prefix):
-        self.account_prefix.append(prefix)
+        self.account = self.account[prefix]
 
     def remove_account_prefix(self):
-        self.account_prefix.pop()
+        self.account = self.account.parent
 
     def add_transaction(self, transaction):
         entries = self.filter(transaction)
@@ -28,8 +28,7 @@ class LedgerProcessor(Observable):
     def filter(self, transaction):
         result = []
         for entry in transaction.entries:
-            name = ":".join(self.account_prefix + [entry.account.name])
-            account = self.ledger.accounts.get_account(name)
+            account = self.account[entry.account.name]
             amount = entry.amount
             result += self.filters.apply(transaction, account, amount)
         return result
