@@ -1,34 +1,61 @@
 from pledger.value import ZERO
+from pledger.util import struct, linearized
 
 class BalanceEntryProcessor(object):
+    Entry = struct("level", "account", "amount")
+
     def __init__(self):
-        self.result = ZERO
+        self.sheet = { }
 
     def process_entry(self, transaction, entry):
-        self.result += entry.amount
+        self.add_entry(entry.account, entry.amount)
+
+    def add_entry(self, account, amount):
+        self.sheet.setdefault(account, ZERO)
+        self.sheet[account] += amount
+        if account.parent:
+            self.add_entry(account.parent, amount)
+
+    def accounts(self):
+        grouped = self.__class__.grouped_accounts(None, 0, sorted(self.sheet.keys()))
+        root, items = grouped[0]
+        return linearized(items)
+
+    @classmethod
+    def grouped_accounts(cls, root, level, accounts, prefix = ""):
+        children = [account for account in accounts if account.parent == root]
+        if len(children) == 1 and root and root.base_name:
+            return cls.grouped_accounts(children[0], level, accounts, prefix + root.base_name + ":")
+        else:
+            result = [cls.grouped_accounts(child, level + 1, accounts) for child in children]
+            if root:
+                return ((root, prefix + str(root.base_name), level), result)
+            else:
+                return result
+
+    @property
+    def result(self):
+        for account, name, level in self.accounts():
+            yield self.__class__.Entry(level=level,
+                                       account=name,
+                                       amount=self.sheet[account])
 
 class RegisterEntryProcessor(object):
-    class Entry(object):
-        def __init__(self, date, label, account, amount, total):
-            self.date = date
-            self.label = label
-            self.account = account
-            self.amount = amount
-            self.total = total
+    Entry = struct("date", "label", "account", "amount", "total")
 
     def __init__(self, sorting):
         self.unsorted_result = []
-        self.balance = BalanceEntryProcessor()
+        self.total = ZERO
         self.sorting = sorting
 
     def process_entry(self, transaction, entry):
-        self.balance.process_entry(transaction, entry)
+        self.total += entry.amount
         e = RegisterEntryProcessor.Entry(
-                transaction.date,
-                transaction.label,
-                entry.account,
-                entry.amount,
-                self.balance.result)
+                date=transaction.date,
+                label=transaction.label,
+                account=entry.account,
+                amount=entry.amount,
+                total=self.total)
         self.unsorted_result.append(e)
 
     @property
@@ -57,9 +84,14 @@ class Report(object):
         return self.entry_processor.result
 
     @classmethod
-    def balance(cls, ledger, rules, filter):
+    def balance(cls, ledger, rules, filter, sorting):
         return cls(ledger, rules, filter, BalanceEntryProcessor())
 
     @classmethod
     def register(cls, ledger, rules, filter, sorting):
         return cls(ledger, rules, filter, RegisterEntryProcessor(sorting))
+
+reports = {
+    "balance" : Report.balance,
+    "register" : Report.register
+}

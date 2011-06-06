@@ -25,3 +25,20 @@ class Observable(object):
                 pass
             if method:
                 method(*args, **kwargs)
+
+def struct(*fields):
+    class tmp:
+        def __init__(self, **kwargs):
+            for field in fields:
+                setattr(self, field, kwargs[field])
+
+        def __str__(self):
+            return str(tuple(getattr(self, field) for field in fields))
+    return tmp
+
+def linearized(items):
+    result = []
+    for item, subitems in items:
+        result.append(item)
+        result += linearized(subitems)
+    return result

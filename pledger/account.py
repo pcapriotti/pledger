@@ -30,6 +30,8 @@ class Account(Taggable):
 class AccountRepository(object):
     def __init__(self):
         self.accounts = { }
+        self.parent = None
+        self.base_name = None
         super(AccountRepository, self).__init__()
 
     def get_account(self, name, *args):
@@ -62,11 +64,17 @@ class NamedAccount(Account, AccountRepository):
         self.base_name = name
         self.parent = parent
 
-    def __eq__(self, other):
-        return self.name == other.name
-
     def __str__(self):
         return self.name
+
+    def __repr__(self):
+        return "<%s>" % self.name
+
+    def __cmp__(self, other):
+        if other:
+            return cmp(self.name, other.name)
+        else:
+            return 1
 
     @property
     def name(self):
