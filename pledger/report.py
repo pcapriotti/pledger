@@ -1,5 +1,6 @@
 from pledger.value import ZERO
 from pledger.util import struct, linearized
+from pledger.template import BalanceTemplate, RegisterTemplate
 
 class BalanceEntryProcessor(object):
     Entry = struct("level", "account", "amount")
@@ -65,11 +66,12 @@ class RegisterEntryProcessor(object):
         return l
 
 class Report(object):
-    def __init__(self, ledger, rules, filter, entry_processor):
+    def __init__(self, ledger, rules, filter, entry_processor, template):
         self.ledger_processor = ledger.create_processor(rules)
         self.ledger_processor.add_listener(self)
         self.filter = filter
         self.entry_processor = entry_processor
+        self.template = template
 
     def generate(self):
         self.ledger_processor.run()
@@ -85,11 +87,13 @@ class Report(object):
 
     @classmethod
     def balance(cls, ledger, rules, filter, sorting):
-        return cls(ledger, rules, filter, BalanceEntryProcessor())
+        return cls(ledger, rules, filter, BalanceEntryProcessor(),
+                template=BalanceTemplate())
 
     @classmethod
     def register(cls, ledger, rules, filter, sorting):
-        return cls(ledger, rules, filter, RegisterEntryProcessor(sorting))
+        return cls(ledger, rules, filter, RegisterEntryProcessor(sorting),
+                template=RegisterTemplate())
 
 reports = {
     "balance" : Report.balance,
