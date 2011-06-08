@@ -9,7 +9,7 @@ from pledger.template import default_template
 parser = Parser()
 filter = Filter.null
 rules = RuleCollection()
-sorting = MapSorting(lambda x: x.date)
+sorting = MapSorting(lambda x: x.transaction.date)
 template = default_template
 
 def run_cli():

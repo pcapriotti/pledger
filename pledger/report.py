@@ -42,7 +42,7 @@ class BalanceEntryProcessor(object):
                                        amount=self.sheet[account])
 
 class RegisterEntryProcessor(object):
-    Entry = struct("date", "label", "account", "amount", "total")
+    Entry = struct("transaction", "entry", "total")
 
     def __init__(self, sorting):
         self.unsorted_result = []
@@ -52,10 +52,8 @@ class RegisterEntryProcessor(object):
     def process_entry(self, transaction, entry):
         self.total += entry.amount
         e = RegisterEntryProcessor.Entry(
-                date=transaction.date,
-                label=transaction.label,
-                account=entry.account,
-                amount=entry.amount,
+                transaction=transaction,
+                entry=entry,
                 total=self.total)
         self.unsorted_result.append(e)
 
