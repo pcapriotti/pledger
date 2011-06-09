@@ -21,17 +21,16 @@ class BalanceEntryProcessor(object):
             self.total += amount
 
     def accounts(self):
-        grouped = self.__class__.grouped_accounts(None, 0, sorted(self.sheet.keys()))
+        grouped = self.grouped_accounts(None, 0, sorted(self.sheet.keys()))
         root, items = grouped[0]
         return linearized(items)
 
-    @classmethod
-    def grouped_accounts(cls, root, level, accounts, prefix = ""):
+    def grouped_accounts(self, root, level, accounts, prefix = ""):
         children = [account for account in accounts if account.parent == root]
-        if len(children) == 1 and root and root.base_name:
-            return cls.grouped_accounts(children[0], level, accounts, prefix + root.base_name + ":")
+        if len(children) == 1 and root and root.base_name and self.sheet[root] == self.sheet[children[0]]:
+            return self.grouped_accounts(children[0], level, accounts, prefix + root.base_name + ":")
         else:
-            result = [cls.grouped_accounts(child, level + 1, accounts) for child in children]
+            result = [self.grouped_accounts(child, level + 1, accounts) for child in children]
             if root:
                 return ((root, prefix + str(root.base_name), level), result)
             else:
