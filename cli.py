@@ -41,4 +41,5 @@ def run_cli():
 
     ledger = parser.parse_ledger(filename)
     report = report_factory(ledger, rules, filter, sorting)
-    print "\n".join(template(report))
+    for line in template(report):
+        print line.encode("utf-8")

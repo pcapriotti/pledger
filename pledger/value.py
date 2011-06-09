@@ -10,6 +10,11 @@ class Value(object):
             if amount != 0: return False
         return True
 
+    def negative(self):
+        for currency, amount in self.values.iteritems():
+            if amount > 0: return False
+        return not self.null()
+
     def __eq__(self, other):
         if other is None:
             return False

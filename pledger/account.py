@@ -33,6 +33,30 @@ class Account(Taggable):
         else:
             return self
 
+    def shortened_name(self, size):
+        full = self.name
+        delta = len(full) - size
+        if delta <= 0: return full
+        components = self.name_components()
+        n = len(components) - 1
+        component_delta = delta / n
+        extra = delta - component_delta * n
+        components = \
+            [x[:len(x) - component_delta - 1] for x in components[:extra]] + \
+            [x[:len(x) - component_delta] for x in components[extra:-1]] + \
+            [components[-1]]
+        return ":".join(components)
+
+    def name_components(self):
+        if self.parent and self.parent.name:
+            return self.parent.name_components() + [self.base_name]
+        else:
+            return [self.base_name]
+
+    @property
+    def name(self):
+        return ":".join(self.name_components())
+
 class AccountRepository(object):
     def __init__(self):
         self.accounts = { }
@@ -93,14 +117,3 @@ class NamedAccount(Account, AccountRepository):
             return cmp(self.name, other.name)
         else:
             return 1
-
-    @property
-    def name(self):
-        parent_name = None
-        if self.parent is not None:
-            parent_name = self.parent.name
-
-        if parent_name is None:
-            return self.base_name
-        else:
-            return parent_name + ":" + self.base_name
