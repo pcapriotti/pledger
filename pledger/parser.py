@@ -1,26 +1,17 @@
 import itertools
 import re
 import util
+from util import PledgerException
 from datetime import datetime
 from pledger.account import AccountRepository, NamedAccount
 from pledger.value import Value
 from pledger.ledger import Ledger
-from pledger.transaction import Transaction
+from pledger.transaction import Transaction, UndefinedTransaction, UnbalancedTransaction
 from pledger.directive import Directive, UnsupportedDirective
 from pledger.entry import Entry
 
-class UnbalancedTransaction(Exception):
-    def __init__(self, tr):
-        self.tr = tr
-
-class UndefinedTransaction(Exception):
-    def __init__(self, tr, index):
-        self.tr = tr
-        self.index = index
-
-class MalformedHeader(Exception):
+class MalformedHeader(PledgerException):
     pass
-
 
 class Parser(object):
     def __init__(self):
@@ -32,14 +23,18 @@ class Parser(object):
     def parse_value(self, str):
         return Value.parse(str)
 
-    def parse_ledger(self, str):
+    def parse_ledger(self, filename, str):
         f = lambda (number, line): line == ""
-
         lines = itertools.izip(itertools.count(1), str.split("\n"))
-        transactions = [self.parse_transaction(group) for group in util.itersplit(f, lines)]
-        return Ledger([t for t in transactions if t], self)
+        try:
+            transactions = [self.parse_transaction(group) for group in util.itersplit(f, lines)]
+        except PledgerException, e:
+            e.filename = filename
+            raise e
+        return Ledger(filename, [t for t in transactions if t], self)
 
     def parse_entry(self, str):
+        str = re.sub(";.*$", "", str)
         elements = [e for e in re.split(r"  +", str) if e]
         if len(elements) >= 1:
             account = self.parse_account(elements[0])
@@ -54,14 +49,20 @@ class Parser(object):
             lines = itertools.izip(itertools.count(1), iter(str.split("\n")))
         else:
             lines = iter(str)
-        lines = ((n, line) for (n, line) in lines if not re.match("\s*;", line))
-        try:
-            n, header = lines.next()
-        except StopIteration:
+        lines = [(n, line) for (n, line) in lines if not re.match("\s*;", line)]
+        if len(lines) == 0:
+            return None
+
+        n, header = lines[0]
+        lines = lines[1:]
+
+        # skip rules
+        if len(header) == 0 or header[0] == "=":
             return None
 
         directive = self.parse_directive(header)
         if directive: return directive
+
 
         try:
             date, label = self.parse_header(header)
@@ -77,7 +78,6 @@ class Parser(object):
             raise e
         except MalformedHeader, e:
             e.line_number = n
-            print n
             raise e
         except ValueError, e:
             e = MalformedHeader()

@@ -1,6 +1,18 @@
 from pledger.entry import Entry
 from pledger.value import ZERO
 from pledger.directive import Directive
+from pledger.util import PledgerException
+
+class UnbalancedTransaction(PledgerException):
+    def __init__(self, tr):
+        self.tr = tr
+        super(UnbalancedTransaction, self).__init__()
+
+class UndefinedTransaction(PledgerException):
+    def __init__(self, tr, index):
+        self.tr = tr
+        self.index = index
+        super(UndefinedTransaction, self).__init__()
 
 class Transaction(object):
     def __init__(self, entries, date = None, label = ""):

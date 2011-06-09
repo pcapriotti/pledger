@@ -42,3 +42,12 @@ def linearized(items):
         result.append(item)
         result += linearized(subitems)
     return result
+
+class PledgerException(Exception):
+    def __init__(self):
+        super(PledgerException, self).__init__()
+        self.line_number = None
+        self.filename = None
+
+    def __str__(self):
+        return "%s (%s:%d)" % (self.__class__, self.filename, self.line_number)

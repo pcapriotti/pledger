@@ -32,7 +32,7 @@ class IncludeDirective(Directive):
         self.filename = filename
 
     def execute(self, processor):
-        """not implemented"""
+        processor.include(self.filename)
 
 class EndAccountDirective(Directive):
     keyword = 'end'

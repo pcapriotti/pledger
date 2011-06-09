@@ -31,14 +31,14 @@ def run_cli():
     if filters:
         filter &= reduce(Filter.__or__, filters)
 
-    filename = os.environ.get("PLEDGER")
+    filename = args.filename and args.filename[0] or None
     if filename is None:
-        filename = args.filename[0]
+        filename = os.environ.get("PLEDGER")
 
     if filename is None:
         sys.stderr.write("No ledger specified\n")
         sys.exit(1)
 
-    ledger = parser.parse_ledger(open(filename).read())
+    ledger = parser.parse_ledger(filename, open(filename).read())
     report = report_factory(ledger, rules, filter, sorting)
     print template(report)
