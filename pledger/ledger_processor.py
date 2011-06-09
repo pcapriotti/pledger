@@ -4,12 +4,13 @@ from pledger.filters import FilterCollection
 from pledger.util import Observable
 
 class LedgerProcessor(Observable):
-    def __init__(self, ledger, filters = None):
+    def __init__(self, ledger, rules):
         super(LedgerProcessor, self).__init__()
         self.ledger = ledger
-        self.account = self.ledger.accounts
         self.total = ZERO
-        self.filters = filters or FilterCollection()
+        self.rules = rules
+        self.parser = self.ledger.parser
+        self.account = self.parser.accounts
 
     def run(self):
         for transaction in self.ledger.transactions:
@@ -30,5 +31,5 @@ class LedgerProcessor(Observable):
         for entry in transaction.entries:
             account = self.account[entry.account.name]
             amount = entry.amount
-            result += self.filters.apply(transaction, account, amount)
+            result += self.rules.apply(transaction, account, amount)
         return result

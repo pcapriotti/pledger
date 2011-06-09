@@ -4,9 +4,9 @@ import itertools
 import util
 
 class Ledger(object):
-    def __init__(self, transactions, accounts):
+    def __init__(self, transactions, parser):
         self.transactions = transactions
-        self.accounts = accounts
+        self.parser = parser
 
     def all_matching(self, predicate):
         return itertools.ifilter(predicate, self.entries)
@@ -14,8 +14,8 @@ class Ledger(object):
     def add(self, transaction):
         self.transactions.append(transaction)
 
-    def create_processor(self, filters = None):
-        return LedgerProcessor(self, filters)
+    def create_processor(self, rules):
+        return LedgerProcessor(self, rules)
 
     @property
     def entries(self):
