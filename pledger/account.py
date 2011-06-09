@@ -24,8 +24,14 @@ class Account(Taggable):
     def tag_rule(cls, tag):
         @Generator
         def generator(entry):
-            return entry.account.tags[tag](entry)
+            return entry.account.get_tag(tag)(entry)
         return Rule(cls.tag_filter(tag), generator)
+
+    def root(self):
+        if self.parent and self.parent.name:
+            return self.parent.root()
+        else:
+            return self
 
 class AccountRepository(object):
     def __init__(self):
@@ -53,6 +59,18 @@ class AccountRepository(object):
 
     def get_tag(self, tag):
         pass
+
+    def sub_name(self, account):
+        def sub_name_components(account):
+            if account == self:
+                return []
+            elif account.parent.base_name is None:
+                return None
+            else:
+                return sub_name_components(account.parent) + [account.base_name]
+        components = sub_name_components(account)
+        if components:
+            return ":".join(components)
 
     @property
     def name(self):
