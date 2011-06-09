@@ -7,6 +7,7 @@ class BalanceEntryProcessor(object):
 
     def __init__(self):
         self.sheet = { }
+        self.total = ZERO
 
     def process_entry(self, transaction, entry):
         self.add_entry(entry.account, entry.amount)
@@ -16,6 +17,8 @@ class BalanceEntryProcessor(object):
         self.sheet[account] += amount
         if account.parent:
             self.add_entry(account.parent, amount)
+        else:
+            self.total += amount
 
     def accounts(self):
         grouped = self.__class__.grouped_accounts(None, 0, sorted(self.sheet.keys()))
@@ -36,6 +39,9 @@ class BalanceEntryProcessor(object):
 
     @property
     def result(self):
+        yield self.__class__.Entry(level=None,
+                                   account=None,
+                                   amount=self.total)
         for account, name, level in self.accounts():
             yield self.__class__.Entry(level=level,
                                        account=name,

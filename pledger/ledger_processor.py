@@ -27,7 +27,7 @@ class LedgerProcessor(Observable):
 
     def include(self, filename):
         filename = self.ledger.absolute_filename(filename)
-        subledger = self.parser.parse_ledger(filename, open(filename).read())
+        subledger = self.parser.parse_ledger(filename)
         self.create_child(subledger).run()
 
     def filter(self, transaction):

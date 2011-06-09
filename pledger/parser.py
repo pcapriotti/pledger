@@ -1,6 +1,7 @@
 import itertools
 import re
 import util
+import codecs
 from util import PledgerException
 from datetime import datetime
 from pledger.account import AccountRepository, NamedAccount
@@ -23,7 +24,9 @@ class Parser(object):
     def parse_value(self, str):
         return Value.parse(str)
 
-    def parse_ledger(self, filename, str):
+    def parse_ledger(self, filename, str = None):
+        if str is None:
+            str = codecs.open(filename, "r", "utf-8").read()
         f = lambda (number, line): line == ""
         lines = itertools.izip(itertools.count(1), str.split("\n"))
         try:

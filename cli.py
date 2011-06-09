@@ -39,6 +39,6 @@ def run_cli():
         sys.stderr.write("No ledger specified\n")
         sys.exit(1)
 
-    ledger = parser.parse_ledger(filename, open(filename).read())
+    ledger = parser.parse_ledger(filename)
     report = report_factory(ledger, rules, filter, sorting)
-    print template(report)
+    print "\n".join(template(report))
