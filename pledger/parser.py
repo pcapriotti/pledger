@@ -47,12 +47,16 @@ class Parser(object):
             if account:
                 return Entry(account, amount)
 
-    def parse_transaction(self, str):
-        if hasattr(str, "split"):
-            lines = itertools.izip(itertools.count(1), iter(str.split("\n")))
-        else:
-            lines = iter(str)
-        lines = [(n, line) for (n, line) in lines if not re.match("\s*;", line)]
+    def parse_transaction(self, lines):
+        if hasattr(lines, "split"):
+            lines = list(itertools.izip(itertools.count(1), iter(lines.split("\n"))))
+
+        tags = { }
+
+        # discard initial comments
+        while lines and re.match(r'\s*;', lines[0][1]):
+            lines = lines[1:]
+
         if len(lines) == 0:
             return None
 
@@ -66,13 +70,20 @@ class Parser(object):
         directive = self.parse_directive(header)
         if directive: return directive
 
+        # parse transaction tags
+        if lines:
+            n, line = lines[0]
+            tags = self.parse_tags(line)
+            if tags: lines = lines[1:]
 
         try:
             date, label = self.parse_header(header)
             date = datetime.strptime(date, "%Y/%m/%d")
             entries = [self.parse_entry(line) for n, line in lines]
             line_numbers = [n for n, line in lines]
-            return Transaction(entries, date, label)
+            transaction = Transaction(entries, date, label)
+            if tags: transaction.tags = tags
+            return transaction
         except UnbalancedTransaction, e:
             e.line_number = n
             raise e
@@ -93,6 +104,21 @@ class Parser(object):
             return m.group(1), m.group(3)
         else:
             raise MalformedHeader()
+
+    def parse_tags(self, str):
+        m = re.match(r'\s*;\s*(.*)$', str)
+        if m:
+            tags = re.split(r'\s+', m.group(1))
+            tag_dict = []
+            for str in tags:
+                tag = self.parse_tag(str)
+                if tag: tag_dict.append(tag)
+            return dict(tag_dict)
+
+    def parse_tag(self, str):
+        m = re.match(r':?(\S+):(\S*)$', str)
+        if m:
+            return (m.group(1), m.group(2))
 
     def parse_directive(self, str):
         if str[0] == '!':
