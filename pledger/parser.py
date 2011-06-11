@@ -38,7 +38,9 @@ class Parser(object):
         return Ledger(filename, [t for t in transactions if t], self)
 
     def parse_entry(self, str):
+        tags = self.parse_tags(str)
         str = re.sub(";.*$", "", str)
+
         elements = [e for e in re.split(r"  +", str) if e]
         if len(elements) >= 1:
             account = self.parse_account(elements[0])
@@ -46,7 +48,9 @@ class Parser(object):
             if len(elements) >= 2:
                 amount = self.parse_value(elements[1])
             if account:
-                return Entry(account, amount)
+                entry = Entry(account, amount)
+                if tags: entry.tags = tags
+                return entry
 
     def parse_transaction(self, lines):
         if hasattr(lines, "split"):
@@ -74,12 +78,12 @@ class Parser(object):
         # parse transaction tags
         if lines:
             n, line = lines[0]
-            tags = self.parse_tags(line)
+            tags = self.parse_tags(line, begin=True)
             if tags: lines = lines[1:]
 
         try:
             date, label = self.parse_header(header)
-            date = datetime.strptime(date, "%Y/%m/%d")
+            date = self.parse_date(date)
 
             entries = [self.parse_entry(line) for n, line in lines]
             line_numbers = [n for n, line in lines]
@@ -100,6 +104,9 @@ class Parser(object):
             e.line_number = n
             raise e
 
+    def parse_date(self, str):
+        return datetime.strptime(str, "%Y/%m/%d")
+
     def parse_header(self, str):
         m = re.match(r'^(\S+)\s+(\*\s+)?(.*)$', str)
         if m:
@@ -107,8 +114,12 @@ class Parser(object):
         else:
             raise MalformedHeader()
 
-    def parse_tags(self, str):
-        m = re.match(r'\s*;\s*(.*)$', str)
+    def parse_tags(self, str, begin=False):
+        pattern = r'\s*;\s*(.*)$'
+        if begin:
+            m = re.match(pattern, str)
+        else:
+            m = re.search(pattern, str)
         if m:
             tags = re.split(r'\s+', m.group(1))
             tag_dict = []
@@ -121,6 +132,12 @@ class Parser(object):
         m = re.match(r':?(\S+):(\S*)$', str)
         if m:
             return (m.group(1), m.group(2))
+        m = re.match(r'\[(\S+)\]$', str)
+        if m:
+            try:
+                return ("date", self.parse_date(m.group(1)))
+            except ValueError:
+                pass
 
     def parse_directive(self, str):
         if str[0] == '!':
