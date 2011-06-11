@@ -17,12 +17,13 @@ class MalformedHeader(PledgerException):
 class Parser(object):
     def __init__(self):
         self.accounts = AccountRepository()
+        self.precision = 2
 
     def parse_account(self, str):
         return NamedAccount(str)
 
     def parse_value(self, str):
-        return Value.parse(str)
+        return Value.parse(str, precision=self.precision)
 
     def parse_ledger(self, filename, str = None):
         if str is None:
@@ -79,6 +80,7 @@ class Parser(object):
         try:
             date, label = self.parse_header(header)
             date = datetime.strptime(date, "%Y/%m/%d")
+
             entries = [self.parse_entry(line) for n, line in lines]
             line_numbers = [n for n, line in lines]
             transaction = Transaction(entries, date, label)

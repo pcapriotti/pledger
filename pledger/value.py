@@ -1,9 +1,10 @@
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal, InvalidOperation, ROUND_DOWN
 import re
 
 class Value(object):
-    def __init__(self, values):
+    def __init__(self, values, precision=2):
         self.values = values
+        self.precision = precision
 
     def null(self):
         for currency, amount in self.values.iteritems():
@@ -29,7 +30,7 @@ class Value(object):
                 result[currency] += amount
             else:
                 result[currency] = amount
-        return Value(result)
+        return Value(result, max(self.precision, other.precision))
 
     def __sub__(self, other):
         return self + (-other)
@@ -38,15 +39,17 @@ class Value(object):
         result = { }
         for currency in self.values:
             result[currency] = -self.values[currency]
-        return Value(result)
+        return Value(result, self.precision)
 
     def __mul__(self, num):
         result = { }
         for currency in self.values:
-            result[currency] = self.values[currency] * num
-        return Value(result)
+            unit = Decimal(10) ** -self.precision
+            result[currency] = (self.values[currency] * num).quantize(unit)
+        return Value(result, self.precision)
 
-    def format_value(self, curr, value, places=2):
+    def format_value(self, curr, value):
+        places = self.precision
         q = Decimal(10) ** -places      # 2 places --> '0.01'
         sign, digits, exp = value.quantize(q).as_tuple()
         result = []
@@ -65,21 +68,21 @@ class Value(object):
         if sign: build('-')
         return ''.join(reversed(result))
 
-    def __str__(self, places=2):
+    def __str__(self):
         return ", ".join([self.format_value(curr, value) for
                           curr, value in self.values.iteritems()])
 
     def __repr__(self): return str(self)
 
     @classmethod
-    def parse(cls, str):
+    def parse(cls, str, precision):
         elements = re.split(r"\s+", str)
         if len(elements) == 2:
             try:
                 amount = Decimal(elements[0])
                 currency = elements[1]
-                return Value({ currency: amount })
+                return Value({ currency: amount }, precision=precision)
             except InvalidOperation:
                 return None
 
-ZERO = Value({})
+ZERO = Value({}, 0)
