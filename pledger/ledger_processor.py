@@ -36,10 +36,21 @@ class LedgerProcessor(Observable):
             account = self.account[entry.account.name]
             amount = entry.amount
             result += self.rules.apply(transaction, Entry(account, amount, tags=entry.tags))
-        return result
+        return self.compact(result)
 
     def create_child(self, ledger):
         child = self.__class__(ledger, self.rules)
         child.account = self.account
         child.listeners = self.listeners
         return child
+
+    def compact(self, entries):
+        result = { }
+        for entry in entries:
+            key = (entry.account, tuple(sorted(entry.tags.items())))
+            e = result.get(key)
+            if e:
+                e.amount += entry.amount
+            else:
+                result[key] = Entry(entry.account, entry.amount, entry.tags)
+        return result.values()
