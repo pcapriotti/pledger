@@ -35,7 +35,7 @@ class LedgerProcessor(Observable):
         for entry in transaction.entries:
             account = self.account[entry.account.name]
             amount = entry.amount
-            result += self.rules.apply(transaction, Entry(account, amount))
+            result += self.rules.apply(transaction, Entry(account, amount, tags=entry.tags))
         return result
 
     def create_child(self, ledger):

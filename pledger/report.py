@@ -50,7 +50,10 @@ class BalanceEntryProcessor(object):
                                        amount=self.sheet[account])
 
 class RegisterEntryProcessor(object):
-    Entry = struct("transaction", "entry", "total")
+    class Entry(struct("transaction", "entry", "total")):
+        @property
+        def date(self):
+            return self.entry.date(self.transaction)
 
     def __init__(self, sorting):
         self.unsorted_result = []

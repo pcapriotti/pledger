@@ -10,7 +10,7 @@ import re, os, sys
 parser = Parser()
 filter = Filter.null
 rules = RuleCollection()
-sorting = MapSorting(lambda x: x.transaction.date)
+sorting = MapSorting(lambda x: x.date)
 template = default_template
 
 def run_cli():

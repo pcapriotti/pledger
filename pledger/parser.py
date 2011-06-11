@@ -48,9 +48,7 @@ class Parser(object):
             if len(elements) >= 2:
                 amount = self.parse_value(elements[1])
             if account:
-                entry = Entry(account, amount)
-                if tags: entry.tags = tags
-                return entry
+                return Entry(account, amount, tags)
 
     def parse_transaction(self, lines):
         if hasattr(lines, "split"):

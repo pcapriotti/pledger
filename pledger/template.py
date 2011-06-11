@@ -65,7 +65,7 @@ class RegisterTemplate(Template):
 
     def print_entry(self, entry):
         return u"%s %s %s %s %s" % (
-            self.lpad(datetime.strftime(entry.transaction.date, "%y-%b-%d"), 9),
+            self.lpad(datetime.strftime(entry.date, "%y-%b-%d"), 9),
             self.lpad(entry.transaction.label, 34),
             self.print_account(entry.entry.account),
             self.print_value(entry.entry.amount),
