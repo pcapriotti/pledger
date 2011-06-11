@@ -1,9 +1,15 @@
 from pledger.entry import Entry
-from pledger.tags import Taggable
+from pledger.tags import TagFilterable, Taggable
 from pledger.filter import Filter
 from pledger.rule import Rule, Generator
 
-class Account(Taggable):
+class AccountBase(object):
+    def __init__(self):
+        super(AccountBase, self).__init__()
+        self.parent = None
+        self.base_name = None
+
+class Account(AccountBase, TagFilterable):
     def __init__(self):
         super(Account, self).__init__()
 
@@ -14,18 +20,15 @@ class Account(Taggable):
         return Entry(self, -value)
 
     @classmethod
-    def tag_filter(cls, tag, value = None):
-        @Filter
-        def result(transaction, entry):
-            return entry.account.has_tag(tag, value)
-        return result
+    def from_entry(cls, transaction, entry):
+        return entry.account
 
     @classmethod
-    def tag_rule(cls, tag):
+    def tag_rule(cls, tag, filter = Filter.null):
         @Generator
         def generator(entry):
             return entry.account.get_tag(tag)(entry)
-        return Rule(cls.tag_filter(tag), generator)
+        return Rule(cls.tag_filter(tag) & filter, generator)
 
     def root(self):
         if self.parent and self.parent.name:
@@ -57,12 +60,10 @@ class Account(Taggable):
     def name(self):
         return ":".join(self.name_components())
 
-class AccountRepository(object):
+class AccountRepository(AccountBase, Taggable):
     def __init__(self):
-        self.accounts = { }
-        self.parent = None
-        self.base_name = None
         super(AccountRepository, self).__init__()
+        self.accounts = { }
 
     def get_account(self, name, *args):
         account = self.accounts.get(name)
@@ -80,9 +81,6 @@ class AccountRepository(object):
 
     def create_subaccount(self, name):
         return NamedAccount(name, self)
-
-    def get_tag(self, tag):
-        pass
 
     def sub_name(self, account):
         def sub_name_components(account):

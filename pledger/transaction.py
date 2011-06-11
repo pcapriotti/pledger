@@ -2,6 +2,7 @@ from pledger.entry import Entry
 from pledger.value import ZERO
 from pledger.directive import Directive
 from pledger.util import PledgerException
+from pledger.tags import TagFilterable
 
 class UnbalancedTransaction(PledgerException):
     def __init__(self, tr):
@@ -14,8 +15,9 @@ class UndefinedTransaction(PledgerException):
         self.index = index
         super(UndefinedTransaction, self).__init__()
 
-class Transaction(object):
+class Transaction(TagFilterable):
     def __init__(self, entries, date = None, label = ""):
+        super(Transaction, self).__init__()
         self.entries = entries
         self.date = date
         self.label = label
@@ -39,6 +41,10 @@ class Transaction(object):
 
     def __repr__(self):
         return "Transaction (%s)" % self.date
+
+    @classmethod
+    def from_entry(cls, transaction, entry):
+        return transaction
 
     @property
     def amount(self):

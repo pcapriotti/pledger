@@ -1,3 +1,6 @@
+from rule import Rule, Generator
+from filter import Filter
+
 class Taggable(object):
     def __init__(self):
         self.tags = { }
@@ -16,3 +19,14 @@ class Taggable(object):
         if value is None and self.parent:
             value = self.parent.get_tag(tag)
         return value
+
+class TagFilterable(Taggable):
+    def __init__(self):
+        super(TagFilterable, self).__init__()
+
+    @classmethod
+    def tag_filter(cls, tag, value = None):
+        @Filter
+        def result(transaction, entry):
+            return cls.from_entry(transaction, entry).has_tag(tag, value)
+        return result

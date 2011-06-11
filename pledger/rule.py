@@ -1,5 +1,3 @@
-from pledger.entry import Entry
-
 class RuleCollection(object):
     def __init__(self):
         self.rules = { }
@@ -8,8 +6,8 @@ class RuleCollection(object):
         self.rules.setdefault(level, [])
         self.rules[level].append(rule)
 
-    def apply(self, transaction, account, amount):
-        entries = [Entry(account, amount)]
+    def apply(self, transaction, entry):
+        entries = [entry]
 
         levels = self.rules.keys()
         levels.sort()

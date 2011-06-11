@@ -1,5 +1,3 @@
-from pledger.entry import Entry
-
 class Filter(object):
     def __init__(self, predicate):
         self.predicate = predicate
@@ -17,6 +15,12 @@ class Filter(object):
         @Filter
         def result(*args):
             return self(*args) or other(*args)
+        return result
+
+    def __invert__(self):
+        @Filter
+        def result(*args):
+            return not self(*args)
         return result
 
     @classmethod
