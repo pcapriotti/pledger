@@ -36,6 +36,9 @@ class BalanceEntryProcessor(object):
             else:
                 return result
 
+    def post_process(self):
+        pass
+
     @property
     def result(self):
         yield self.__class__.Entry(level=None,
@@ -55,18 +58,18 @@ class RegisterEntryProcessor(object):
         self.sorting = sorting
 
     def process_entry(self, transaction, entry):
-        self.total += entry.amount
         e = RegisterEntryProcessor.Entry(
                 transaction=transaction,
                 entry=entry,
-                total=self.total)
+                total=ZERO)
         self.unsorted_result.append(e)
 
-    @property
-    def result(self):
-        l = list(self.unsorted_result)
-        self.sorting.apply_to(l)
-        return l
+    def post_process(self):
+        self.result = self.sorting.apply_to(self.unsorted_result)
+        total = ZERO
+        for entry in self.result:
+            total += entry.entry.amount
+            entry.total = total
 
 class Report(object):
     def __init__(self, ledger, rules, filter, entry_processor, template):
@@ -78,6 +81,7 @@ class Report(object):
 
     def generate(self):
         self.ledger_processor.run()
+        self.entry_processor.post_process()
         return self.result()
 
     def on_transaction(self, transaction, entries):
