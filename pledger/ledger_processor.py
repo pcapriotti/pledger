@@ -1,6 +1,5 @@
 from pledger.value import ZERO
 from pledger.entry import Entry
-from pledger.filters import FilterCollection
 from pledger.util import Observable
 
 class LedgerProcessor(Observable):

@@ -1,7 +1,6 @@
 from pledger.transaction import Transaction
 from pledger.ledger_processor import LedgerProcessor
 import itertools
-import util
 import os.path
 
 class Ledger(object):

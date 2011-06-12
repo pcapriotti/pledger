@@ -1,8 +1,6 @@
 import itertools
 import re
-import util
 import codecs
-from util import PledgerException
 from datetime import datetime
 from pledger.account import AccountRepository, NamedAccount
 from pledger.value import Value
@@ -10,6 +8,7 @@ from pledger.ledger import Ledger
 from pledger.transaction import Transaction, UndefinedTransaction, UnbalancedTransaction
 from pledger.directive import Directive, UnsupportedDirective
 from pledger.entry import Entry
+from pledger.util import PledgerException, itersplit
 
 class MalformedHeader(PledgerException):
     pass
