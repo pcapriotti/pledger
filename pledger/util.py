@@ -28,9 +28,12 @@ class Observable(object):
 
 def struct(*fields):
     class tmp:
-        def __init__(self, **kwargs):
+        def __init__(self, *args, **kwargs):
+            for i in xrange(len(args)):
+                setattr(self, fields[i], args[i])
             for field in fields:
-                setattr(self, field, kwargs[field])
+                if field in kwargs:
+                    setattr(self, field, kwargs[field])
 
         def __str__(self):
             return str(tuple(getattr(self, field) for field in fields))

@@ -19,8 +19,8 @@ def run_cli():
     argparser = ArgumentParser()
     argparser.add_argument("report", action="store")
     argparser.add_argument("--filename", action="store", nargs=1)
-    argparser.add_argument("--begin", nargs=1)
-    argparser.add_argument("--end", nargs=1)
+    for flag in Filter.flags:
+        argparser.add_argument("--%s" % flag.name, nargs=flag.args)
     argparser.add_argument("patterns", metavar="PATTERN", type=str,
                            nargs="*")
 
@@ -43,12 +43,11 @@ def run_cli():
 
     ledger = parser.parse_ledger(filename)
 
-    if args.begin:
-        begin_filter = BeginFilter.parse(parser, args.begin[0])
-        if begin_filter: filter &= begin_filter
-    if args.end:
-        end_filter = EndFilter.parse(parser, args.end[0])
-        if end_filter: filter &= end_filter
+    for flag in Filter.flags:
+        parameters = getattr(args, flag.name)
+        if parameters:
+            f = flag.filter.parse(parser, *parameters)
+            if f: filter &= f
 
     report = report_factory(ledger, rules, filter, sorting)
     for line in template(report):

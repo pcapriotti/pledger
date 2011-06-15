@@ -1,4 +1,21 @@
+from pledger.util import struct
+
+Flag = struct("name", "args", "filter")
+
+class FilterMetaclass(type):
+    def __new__(cls, name, bases, attrs):
+        result = super(FilterMetaclass, cls).__new__(cls, name, bases, attrs)
+        name = attrs.get("flag")
+        if name:
+            args = attrs.get("args", 0)
+            f = Flag(name, args, result)
+            Filter.flags.append(f)
+        return result
+
 class Filter(object):
+    __metaclass__ = FilterMetaclass
+    flags = []
+
     def __init__(self, predicate):
         self.predicate = predicate
 
@@ -52,9 +69,15 @@ class DateFilter(Filter):
         self.date = date
 
 class BeginFilter(DateFilter):
+    flag = "begin"
+    args = 1
+
     def __call__(self, transaction, entry):
         return entry.date(transaction) >= self.date
 
 class EndFilter(DateFilter):
+    flag = "end"
+    args = 1
+
     def __call__(self, transaction, entry):
         return entry.date(transaction) < self.date
