@@ -38,3 +38,23 @@ class Filter(object):
         return result
 
 Filter.null = Filter(lambda transaction, entry: True)
+
+class DateFilter(Filter):
+    @classmethod
+    def parse(cls, parser, str):
+        date = parser.parse_fuzzy_date(str)
+        if date:
+            return cls(date)
+        else:
+            raise ValueError("Invalid date")
+
+    def __init__(self, date):
+        self.date = date
+
+class BeginFilter(DateFilter):
+    def __call__(self, transaction, entry):
+        return entry.date(transaction) >= self.date
+
+class EndFilter(DateFilter):
+    def __call__(self, transaction, entry):
+        return entry.date(transaction) < self.date

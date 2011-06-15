@@ -1,6 +1,6 @@
 from argparse import ArgumentParser
 from pledger.report import reports
-from pledger.filter import Filter
+from pledger.filter import Filter, BeginFilter, EndFilter
 from pledger.parser import Parser
 from pledger.sorting import MapSorting
 from pledger.rule import RuleCollection
@@ -19,6 +19,8 @@ def run_cli():
     argparser = ArgumentParser()
     argparser.add_argument("report", action="store")
     argparser.add_argument("--filename", action="store", nargs=1)
+    argparser.add_argument("--begin", nargs=1)
+    argparser.add_argument("--end", nargs=1)
     argparser.add_argument("patterns", metavar="PATTERN", type=str,
                            nargs="*")
 
@@ -40,6 +42,14 @@ def run_cli():
         sys.exit(1)
 
     ledger = parser.parse_ledger(filename)
+
+    if args.begin:
+        begin_filter = BeginFilter.parse(parser, args.begin[0])
+        if begin_filter: filter &= begin_filter
+    if args.end:
+        end_filter = EndFilter.parse(parser, args.end[0])
+        if end_filter: filter &= end_filter
+
     report = report_factory(ledger, rules, filter, sorting)
     for line in template(report):
-        print line.encode("utf-8")
+        print(line.encode("utf-8"))

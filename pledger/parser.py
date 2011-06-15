@@ -1,7 +1,7 @@
 import itertools
 import re
 import codecs
-from datetime import datetime
+from datetime import datetime, date
 from pledger.account import AccountRepository, NamedAccount
 from pledger.value import Value
 from pledger.ledger import Ledger
@@ -9,6 +9,7 @@ from pledger.transaction import Transaction, UndefinedTransaction, UnbalancedTra
 from pledger.directive import Directive, UnsupportedDirective
 from pledger.entry import Entry
 from pledger.util import PledgerException, itersplit
+from pledger import time
 
 date_formats = {
     "default": "%Y/%m/%d",
@@ -113,22 +114,14 @@ class Parser(object):
             pass
 
     def parse_month(self, str):
-        try:
-            month = self.parse_date(str, "month")
-            current = date.today()
-            return date(current.year, month, 1)
-        except ValueError:
-            pass
+        base = self.parse_date(str, "month")
+        if base: return date(date.today().year, base.month, 1)
 
     def parse_year(self, str):
-        try:
-            year = self.parse_date(str, "year")
-            return date(year, 1, 1)
-        except ValueError:
-            pass
+        base = self.parse_date(str, "year")
+        if base: return date(year, 1, 1)
 
     def parse_fuzzy_date(self, str):
-        result = None
         for parser in [self.parse_date, self.parse_month, self.parse_year]:
             result = parser(str)
             if result: return result
