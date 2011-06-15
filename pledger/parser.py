@@ -10,6 +10,11 @@ from pledger.directive import Directive, UnsupportedDirective
 from pledger.entry import Entry
 from pledger.util import PledgerException, itersplit
 
+date_formats = {
+    "default": "%Y/%m/%d",
+    "year": "%Y",
+    "month": "%b" }
+
 class MalformedHeader(PledgerException):
     pass
 
@@ -30,7 +35,7 @@ class Parser(object):
         f = lambda (number, line): line == ""
         lines = itertools.izip(itertools.count(1), str.split("\n"))
         try:
-            transactions = [self.parse_transaction(group) for group in util.itersplit(f, lines)]
+            transactions = [self.parse_transaction(group) for group in itersplit(f, lines)]
         except PledgerException, e:
             e.filename = filename
             raise e
@@ -101,8 +106,33 @@ class Parser(object):
             e.line_number = n
             raise e
 
-    def parse_date(self, str):
-        return datetime.strptime(str, "%Y/%m/%d")
+    def parse_date(self, str, format="default"):
+        try:
+            return datetime.strptime(str, date_formats[format]).date()
+        except ValueError:
+            pass
+
+    def parse_month(self, str):
+        try:
+            month = self.parse_date(str, "month")
+            current = date.today()
+            return date(current.year, month, 1)
+        except ValueError:
+            pass
+
+    def parse_year(self, str):
+        try:
+            year = self.parse_date(str, "year")
+            return date(year, 1, 1)
+        except ValueError:
+            pass
+
+    def parse_fuzzy_date(self, str):
+        result = None
+        for parser in [self.parse_date, self.parse_month, self.parse_year]:
+            result = parser(str)
+            if result: return result
+        return None
 
     def parse_header(self, str):
         m = re.match(r'^(\S+)\s+(\*\s+)?(.*)$', str)
