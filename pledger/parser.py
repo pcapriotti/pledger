@@ -85,13 +85,14 @@ class Parser(object):
             if tags: lines = lines[1:]
 
         try:
-            date, label = self.parse_header(header)
+            date, label, cleared = self.parse_header(header)
             date = self.parse_date(date)
 
             entries = [self.parse_entry(line) for n, line in lines]
             line_numbers = [n for n, line in lines]
             transaction = Transaction(entries, date, label)
             if tags: transaction.tags = tags
+            if cleared: transaction.tags["cleared"] = True
             return transaction
         except UnbalancedTransaction, e:
             e.line_number = n
@@ -130,7 +131,7 @@ class Parser(object):
     def parse_header(self, str):
         m = re.match(r'^(\S+)\s+(\*\s+)?(.*)$', str)
         if m:
-            return m.group(1), m.group(3)
+            return m.group(1), m.group(3), m.group(2)
         else:
             raise MalformedHeader()
 

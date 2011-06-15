@@ -1,11 +1,11 @@
 from datetime import datetime
 
 COLORS = {
+    "bold_white" : "\033[1;37m",
     "red" : "\033[0;31m",
     "yellow" : "\033[0;33m",
     "green" : "\033[0;32m",
     "nocolor" : "\033[00m",
-    "bold_teal" : "\033[1;36m",
     "blue" : "\033[0;34m" }
 
 class Template(object):
@@ -34,6 +34,12 @@ class Template(object):
         else:
             text = account.shortened_name(size)
             return self.lpad(text, size, "blue")
+
+    def print_label(self, transaction, size):
+        color = None
+        if not transaction.has_tag("cleared"):
+            color = "bold_white"
+        return self.lpad(transaction.label, size, color)
 
     def colored(self, color, text):
         if color:
@@ -66,7 +72,7 @@ class RegisterTemplate(Template):
     def print_entry(self, entry):
         return u"%s %s %s %s %s" % (
             self.lpad(datetime.strftime(entry.date, "%y-%b-%d"), 9),
-            self.lpad(entry.transaction.label, 34),
+            self.print_label(entry.transaction, 34),
             self.print_account(entry.entry.account),
             self.print_value(entry.entry.amount),
             self.print_value(entry.total))
