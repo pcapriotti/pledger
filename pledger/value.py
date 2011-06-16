@@ -6,6 +6,14 @@ class Value(object):
         self.values = values
         self.precision = precision
 
+    def currencies(self):
+        return (currency for currency,amount in self.values.iteritems() if amount != 0)
+
+    def component(self, currency):
+        amount = self.values.get(currency, 0)
+        if amount:
+            return Value({currency: amount})
+
     def null(self):
         for currency, amount in self.values.iteritems():
             if amount != 0: return False
@@ -75,8 +83,11 @@ class Value(object):
         return ''.join(reversed(result))
 
     def __str__(self):
-        return ", ".join([self.format_value(curr, value) for
-                          curr, value in self.values.iteritems()])
+        if self.null():
+            return "0"
+        else:
+            return ", ".join([self.format_value(curr, value) for
+                              curr, value in self.values.iteritems()])
 
     def __repr__(self): return str(self)
 

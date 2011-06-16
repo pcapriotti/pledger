@@ -22,11 +22,14 @@ class Template(object):
         return u"%s%s" % (self.colored(color, text), " " * padlength)
 
     def print_value(self, value):
-        text = unicode(value)
-        color = None
-        if value.negative():
-            color = "red"
-        return self.pad(text, 20, color)
+        if value:
+            text = unicode(value)
+            color = None
+            if value.negative():
+                color = "red"
+            return self.pad(text, 20, color)
+        else:
+            return ""
 
     def print_account(self, account, size=39):
         if size is None:
@@ -53,36 +56,56 @@ class BalanceTemplate(Template):
         # save total
         total = it.next()
         for entry in it:
-            yield self.print_value(entry.amount) + \
+            currencies = sorted(entry.amount.currencies())
+            for currency in currencies[:-1]:
+                yield self.print_value(entry.amount.component(currency))
+            yield self.print_value(entry.amount.component(currencies[-1])) + \
                   ("  " * (entry.level - 1)) + \
                   self.print_account(entry.account, None)
         yield u"-" * 20
-        yield self.print_value(total.amount)
+        currencies = sorted(total.amount.currencies())
+        for currency in currencies:
+            yield self.print_value(total.amount.component(currency))
 
 class RegisterTemplate(Template):
     def __call__(self, report):
         last_entry = None
         for entry in report.generate():
             if last_entry and id(last_entry.transaction) == id(entry.transaction):
-                yield self.print_secondary_entry(entry)
+                for line in self.print_secondary_entry(entry):
+                    yield line
             else:
-                yield self.print_entry(entry)
+                for line in self.print_entry(entry):
+                    yield line
             last_entry = entry
 
     def print_entry(self, entry):
-        return u"%s %s %s %s %s" % (
+        currencies = sorted(set(entry.entry.amount.currencies()).union(entry.total.currencies()))
+        yield u"%s %s %s %s %s" % (
             self.lpad(datetime.strftime(entry.date, "%y-%b-%d"), 9),
             self.print_label(entry.transaction, 34),
             self.print_account(entry.entry.account),
-            self.print_value(entry.entry.amount),
-            self.print_value(entry.total))
+            self.print_value(entry.entry.amount.component(currencies[0])),
+            self.print_value(entry.total.component(currencies[0])))
+        for line in self.print_extra_components(entry, currencies[1:]):
+            yield line
 
     def print_secondary_entry(self, entry):
-        return u"%s %s %s %s" % (
+        currencies = sorted(set(entry.entry.amount.currencies()).union(entry.total.currencies()))
+        yield u"%s %s %s %s" % (
             " " * 44,
             self.print_account(entry.entry.account),
-            self.print_value(entry.entry.amount),
-            self.print_value(entry.total))
+            self.print_value(entry.entry.amount.component(currencies[0])),
+            self.print_value(entry.total.component(currencies[0])))
+        for line in self.print_extra_components(entry, currencies[1:]):
+            yield line
+
+    def print_extra_components(self, entry, currencies):
+        for currency in currencies:
+            yield u"%s %s %s" % (
+                " " * 104,
+                self.print_value(entry.entry.amount.component(currency)),
+                self.print_value(entry.total.component(currency)))
 
 def default_template(report):
     return report.template(report)
