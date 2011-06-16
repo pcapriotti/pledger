@@ -48,6 +48,12 @@ class Value(object):
             result[currency] = (self.values[currency] * num).quantize(unit)
         return Value(result, self.precision)
 
+    def __lt__(self, other):
+        return (self - other).negative()
+
+    def __gt__(self, other):
+        return (other - self).negative()
+
     def format_value(self, curr, value):
         places = self.precision
         q = Decimal(10) ** -places      # 2 places --> '0.01'

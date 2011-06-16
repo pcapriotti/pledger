@@ -20,6 +20,9 @@ class Taggable(object):
             value = self.parent.get_tag(tag)
         return value
 
+    def __getattr__(self, name):
+        return self.get_tag(name)
+
 class TagFilterable(Taggable):
     def __init__(self):
         super(TagFilterable, self).__init__()

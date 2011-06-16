@@ -20,3 +20,9 @@ class Entry(Taggable):
         if result is None:
             result = transaction.date
         return result
+
+    def of(self, transaction):
+        result = Entry(self.account, self.amount, self.tags)
+        result.date = self.date(transaction)
+        result.parent = transaction
+        return result

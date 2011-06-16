@@ -1,4 +1,5 @@
 from pledger.util import struct
+from pledger.value import ZERO
 
 Flag = struct("name", "args", "filter")
 
@@ -54,6 +55,10 @@ class Filter(object):
             return regexp.search(entry.account.name) is not None
         return result
 
+    @classmethod
+    def parse(cls, parser, *args):
+        return cls(*args)
+
 Filter.null = Filter(lambda transaction, entry: True)
 
 class DateFilter(Filter):
@@ -81,3 +86,17 @@ class EndFilter(DateFilter):
 
     def __call__(self, transaction, entry):
         return entry.date(transaction) < self.date
+
+class ExpressionFilter(Filter):
+    flag = "filter"
+    args = 1
+
+    def __init__(self, expression):
+        self.expression = compile(expression, "<commandline>", "eval")
+
+    def __call__(self, transaction, entry):
+        context = {
+                "transaction" : transaction,
+                "entry" : entry.of(transaction),
+                "ZERO": ZERO }
+        return eval(self.expression, context)

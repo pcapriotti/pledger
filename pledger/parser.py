@@ -120,7 +120,7 @@ class Parser(object):
 
     def parse_year(self, str):
         base = self.parse_date(str, "year")
-        if base: return date(year, 1, 1)
+        if base: return date(base.year, 1, 1)
 
     def parse_fuzzy_date(self, str):
         for parser in [self.parse_date, self.parse_month, self.parse_year]:
