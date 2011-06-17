@@ -91,12 +91,21 @@ class ExpressionFilter(Filter):
     flag = "filter"
     args = 1
 
-    def __init__(self, expression):
+    @classmethod
+    def parse(cls, parser, expression):
+        return cls(parser, expression)
+
+    def __init__(self, parser, expression):
+        self.parser = parser
         self.expression = compile(expression, "<commandline>", "eval")
 
     def __call__(self, transaction, entry):
         context = {
                 "transaction" : transaction,
                 "entry" : entry.of(transaction),
+                "date" : self.parse_date,
                 "ZERO": ZERO }
         return eval(self.expression, context)
+
+    def parse_date(self, str):
+        return self.parser.parse_fuzzy_date(str)
