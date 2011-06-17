@@ -68,7 +68,7 @@ class RegisterEntryProcessor(object):
         self.unsorted_result.append(e)
 
     def post_process(self):
-        self.result = self.sorting.apply_to(self.unsorted_result)
+        self.result = self.sorting(self.unsorted_result)
         total = ZERO
         for entry in self.result:
             total += entry.entry.amount

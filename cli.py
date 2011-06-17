@@ -2,7 +2,7 @@ from argparse import ArgumentParser
 from pledger.report import reports
 from pledger.filter import Filter, BeginFilter, EndFilter
 from pledger.parser import Parser
-from pledger.sorting import MapSorting
+from pledger.sorting import MapSorting, ExpressionSorting
 from pledger.rule import RuleCollection
 from pledger.template import default_template
 import re, os, sys
@@ -15,12 +15,15 @@ template = default_template
 
 def run_cli():
     global filter
+    global sorting
 
     argparser = ArgumentParser()
     argparser.add_argument("report", action="store")
     argparser.add_argument("--filename", action="store", nargs=1)
     for flag in Filter.flags:
         argparser.add_argument("--%s" % flag.name, nargs=flag.args)
+    argparser.add_argument("--sort", nargs=1)
+    argparser.add_argument("--sortb", nargs=1)
     argparser.add_argument("patterns", metavar="PATTERN", type=str,
                            nargs="*")
 
@@ -48,6 +51,11 @@ def run_cli():
         if parameters:
             f = flag.filter.parse(parser, *parameters)
             if f: filter &= f
+
+    if args.sort:
+        sorting = ExpressionSorting(parser, *args.sort)
+    elif args.sortb:
+        sorting = ~ExpressionSorting(parser, *args.sortb)
 
     report = report_factory(ledger, rules, filter, sorting)
     for line in template(report):
