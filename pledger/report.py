@@ -1,5 +1,5 @@
 from pledger.value import ZERO
-from pledger.util import struct, linearized
+from pledger.util import struct, linearized, PrefixTree
 from pledger.template import BalanceTemplate, RegisterTemplate
 
 class BalanceEntryProcessor(object):
@@ -105,7 +105,17 @@ class Report(object):
         return cls(ledger, rules, filter, RegisterEntryProcessor(sorting),
                 template=RegisterTemplate())
 
-reports = {
+class ReportRegistry(object):
+    def __init__(self, reps):
+        self.reps = reps
+        self.prefix_tree = PrefixTree(reps.keys())
+
+    def get(self, prefix):
+        candidates = self.prefix_tree.from_prefix(prefix)
+        if len(candidates) == 1:
+            return self.reps[candidates[0]]
+
+reports = ReportRegistry({
     "balance" : Report.balance,
     "register" : Report.register
-}
+})
