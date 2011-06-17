@@ -56,16 +56,15 @@ class BalanceTemplate(Template):
         # save total
         total = it.next()
         for entry in it:
-            currencies = sorted(entry.amount.currencies())
-            for currency in currencies[:-1]:
-                yield self.print_value(entry.amount.component(currency))
-            yield self.print_value(entry.amount.component(currencies[-1])) + \
+            components = entry.amount.components()
+            for component in components[:-1]:
+                yield self.print_value(component)
+            yield self.print_value(components[-1]) + \
                   ("  " * (entry.level - 1)) + \
                   self.print_account(entry.account, None)
         yield u"-" * 20
-        currencies = sorted(total.amount.currencies())
-        for currency in currencies:
-            yield self.print_value(total.amount.component(currency))
+        for component in total.amount.components():
+            yield self.print_value(component)
 
 class RegisterTemplate(Template):
     def __call__(self, report):
@@ -81,31 +80,35 @@ class RegisterTemplate(Template):
 
     def print_entry(self, entry):
         currencies = sorted(set(entry.entry.amount.currencies()).union(entry.total.currencies()))
+        components = entry.entry.amount.components(currencies)
+        total_components = entry.total.components(currencies)
         yield u"%s %s %s %s %s" % (
             self.lpad(datetime.strftime(entry.date, "%y-%b-%d"), 9),
             self.print_label(entry.transaction, 34),
             self.print_account(entry.entry.account),
-            self.print_value(entry.entry.amount.component(currencies[0])),
-            self.print_value(entry.total.component(currencies[0])))
-        for line in self.print_extra_components(entry, currencies[1:]):
+            self.print_value(components[0]),
+            self.print_value(total_components[0]))
+        for line in self.print_extra_components(entry, components[1:], total_components[1:]):
             yield line
 
     def print_secondary_entry(self, entry):
         currencies = sorted(set(entry.entry.amount.currencies()).union(entry.total.currencies()))
+        components = entry.entry.amount.components(currencies)
+        total_components = entry.total.components(currencies)
         yield u"%s %s %s %s" % (
             " " * 44,
             self.print_account(entry.entry.account),
-            self.print_value(entry.entry.amount.component(currencies[0])),
-            self.print_value(entry.total.component(currencies[0])))
-        for line in self.print_extra_components(entry, currencies[1:]):
+            self.print_value(components[0]),
+            self.print_value(total_components[0]))
+        for line in self.print_extra_components(entry, components[1:], total_components[1:]):
             yield line
 
-    def print_extra_components(self, entry, currencies):
-        for currency in currencies:
+    def print_extra_components(self, entry, components, total_components):
+        for i in xrange(len(components)):
             yield u"%s %s %s" % (
                 " " * 104,
-                self.print_value(entry.entry.amount.component(currency)),
-                self.print_value(entry.total.component(currency)))
+                self.print_value(components[i]),
+                self.print_value(total_components[i]))
 
 def default_template(report):
     return report.template(report)

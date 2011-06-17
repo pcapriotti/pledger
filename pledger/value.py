@@ -9,10 +9,20 @@ class Value(object):
     def currencies(self):
         return (currency for currency,amount in self.values.iteritems() if amount != 0)
 
-    def component(self, currency):
-        amount = self.values.get(currency, 0)
-        if amount:
-            return Value({currency: amount})
+    def components(self, currencies = None):
+        if currencies is None:
+            currencies = sorted(self.currencies())
+        if len(currencies):
+            result = []
+            for currency in currencies:
+                amount = self.values.get(currency, 0)
+                if amount:
+                    result.append(Value({currency: amount}))
+                else:
+                    result.append(ZERO)
+            return result
+        else:
+            return [ZERO]
 
     def null(self):
         for currency, amount in self.values.iteritems():
