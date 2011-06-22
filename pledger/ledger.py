@@ -15,9 +15,6 @@ class Ledger(object):
     def add(self, transaction):
         self.transactions.append(transaction)
 
-    def create_processor(self, rules):
-        return LedgerProcessor(self, rules)
-
     def absolute_filename(self, filename):
         if os.path.isabs(filename): return filename
         dir = os.path.dirname(self.filename)

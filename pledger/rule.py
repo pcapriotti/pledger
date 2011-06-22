@@ -47,3 +47,10 @@ class Rule(object):
             return self.generator(entry)
         else:
             return []
+
+class TransactionRule(Rule):
+    def apply(self, transaction):
+        if self.filter(transaction, None):
+            return self.generator(transaction)
+        else:
+            return transaction

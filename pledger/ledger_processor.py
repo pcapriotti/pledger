@@ -1,12 +1,14 @@
 from pledger.value import ZERO
 from pledger.entry import Entry
+from pledger.transaction import Transaction
 from pledger.util import Observable
 
 class LedgerProcessor(Observable):
-    def __init__(self, ledger, rules):
+    def __init__(self, ledger, rules, transaction_rules):
         super(LedgerProcessor, self).__init__()
         self.ledger = ledger
         self.rules = rules
+        self.transaction_rules = transaction_rules
         self.parser = self.ledger.parser
         self.account = self.parser.accounts
 
@@ -22,7 +24,8 @@ class LedgerProcessor(Observable):
 
     def add_transaction(self, transaction):
         entries = self.filter(transaction)
-        self.fire("transaction", transaction, entries)
+        t = self.process_transaction(transaction, entries)
+        self.fire("transaction", t, entries)
 
     def include(self, filename):
         filename = self.ledger.absolute_filename(filename)
@@ -37,8 +40,14 @@ class LedgerProcessor(Observable):
             result += self.rules.apply(transaction, Entry(account, amount, tags=entry.tags))
         return self.compact(result)
 
+    def process_transaction(self, transaction, entries):
+        result = Transaction(entries, transaction.date, transaction.label, transaction.tags)
+        for rule in self.transaction_rules:
+            result = rule.apply(result)
+        return result
+
     def create_child(self, ledger):
-        child = self.__class__(ledger, self.rules)
+        child = self.__class__(ledger, self.rules, self.transaction_rules)
         child.account = self.account
         child.listeners = self.listeners
         return child

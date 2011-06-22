@@ -23,13 +23,25 @@ class Taggable(object):
     def __getattr__(self, name):
         return self.get_tag(name)
 
+    def clone_with_tags(self, **tags):
+        result = self.clone()
+        for tag in tags:
+            result.tags[tag] = tags[tag]
+        return result
+
 class TagFilterable(Taggable):
     def __init__(self):
         super(TagFilterable, self).__init__()
 
     @classmethod
     def tag_filter(cls, tag, value = None):
+        def get_taggables(transaction, entry):
+            return [cls.from_entry(transaction, entry)]
+        return cls.general_tag_filter(get_taggables, tag, value)
+
+    @classmethod
+    def general_tag_filter(cls, get_taggables, tag, value=None):
         @Filter
         def result(transaction, entry):
-            return cls.from_entry(transaction, entry).has_tag(tag, value)
+            return any([x.has_tag(tag, value) for x in get_taggables(transaction, entry)])
         return result
