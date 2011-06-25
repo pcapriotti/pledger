@@ -90,11 +90,21 @@ class ExpressionFilter(Filter):
 
     def __call__(self, transaction, entry):
         context = {
-                "transaction" : transaction,
-                "entry" : entry.of(transaction),
+                "transaction" : SmartWrapper(transaction),
+                "entry" : SmartWrapper(entry.of(transaction)),
                 "date" : self.parse_date,
                 "ZERO": ZERO }
         return eval(self.expression, context)
 
     def parse_date(self, str):
         return self.parser.parse_fuzzy_date(str)
+
+class SmartWrapper(object):
+    def __init__(self, obj):
+        self.obj = obj
+
+    def __getattr__(self, name):
+        try:
+            return getattr(self.obj, name)
+        except AttributeError:
+            return self.obj.get_tag(name)

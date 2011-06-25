@@ -20,9 +20,6 @@ class Taggable(object):
             value = self.parent.get_tag(tag)
         return value
 
-    def __getattr__(self, name):
-        return self.get_tag(name)
-
     def clone_with_tags(self, **tags):
         result = self.clone()
         for tag in tags:
