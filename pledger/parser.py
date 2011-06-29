@@ -28,7 +28,7 @@ class Parser(object):
         return NamedAccount(str)
 
     def parse_value(self, str):
-        return Value.parse(str, precision=self.precision)
+        return Value.parse(str)
 
     def parse_ledger(self, filename, str = None):
         if str is None:
