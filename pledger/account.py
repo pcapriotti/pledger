@@ -60,6 +60,20 @@ class Account(AccountBase, TagFilterable):
     def name(self):
         return ":".join(self.name_components())
 
+    def is_ancestor(self, account):
+        if self == account:
+            return True
+        elif account.parent and account.parent.name:
+            return self.is_ancestor(account.parent)
+        else:
+            return False
+
+    def filter(self):
+        @Filter
+        def result(transaction, entry):
+            return self.is_ancestor(entry.account)
+        return result
+
 class AccountRepository(AccountBase, Taggable):
     def __init__(self):
         super(AccountRepository, self).__init__()
