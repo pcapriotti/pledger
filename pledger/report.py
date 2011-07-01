@@ -116,6 +116,15 @@ class ReportRegistry(object):
         if len(candidates) == 1:
             return self.reps[candidates[0]]
 
+    def __getitem__(self, name):
+        return self.reps[name]
+
+    def add(self, name, factory):
+        if name in self.reps:
+            raise Exception.new("Report %s already exists" % name)
+        self.reps[name] = factory
+        self.prefix_tree.insert(name)
+
 reports = ReportRegistry({
     "balance" : Report.balance,
     "register" : Report.register
