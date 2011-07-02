@@ -9,7 +9,6 @@ from pledger.transaction import Transaction, UndefinedTransaction, UnbalancedTra
 from pledger.directive import Directive, UnsupportedDirective
 from pledger.entry import Entry
 from pledger.util import PledgerException, itersplit
-from pledger import time
 
 date_formats = {
     "default": "%Y/%m/%d",
