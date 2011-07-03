@@ -1,6 +1,8 @@
 from argparse import ArgumentParser
+from pledger.account import Account
 from pledger.report import reports
 from pledger.filter import Filter, BeginFilter, EndFilter
+from pledger.pattern import PatternParser
 from pledger.parser import Parser
 from pledger.sorting import MapSorting, ExpressionSorting
 from pledger.rule import RuleCollection
@@ -33,9 +35,9 @@ def run_cli():
     report_factory = reports.get(args.report)
     if report_factory is None:
         raise Exception("no such report " + args.report)
-    filters = [Filter.matches(re.compile(pattern)) for pattern in args.patterns]
-    if filters:
-        filter &= reduce(Filter.__or__, filters)
+    if args.patterns:
+        pattern_parser = PatternParser(args.patterns)
+        filter &= pattern_parser.parse_filter()
 
     filename = args.filename and args.filename[0] or None
     if filename is None:
