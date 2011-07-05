@@ -33,7 +33,7 @@ Transactions can be written in text files which pledger is able to parse using a
         Assets:Bank             -1000.00 €
         Expenses:Rent
 
-As you can see, this expression includes the date of the transaction, an optional * mark representing whether the trasaction is "cleared" (which means whatever you want it to mean, but usually, that you have verified the transaction on a bank statement), and an arbitrary label that describes it.
+As you can see, this expression includes the date of the transaction, an optional \* mark representing whether the trasaction is "cleared" (which means whatever you want it to mean, but usually, that you have verified the transaction on a bank statement), and an arbitrary label that describes it.
 
 After that, there is a list of entries, written as <account> <2 or more spaces> <amount>. One of the amounts can be omitted, since it is implied that is equal to the opposite of the sum of the others (remember each transaction has to total 0).
 
@@ -95,7 +95,7 @@ A startup script allows you to define new report types, or custom representation
 
 ## Tags
 
-Entries, transactions and accounts can have tags attached to them. A tag is an arbitrary key-value pair. Some tags are reversed, and have a special meaning to pledger, like the 'date' tag for an entry, which changes its date.
+Entries, transactions and accounts can have tags attached to them. A tag is an arbitrary key-value pair. Some tags are reserved, and have a special meaning to pledger, like the 'date' tag for an entry, which changes its date.
 
 Tags for entries and transactions can be specified in the input file, but account tags can only be set in python code at the moment.
 
