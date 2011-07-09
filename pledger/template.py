@@ -9,6 +9,10 @@ COLORS = {
     "blue" : "\033[0;34m" }
 
 class Template(object):
+    def __call__(self, report, output):
+        for line in self.generate(report):
+            output(line)
+
     def pad(self, item, size, color = None):
         text = unicode(item)[:size]
         padlength = size - len(text)
@@ -51,7 +55,7 @@ class Template(object):
             return text
 
 class BalanceTemplate(Template):
-    def __call__(self, report):
+    def generate(self, report):
         it = report.generate()
         # save total
         total = it.next()
@@ -67,7 +71,7 @@ class BalanceTemplate(Template):
             yield self.print_value(component)
 
 class RegisterTemplate(Template):
-    def __call__(self, report):
+    def generate(self, report):
         last_entry = None
         for entry in report.generate():
             if last_entry and id(last_entry.transaction) == id(entry.transaction):
@@ -110,5 +114,5 @@ class RegisterTemplate(Template):
                 self.print_value(components[i]),
                 self.print_value(total_components[i]))
 
-def default_template(report):
-    return report.template(report)
+def default_template(report, *args):
+    return report.template(report, *args)

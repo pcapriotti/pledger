@@ -99,7 +99,9 @@ class Value(object):
             return ", ".join([self.format_value(curr, value) for
                               curr, value in self.values.iteritems()])
 
-    def __repr__(self): return str(self)
+    def __repr__(self):
+        return "<%s>" % " ".join([self.format_value("?", value) for
+                                 curr, value in self.values.iteritems()])
 
     @classmethod
     def parse(cls, str, precision=None):

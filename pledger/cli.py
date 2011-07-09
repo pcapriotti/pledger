@@ -16,6 +16,9 @@ transaction_rules = []
 sorting = MapSorting(lambda x: x.date)
 template = default_template
 
+def output(line):
+    print line.encode("utf-8")
+
 def run_cli():
     global filter
     global sorting
@@ -61,5 +64,4 @@ def run_cli():
         sorting = ~ExpressionSorting(parser, *args.sortb)
 
     report = report_factory(ledger, rules, transaction_rules, filter, sorting)
-    for line in template(report):
-        print(line.encode("utf-8"))
+    return template(report, output)
