@@ -23,8 +23,11 @@ class BalanceEntryProcessor(object):
 
     def accounts(self):
         grouped = self.grouped_accounts(None, 0, sorted(self.sheet.keys()))
-        root, items = grouped[0]
-        return linearized(items)
+        if len(grouped) > 0:
+            root, items = grouped[0]
+            return linearized(items)
+        else:
+            return []
 
     def grouped_accounts(self, root, level, accounts, prefix = ""):
         children = [account for account in accounts if account.parent == root]

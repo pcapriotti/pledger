@@ -59,6 +59,7 @@ class BalanceTemplate(Template):
         it = report.generate()
         # save total
         total = it.next()
+        count = 0
         for entry in it:
             components = entry.amount.components()
             for component in components[:-1]:
@@ -66,9 +67,11 @@ class BalanceTemplate(Template):
             yield self.print_value(components[-1]) + \
                   ("  " * (entry.level - 1)) + \
                   self.print_account(entry.account, None)
-        yield u"-" * 20
-        for component in total.amount.components():
-            yield self.print_value(component)
+            count += 1
+        if count > 0:
+            yield u"-" * 20
+            for component in total.amount.components():
+                yield self.print_value(component)
 
 class RegisterTemplate(Template):
     def generate(self, report):
