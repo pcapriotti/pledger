@@ -69,8 +69,14 @@ class Value(object):
     def __lt__(self, other):
         return (self - other).negative()
 
+    def __le__(self, other):
+        return self == other or self < other
+
     def __gt__(self, other):
         return (other - self).negative()
+
+    def __ge__(self, other):
+        return self == other or self > other
 
     def format_value(self, curr, value):
         places = self.precision
@@ -102,6 +108,9 @@ class Value(object):
     def __repr__(self):
         return "<%s>" % " ".join([self.format_value("?", value) for
                                  curr, value in self.values.iteritems()])
+
+    def __hash__(self):
+        return hash(tuple(sorted(self.values.items())))
 
     @classmethod
     def parse(cls, str, precision=None):
