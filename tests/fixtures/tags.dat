@@ -1,0 +1,8 @@
+2011/03/01 Equity
+    ; :balance:
+    Assets:Bank             1500.00 $
+    Equity:Capital                      ; [2011/01/01]
+
+2011/03/06 Bookshop
+    Expenses:Books          -35.00 $    ; title:Dracula
+    Assets:Bank
