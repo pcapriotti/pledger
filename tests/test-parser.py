@@ -24,3 +24,11 @@ class ParserTest(unittest.TestCase):
         self.assertEqual({ "foo":"bar" }, self.parser.parse_tags("; foo:bar \t "))
         self.assertEqual({ "foo":"1", "bar":"2", "baz":"" },
                 self.parser.parse_tags("; :baz: foo:1 \tbar:2"))
+
+    def testTagsWithSpaces(self):
+        self.assertEqual({ "foo":"hello world" },
+                self.parser.parse_tags('; foo:"hello world"'))
+        self.assertEqual({ "foo":'hello "world"' },
+                self.parser.parse_tags('; foo:\'hello "world"\''))
+        self.assertEqual({ "foo":"hello world", "bar":"0", "baz":"5" },
+                self.parser.parse_tags(';bar:0 foo:"hello world" baz:5'))

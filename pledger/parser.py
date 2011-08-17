@@ -152,6 +152,12 @@ class Parser(object):
             return dict(tag_dict)
 
     def parse_tag(self, str):
+        m = re.match(r':?(\S+):"([^"]*)"\s*', str)
+        if m:
+            return ((m.group(1), m.group(2)), m.end())
+        m = re.match(r":?(\S+):'([^']*)'\s*", str)
+        if m:
+            return ((m.group(1), m.group(2)), m.end())
         m = re.match(r':?(\S+):(\S*)\s*', str)
         if m:
             return ((m.group(1), m.group(2)), m.end())
