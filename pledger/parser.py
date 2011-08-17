@@ -141,21 +141,24 @@ class Parser(object):
         else:
             m = re.search(pattern, str)
         if m:
-            tags = re.split(r'\s+', m.group(1))
+            tagstring = m.group(1)
             tag_dict = []
-            for str in tags:
-                tag = self.parse_tag(str)
-                if tag: tag_dict.append(tag)
+            while True:
+                result = self.parse_tag(tagstring)
+                if result is None: break
+                tag, index = result
+                tag_dict.append(tag)
+                tagstring = tagstring[index:]
             return dict(tag_dict)
 
     def parse_tag(self, str):
-        m = re.match(r':?(\S+):(\S*)$', str)
+        m = re.match(r':?(\S+):(\S*)\s*', str)
         if m:
-            return (m.group(1), m.group(2))
-        m = re.match(r'\[(\S+)\]$', str)
+            return ((m.group(1), m.group(2)), m.end())
+        m = re.match(r'\[(\S+)\]\s*', str)
         if m:
             try:
-                return ("date", self.parse_date(m.group(1)))
+                return (("date", self.parse_date(m.group(1))), m.end())
             except ValueError:
                 pass
 
