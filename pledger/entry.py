@@ -15,6 +15,9 @@ class Entry(Taggable):
     def __str__(self):
         return "%s (%s)" % (self.account, self.amount)
 
+    def __hash__(self):
+        return hash(self.account, self.amount)
+
     def date(self, transaction):
         result = self.get_tag("date")
         if result is None:
