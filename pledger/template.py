@@ -90,7 +90,7 @@ class RegisterTemplate(Template):
         components = entry.entry.amount.components(currencies)
         total_components = entry.total.components(currencies)
         yield u"%s %s %s %s %s" % (
-            self.lpad(datetime.strftime(entry.date, "%y-%b-%d"), 9),
+            self.lpad(entry.date.strftime("%y-%b-%d"), 9),
             self.print_label(entry.transaction, 34),
             self.print_account(entry.entry.account),
             self.print_value(components[0]),
