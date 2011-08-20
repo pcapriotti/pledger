@@ -21,10 +21,10 @@
 # THE SOFTWARE.
 
 from setuptools import setup, find_packages
-from pledger.version import VERSION
+from pledger.version import get_version
 
 setup(name="pledger",
-      version=".".join(str(x) for x in VERSION),
+      version=get_version(),
       description="Command line accounting tool and library",
       author="Paolo Capriotti",
       author_email="p.capriotti@gmail.com",

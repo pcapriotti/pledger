@@ -27,6 +27,7 @@ from pledger.parser import Parser
 from pledger.sorting import MapSorting, ExpressionSorting
 from pledger.rule import RuleCollection
 from pledger.template import default_template
+from pledger.version import get_version
 import re, os, sys
 
 parser = Parser()
@@ -45,6 +46,7 @@ def run_cli():
 
     argparser = ArgumentParser()
     argparser.add_argument("report", action="store")
+    argparser.add_argument("--version", action="version", version=get_version())
     argparser.add_argument("--filename", action="store", nargs=1)
     for flag in Filter.flags:
         argparser.add_argument("--%s" % flag.name, nargs=flag.args)
