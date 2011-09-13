@@ -36,9 +36,9 @@ class MapSorting(Sorting):
         self.map = map
 
     def __call__(self, list):
-        l = [(self.map(x), x) for x in list]
+        l = [(self.map(x), i, x) for i, x in enumerate(list)]
         l.sort()
-        return [x for (v, x) in l]
+        return [x for (v, i, x) in l]
 
 class ExpressionSorting(MapSorting):
     def __init__(self, parser, expression):
