@@ -35,8 +35,11 @@ class Entry(Taggable):
     def __str__(self):
         return "%s (%s)" % (self.account, self.amount)
 
+    def __repr__(self):
+        return "<Entry %s>" % str(self)
+
     def __hash__(self):
-        return hash(self.account, self.amount)
+        return hash((self.account, self.amount, tuple(sorted(self.tags.items()))))
 
     def date(self, transaction):
         result = self.get_tag("date")
