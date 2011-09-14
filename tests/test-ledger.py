@@ -18,18 +18,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from pledger.transaction import Transaction
-from pledger.ledger_processor import LedgerProcessor
-import itertools
-import os.path
+import unittest
+from pledger.parser import Parser
+from tests.fixtures import fixture_path
 
-class Ledger(object):
-    def __init__(self, filename, transactions, parser):
-        self.filename = filename
-        self.transactions = transactions
-        self.parser = parser
 
-    def absolute_filename(self, filename):
-        if os.path.isabs(filename): return filename
-        dir = os.path.dirname(self.filename)
-        return os.path.join(dir, filename)
+class TestLedger(unittest.TestCase):
+    def setUp(self):
+        self.parser = Parser()
+
+    def testFilename(self):
+        ledger = self.parser.parse_ledger(fixture_path("simple.dat"))
+        self.assertEqual(fixture_path("test.dat"), ledger.absolute_filename("test.dat"))
