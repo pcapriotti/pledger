@@ -44,7 +44,7 @@ class Parser(object):
         self.precision = 2
 
     def parse_account(self, str):
-        return NamedAccount(str)
+        return self.accounts[str]
 
     def parse_value(self, str):
         return Value.parse(str)

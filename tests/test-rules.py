@@ -20,6 +20,7 @@
 
 import unittest
 from decimal import Decimal
+from pledger.account import Account
 from pledger.filter import Filter
 from pledger.parser import Parser
 from pledger.rule import Rule, RuleCollection, Generator
@@ -39,15 +40,31 @@ class RuleTest(unittest.TestCase):
 
         self.rules = RuleCollection()
 
-    def testRuleOnLedger(self):
         @Generator
         def discount(entry):
             amount = entry.amount * Decimal("0.1")
             yield entry.account - amount
             yield self.cash_account + amount
+        self.discount = discount
 
-        rule = Rule(Filter.has_account(self.books_account), discount)
+    def testRuleOnLedger(self):
+        rule = Rule(Filter.has_account(self.books_account), self.discount)
         self.rules.add_rule(rule)
+
+        result = []
+        result += self.rules.apply(self.tr, self.tr.entries[0])
+        result += self.rules.apply(self.tr, self.tr.entries[1])
+
+        expected = [self.bank_account - self.parser.parse_value("33.00 EUR"),
+                    self.books_account + self.parser.parse_value("33.00 EUR"),
+                    self.cash_account + self.parser.parse_value("3.30 EUR"),
+                    self.books_account - self.parser.parse_value("3.30 EUR")]
+
+        self.assertItemsEqual(expected, result)
+
+    def testAccountTagRule(self):
+        self.books_account.tags["discount"] = self.discount
+        self.rules.add_rule(Account.tag_rule("discount"))
 
         result = []
         result += self.rules.apply(self.tr, self.tr.entries[0])
