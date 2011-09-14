@@ -1,7 +1,7 @@
 2011/03/01 Equity
-    Assets:Bank             1500.00 $
+    Assets:Bank             1500.00 EUR
     Equity:Capital
 
 2011/03/06 Bookshop
-    Expenses:Books          -35.00 $
+    Expenses:Books          35.00 EUR
     Assets:Bank
