@@ -22,6 +22,7 @@ from pledger.value import ZERO
 from pledger.entry import Entry
 from pledger.transaction import Transaction
 from pledger.util import Observable
+from collections import OrderedDict
 
 class LedgerProcessor(Observable):
     def __init__(self, ledger, rules, transaction_rules):
@@ -73,7 +74,7 @@ class LedgerProcessor(Observable):
         return child
 
     def compact(self, entries):
-        result = { }
+        result = OrderedDict()
         for entry in entries:
             key = (entry.account, tuple(sorted(entry.tags.items())))
             e = result.get(key)
