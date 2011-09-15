@@ -75,6 +75,7 @@ class SingleCurrency(unittest.TestCase):
     def testFormat(self):
         value = Value({ "EUR": Decimal("31.992371") })
         self.assertEqual("31.99 EUR", str(value))
+        self.assertEqual("0", str(ZERO))
 
     def testComparison(self):
         value = Value({ "EUR": Decimal("31.99") })
