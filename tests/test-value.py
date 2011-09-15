@@ -75,6 +75,7 @@ class SingleCurrency(unittest.TestCase):
     def testFormat(self):
         value = Value({ "EUR": Decimal("31.992371") })
         self.assertEqual("31.99 EUR", str(value))
+        self.assertEqual("0", str(ZERO))
 
     def testComparison(self):
         value = Value({ "EUR": Decimal("31.99") })
@@ -85,6 +86,18 @@ class SingleCurrency(unittest.TestCase):
         self.assertGreaterEqual(value, value)
         self.assertLessEqual(value2, value)
         self.assertLessEqual(value2, value2)
+
+    def testParsePositive(self):
+        value = Value.parse("3819 USD")
+        self.assertEqual(2, value.precision)
+
+    def testParseNegative(self):
+        value = Value.parse("-440 EUR")
+        self.assertEqual(2, value.precision)
+
+    def testParsePrecision(self):
+        value = Value.parse("1.4123 GBP")
+        self.assertEqual(4, value.precision)
 
 class MultipleCurrencies(unittest.TestCase):
     def testComponents(self):

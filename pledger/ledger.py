@@ -29,17 +29,7 @@ class Ledger(object):
         self.transactions = transactions
         self.parser = parser
 
-    def all_matching(self, predicate):
-        return itertools.ifilter(predicate, self.entries)
-
-    def add(self, transaction):
-        self.transactions.append(transaction)
-
     def absolute_filename(self, filename):
         if os.path.isabs(filename): return filename
         dir = os.path.dirname(self.filename)
         return os.path.join(dir, filename)
-
-    @property
-    def entries(self):
-        return itertools.chain(*self.transactions)

@@ -38,3 +38,18 @@ class AccountTest(unittest.TestCase):
         self.assertEqual(self.account, entry.account)
         self.assertEqual(-amount, entry.amount)
 
+    def testRoot(self):
+        self.assertEqual(self.parser.accounts["Assets"], self.account.root())
+
+    def testShortenedName(self):
+        account = self.account["Joint:Savings:Yearly:Interest:Compound:Open"]
+        size = 30
+        name = account.shortened_name(size)
+
+        self.assertLessEqual(len(name), size)
+        self.assertEqual(7, len(filter(lambda x: x == ':', name)))
+
+    def testSubName(self):
+        account = self.account["Checking"]
+        self.assertEqual(u'Bank:Checking', self.account.parent.sub_name(account))
+        self.assertIsNone(self.account.sub_name(self.parser.accounts["Test"]))

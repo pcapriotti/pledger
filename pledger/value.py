@@ -140,7 +140,10 @@ class Value(object):
                 amount = Decimal(elements[0])
                 if precision is None:
                     p = elements[0].find('.')
-                    precision = p == -1 and 0 or (len(elements[0]) - p - 1)
+                    if p == -1:
+                        precision = 2
+                    else:
+                        precision = len(elements[0 ]) - p - 1
                 currency = elements[1]
                 return Value({ currency: amount }, precision=precision)
             except InvalidOperation:

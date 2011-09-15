@@ -18,37 +18,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from pledger.value import Value
-from pledger.tags import Taggable
+import unittest
+from pledger.parser import Parser
+from tests.fixtures import fixture_path
 
-class Entry(Taggable):
-    def __init__(self, account, amount, tags=None):
-        super(Entry, self).__init__()
-        self.account = account
-        self.amount = amount
-        if tags: self.tags = tags
 
-    def __eq__(self, other):
-        return self.account == other.account and \
-               self.amount == other.amount
+class TestLedger(unittest.TestCase):
+    def setUp(self):
+        self.parser = Parser()
 
-    def __str__(self):
-        return "%s (%s)" % (self.account, self.amount)
-
-    def __repr__(self):
-        return "<Entry %s>" % str(self)
-
-    def __hash__(self):
-        return hash((self.account, self.amount, tuple(sorted(self.tags.items()))))
-
-    def date(self, transaction):
-        result = self.get_tag("date")
-        if result is None:
-            result = transaction.date
-        return result
-
-    def of(self, transaction):
-        result = Entry(self.account, self.amount, self.tags)
-        result.date = self.date(transaction)
-        result.parent = transaction
-        return result
+    def testFilename(self):
+        ledger = self.parser.parse_ledger(fixture_path("simple.dat"))
+        self.assertEqual(fixture_path("test.dat"), ledger.absolute_filename("test.dat"))

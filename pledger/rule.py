@@ -18,6 +18,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+import itertools
+
+
 class RuleCollection(object):
     def __init__(self):
         self.rules = { }
@@ -55,7 +58,7 @@ class Generator(object):
         def result(*args):
             return itertools.chain(self(*args), other(*args))
         return result
-Generator.null = Generator(lambda x: [])
+Generator.null = Generator(lambda *args: [])
 
 class Rule(object):
     def __init__(self, filter, generator):
