@@ -57,7 +57,7 @@ class Template(object):
 
     def print_account(self, account, size=39):
         if size is None:
-            return self.colored("blue", account)
+            return self.colored("blue", account.name)
         else:
             text = account.shortened_name(size)
             return self.lpad(text, size, "blue")
