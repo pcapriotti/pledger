@@ -33,7 +33,6 @@ import re, os, sys
 parser = Parser()
 filter = Filter.null
 rules = RuleCollection()
-transaction_rules = []
 sorting = MapSorting(lambda x: x.date)
 template = default_template
 
@@ -85,5 +84,5 @@ def run_cli():
     elif args.sortb:
         sorting = ~ExpressionSorting(parser, *args.sortb)
 
-    report = report_factory(ledger, rules, transaction_rules, filter, sorting)
+    report = report_factory(ledger, rules, filter, sorting)
     return template(report, output)

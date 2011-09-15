@@ -39,11 +39,10 @@ class TestLedgerProcessor(unittest.TestCase):
     def setUp(self):
         self.parser = Parser()
         self.rules = RuleCollection()
-        self.trules = []
 
     def testAccountPrefix(self):
         ledger = self.parser.parse_ledger(fixture_path("simple.dat"))
-        processor = LedgerProcessor(ledger, self.rules, self.trules)
+        processor = LedgerProcessor(ledger, self.rules)
         collector = TransactionCollector()
         processor.add_listener(collector)
 
@@ -56,7 +55,7 @@ class TestLedgerProcessor(unittest.TestCase):
 
     def testRemoveAccountPrefix(self):
         ledger = self.parser.parse_ledger(fixture_path("simple.dat"))
-        processor = LedgerProcessor(ledger, self.rules, self.trules)
+        processor = LedgerProcessor(ledger, self.rules)
         collector = TransactionCollector()
         processor.add_listener(collector)
 
@@ -80,7 +79,7 @@ class TestLedgerProcessor(unittest.TestCase):
 
     def testInclude(self):
         ledger = self.parser.parse_ledger(fixture_path("simple.dat"))
-        processor = LedgerProcessor(ledger, self.rules, self.trules)
+        processor = LedgerProcessor(ledger, self.rules)
         collector = TransactionCollector()
         processor.add_listener(collector)
 
@@ -91,7 +90,7 @@ class TestLedgerProcessor(unittest.TestCase):
 
     def testCompact(self):
         ledger = self.parser.parse_ledger(fixture_path("simple.dat"))
-        processor = LedgerProcessor(ledger, self.rules, self.trules)
+        processor = LedgerProcessor(ledger, self.rules)
         entry = ledger.transactions[1].entries[0]
         self.assertEqual(Value.parse("35 EUR"), entry.amount)
         # add entry

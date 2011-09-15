@@ -35,7 +35,7 @@ class RegisterReportTest(unittest.TestCase):
     def testSimpleReport(self):
         ledger = self.parser.parse_ledger(fixture_path("simple.dat"))
         sorting = MapSorting(lambda x: x.date)
-        report = self.report_factory(ledger, RuleCollection(), [], Filter.null, sorting)
+        report = self.report_factory(ledger, RuleCollection(), Filter.null, sorting)
         records = list(report.generate())
 
         self.assertEqual(4, len(records))
@@ -50,7 +50,7 @@ class RegisterReportTest(unittest.TestCase):
     def testReportOrdering(self):
         ledger = self.parser.parse_ledger(fixture_path("sorting.dat"))
         sorting = MapSorting(lambda x: x.date)
-        report = self.report_factory(ledger, RuleCollection(), [], Filter.null, sorting)
+        report = self.report_factory(ledger, RuleCollection(), Filter.null, sorting)
 
         self.assertEqual(
             [unicode(chr(i)) for i in xrange(ord('A'), ord('N') + 1) for _ in xrange(2)],
@@ -60,7 +60,7 @@ class RegisterReportTest(unittest.TestCase):
         ledger = self.parser.parse_ledger(fixture_path("simple.dat"))
         sorting = MapSorting(lambda x: x.date)
         filter = self.parser.accounts["Expenses"]["Clothing"].filter()
-        report = self.report_factory(ledger, RuleCollection(), [], filter, sorting)
+        report = self.report_factory(ledger, RuleCollection(), filter, sorting)
         records = list(report.generate())
 
         self.assertEqual(0, len(records))
@@ -73,7 +73,7 @@ class BalanceReportTest(unittest.TestCase):
     def testSimpleReport(self):
         ledger = self.parser.parse_ledger(fixture_path("simple.dat"))
         sorting = Sorting(lambda x: x)
-        report = self.report_factory(ledger, RuleCollection(), [], Filter.null, sorting)
+        report = self.report_factory(ledger, RuleCollection(), Filter.null, sorting)
 
         self.assertEqual(
             [(u'Assets:Bank', Value.parse("1465 EUR")),
@@ -84,7 +84,7 @@ class BalanceReportTest(unittest.TestCase):
     def testEmptyBalance(self):
         ledger = self.parser.parse_ledger("<test>", "")
         sorting = Sorting(lambda x: x)
-        report = self.report_factory(ledger, RuleCollection(), [], Filter.null, sorting)
+        report = self.report_factory(ledger, RuleCollection(), Filter.null, sorting)
         records = list(report.generate())
 
         self.assertEqual(1, len(records))

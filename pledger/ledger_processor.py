@@ -25,11 +25,10 @@ from pledger.util import Observable
 from collections import OrderedDict
 
 class LedgerProcessor(Observable):
-    def __init__(self, ledger, rules, transaction_rules):
+    def __init__(self, ledger, rules):
         super(LedgerProcessor, self).__init__()
         self.ledger = ledger
         self.rules = rules
-        self.transaction_rules = transaction_rules
         self.parser = self.ledger.parser
         self.account = self.parser.accounts
 
@@ -62,13 +61,10 @@ class LedgerProcessor(Observable):
         return self.compact(result)
 
     def process_transaction(self, transaction, entries):
-        result = Transaction(entries, transaction.date, transaction.label, transaction.tags)
-        for rule in self.transaction_rules:
-            result = rule.apply(result)
-        return result
+        return Transaction(entries, transaction.date, transaction.label, transaction.tags)
 
     def create_child(self, ledger):
-        child = self.__class__(ledger, self.rules, self.transaction_rules)
+        child = self.__class__(ledger, self.rules)
         child.account = self.account
         child.listeners = self.listeners
         return child
