@@ -20,8 +20,10 @@
 
 import unittest
 from pledger.parser import Parser
+from pledger.util import PledgerException
 from tests.fixtures import fixture_path
 from datetime import date
+
 
 class ParserTest(unittest.TestCase):
     def setUp(self):
@@ -52,3 +54,10 @@ class ParserTest(unittest.TestCase):
                 self.parser.parse_tags('; foo:\'hello "world"\''))
         self.assertEqual({ "foo":"hello world", "bar":"0", "baz":"5" },
                 self.parser.parse_tags(';bar:0 foo:"hello world" baz:5'))
+
+    def testParseError(self):
+        with self.assertRaises(PledgerException) as cm:
+            self.parser.parse_ledger(fixture_path("errors.dat"))
+
+        self.assertEqual(3, cm.exception.line_number)
+        self.assertEqual(fixture_path("errors.dat"), cm.exception.filename)

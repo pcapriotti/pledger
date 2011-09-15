@@ -106,6 +106,8 @@ class Parser(object):
         try:
             date, label, cleared = self.parse_header(header)
             date = self.parse_date(date)
+            if date is None:
+                raise MalformedHeader()
 
             entries = [self.parse_entry(line) for n, line in lines]
             line_numbers = [n for n, line in lines]
@@ -120,10 +122,6 @@ class Parser(object):
             e.line_number = line_numbers[e.index]
             raise e
         except MalformedHeader, e:
-            e.line_number = n
-            raise e
-        except ValueError, e:
-            e = MalformedHeader()
             e.line_number = n
             raise e
 
