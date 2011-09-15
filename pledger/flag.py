@@ -18,9 +18,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from pledger.util import struct
+from collections import namedtuple
 
-Flag = struct("name", "args", "filter")
+
+Flag = namedtuple("Flag", ["name", "args", "filter"])
+
 
 class FlagMetaclass(type):
     def __new__(cls, name, bases, attrs):

@@ -19,12 +19,13 @@
 # THE SOFTWARE.
 
 from pledger.value import ZERO
-from pledger.util import struct, linearized, PrefixTree
+from pledger.util import linearized, PrefixTree
 from pledger.template import BalanceTemplate, RegisterTemplate
 from pledger.ledger_processor import LedgerProcessor
+from collections import namedtuple
 
 class BalanceEntryProcessor(object):
-    Entry = struct("level", "account", "amount")
+    Entry = namedtuple("Entry", "level account amount")
 
     def __init__(self):
         self.sheet = { }
@@ -74,7 +75,7 @@ class BalanceEntryProcessor(object):
                                        amount=self.sheet[account])
 
 class RegisterEntryProcessor(object):
-    class Entry(struct("transaction", "entry", "total")):
+    class Entry(namedtuple("Entry_", "transaction entry total")):
         @property
         def date(self):
             return self.entry.date(self.transaction)
@@ -92,11 +93,11 @@ class RegisterEntryProcessor(object):
         self.unsorted_result.append(e)
 
     def post_process(self):
-        self.result = self.sorting(self.unsorted_result)
         total = ZERO
-        for entry in self.result:
-            total += entry.entry.amount
-            entry.total = total
+        self.result = []
+        for record in self.sorting(self.unsorted_result):
+            total += record.entry.amount
+            self.result.append(record._replace(total=total))
 
 class Report(object):
     def __init__(self, ledger, rules, filter, entry_processor, template):

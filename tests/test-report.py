@@ -40,11 +40,11 @@ class RegisterReportTest(unittest.TestCase):
 
         self.assertEqual(4, len(records))
         self.assertEqual(
-            [(u'Assets:Bank', Value.parse('1500 EUR')),
-             (u'Equity:Capital', Value.parse('-1500 EUR')),
-             (u'Expenses:Books', Value.parse('35 EUR')),
-             (u'Assets:Bank', Value.parse('-35 EUR'))],
-            [(record.entry.account.name, record.entry.amount) for record in records])
+            [(u'Assets:Bank', Value.parse('1500 EUR'), Value.parse('1500 EUR')),
+             (u'Equity:Capital', Value.parse('-1500 EUR'), ZERO),
+             (u'Expenses:Books', Value.parse('35 EUR'), Value.parse('35 EUR')),
+             (u'Assets:Bank', Value.parse('-35 EUR'), ZERO)],
+            [(record.entry.account.name, record.entry.amount, record.total) for record in records])
 
 
     def testReportOrdering(self):

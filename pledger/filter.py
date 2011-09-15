@@ -18,7 +18,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from pledger.util import struct
 from pledger.flag import FlagMetaclass
 from pledger.value import ZERO
 

@@ -46,19 +46,6 @@ class Observable(object):
             if method:
                 method(*args, **kwargs)
 
-def struct(*fields):
-    class tmp:
-        def __init__(self, *args, **kwargs):
-            for i in xrange(len(args)):
-                setattr(self, fields[i], args[i])
-            for field in fields:
-                if field in kwargs:
-                    setattr(self, field, kwargs[field])
-
-        def __str__(self):
-            return str(tuple(getattr(self, field) for field in fields))
-    return tmp
-
 def linearized(items):
     result = []
     for item, subitems in items:
