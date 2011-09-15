@@ -82,9 +82,6 @@ class PrefixTree(object):
             self.insert(word)
 
     def insert_aux(self, word, base, index):
-        if base is None:
-            base = self.tree
-
         c = word[index : index + 1]
         sub = base.get(c)
         if sub is None:
