@@ -106,6 +106,21 @@ class TransactionTest(unittest.TestCase):
         tr = Transaction([entry1, entry2])
         self.assertEqual(-value, tr.entries[-1].amount)
 
+    def testRepr(self):
+        value = self.parser.parse_value("50 EUR")
+        entry1 = Entry(self.bank, value)
+        entry2 = Entry(self.expenses, None)
+        tr = Transaction([entry1, entry2])
+        self.assertRegexpMatches(repr(tr), "Transaction")
+
+    def testTransactionEntries(self):
+        value = self.parser.parse_value("50 EUR")
+        entry1 = Entry(self.bank, value)
+        entry2 = Entry(self.expenses, None)
+        tr = Transaction([entry1, entry2])
+        self.assertEqual(entry1, tr[0])
+        self.assertEqual(entry2, tr[1])
+
     def testAmount(self):
         value = self.parser.parse_value("40 EUR")
         entry1 = Entry(self.bank, value)
