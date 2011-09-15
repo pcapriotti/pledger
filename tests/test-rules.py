@@ -76,3 +76,27 @@ class RuleTest(unittest.TestCase):
                     self.books_account - self.parser.parse_value("3.30 EUR")]
 
         self.assertItemsEqual(expected, result)
+
+class GeneratorTest(unittest.TestCase):
+    def testNullGenerator(self):
+        g = Generator.null
+        transaction = object()
+        entry = object()
+
+        self.assertEqual([], list(g(transaction, entry)))
+
+    def testGeneratorSum(self):
+        @Generator
+        def g1(transaction, entry):
+            yield entry
+
+        @Generator
+        def g2(transaction, entry):
+            yield entry
+            yield entry
+
+        g = g1 + g2
+        transaction = object()
+        entry = object()
+
+        self.assertEqual(3, len(list(g(transaction, entry))))
