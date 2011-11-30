@@ -53,7 +53,11 @@ class TagFilterable(Taggable):
     @classmethod
     def tag_filter(cls, tag, value = None):
         def get_taggables(transaction, entry):
-            return [cls.from_entry(transaction, entry)]
+            taggable = cls.from_entry(transaction, entry)
+            if taggable:
+                return [taggable]
+            else:
+                return []
         return cls.general_tag_filter(get_taggables, tag, value)
 
     @classmethod

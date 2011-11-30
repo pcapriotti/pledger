@@ -22,6 +22,7 @@ import unittest
 import re
 from datetime import date
 from pledger.account import Account
+from pledger.entry import Entry
 from pledger.filter import *
 from pledger.parser import Parser
 from pledger.transaction import Transaction
@@ -93,6 +94,7 @@ class TestTagFilters(unittest.TestCase):
         self.books = books_account + self.parser.parse_value("33 $")
         self.tr = Transaction([self.bank, self.books])
         self.tr.tags["baz"] = "hello world"
+        self.books.tags["title"] = "Necronomicon"
 
     def testAccountTagFilter(self):
         filter = Account.tag_filter("foo", "bar")
@@ -130,6 +132,12 @@ class TestTagFilters(unittest.TestCase):
     def testTransactionAccountFilter(self):
         filter = Transaction.account_tag_filter("foo", "bar")
         self.assertTrue(filter(self.tr, None))
+
+    def testEntryTagFilter(self):
+        filter = Entry.tag_filter("title", "Necronomicon")
+        self.assertTrue(filter(self.tr, self.books))
+        self.assertFalse(filter(self.tr, self.bank))
+        self.assertFalse(filter(self.tr, None))
 
 class TestCLIFilters(unittest.TestCase):
     def setUp(self):

@@ -19,9 +19,9 @@
 # THE SOFTWARE.
 
 from pledger.value import Value
-from pledger.tags import Taggable
+from pledger.tags import TagFilterable
 
-class Entry(Taggable):
+class Entry(TagFilterable):
     def __init__(self, account, amount, tags=None):
         super(Entry, self).__init__()
         self.account = account
@@ -52,3 +52,7 @@ class Entry(Taggable):
         result.date = self.date(transaction)
         result.parent = transaction
         return result
+
+    @classmethod
+    def from_entry(cls, transaction, entry):
+        return entry
