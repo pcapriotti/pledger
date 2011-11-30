@@ -29,6 +29,8 @@ COLORS = {
     "blue" : "\033[0;34m" }
 
 class Template(object):
+    ACCOUNT_COLOR = "blue"
+
     def __call__(self, report, output):
         for line in self.generate(report):
             output(line)
@@ -57,10 +59,10 @@ class Template(object):
 
     def print_account(self, account, size=39):
         if size is None:
-            return self.colored("blue", account.name)
+            return self.colored(self.ACCOUNT_COLOR, account.name)
         else:
             text = account.shortened_name(size)
-            return self.lpad(text, size, "blue")
+            return self.lpad(text, size, self.ACCOUNT_COLOR)
 
     def print_label(self, transaction, size):
         color = None
@@ -86,7 +88,7 @@ class BalanceTemplate(Template):
                 yield self.print_value(component)
             yield self.print_value(components[-1]) + \
                   ("  " * (entry.level - 1)) + \
-                  self.print_account(entry.account, None)
+                  self.colored(self.ACCOUNT_COLOR, entry.account)
             count += 1
         if count > 0:
             yield u"-" * 20
