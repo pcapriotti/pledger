@@ -67,7 +67,7 @@ class Rule(object):
 
     def apply(self, transaction, entry):
         if self.filter(transaction, entry):
-            return self.generator(entry)
+            return self.generator(entry.of(transaction))
         else:
             return []
 
