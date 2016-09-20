@@ -31,7 +31,7 @@ setup(name="pledger",
       url="https://github.com/pcapriotti/pledger",
       packages=find_packages(),
       test_suite='nose.collector',
-      tests_require=['nose, mock'],
+      tests_require=['nose', 'mock'],
       entry_points={
           'console_scripts': [
               'plg = pledger.cli:run_cli' ] },
