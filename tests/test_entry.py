@@ -3,69 +3,65 @@ from pledger.parser import Parser
 from pledger.value import Value
 from datetime import date
 from collections import namedtuple
-import unittest
+import re
 
 FakeTransaction = namedtuple("FakeTransaction", ["date"])
 
-class EntryTest(unittest.TestCase):
-    def setUp(self):
-        self.parser = Parser()
+def test_parsing(parser):
+    value = parser.parse_value("34 EUR")
+    account = parser.parse_account("Test Account")
+    entry = Entry(account, value)
+    assert parser.parse_entry("  Test Account        34 EUR") == entry
 
-    def testParsing(self):
-        value = self.parser.parse_value("34 EUR")
-        account = self.parser.parse_account("Test Account")
-        entry = Entry(account, value)
-        self.assertEqual(entry, self.parser.parse_entry("  Test Account        34 EUR"))
+def test_equality(parser):
+    value1 = parser.parse_value("34 EUR")
+    value2 = parser.parse_value("12 $")
+    account1 = parser.parse_account("Test")
+    account2 = parser.parse_account("Bank")
 
-    def testEquality(self):
-        value1 = self.parser.parse_value("34 EUR")
-        value2 = self.parser.parse_value("12 $")
-        account1 = self.parser.parse_account("Test")
-        account2 = self.parser.parse_account("Bank")
+    assert Entry(account1, value1) == Entry(account1, value1)
+    assert Entry(account1, value1) != Entry(account2, value1)
+    assert Entry(account1, value1) != Entry(account1, value2)
 
-        self.assertEqual(Entry(account1, value1), Entry(account1, value1))
-        self.assertNotEqual(Entry(account1, value1), Entry(account2, value1))
-        self.assertNotEqual(Entry(account1, value1), Entry(account1, value2))
+def test_entry_parser(parser):
+    entry = parser.parse_entry("  Expenses:Books       61 EUR   ; :gift:")
+    assert entry.account.name == "Expenses:Books"
+    assert entry.amount == Value.parse("61 EUR")
+    assert list(entry.tags.keys()) == ["gift"]
 
-    def testEntryParser(self):
-        entry = self.parser.parse_entry("  Expenses:Books       61 EUR   ; :gift:")
-        self.assertEqual("Expenses:Books", entry.account.name)
-        self.assertEqual(Value.parse("61 EUR"), entry.amount)
-        self.assertItemsEqual(["gift"], list(entry.tags.keys()))
+def test_entry_dict(parser):
+    entry = parser.parse_entry("  Expenses:Books       61 EUR   ; :gift:")
+    entry2 = parser.parse_entry("  Expenses:Books       61 EUR")
+    entry3 = parser.parse_entry("  Expenses:Books       51 EUR")
+    entry4 = parser.parse_entry("    Expenses:Books       51 EUR")
 
-    def testEntryDict(self):
-        entry = self.parser.parse_entry("  Expenses:Books       61 EUR   ; :gift:")
-        entry2 = self.parser.parse_entry("  Expenses:Books       61 EUR")
-        entry3 = self.parser.parse_entry("  Expenses:Books       51 EUR")
-        entry4 = self.parser.parse_entry("    Expenses:Books       51 EUR")
+    d = {}
+    d[entry] = True
+    d[entry2] = True
+    d[entry3] = True
+    d[entry4] = True
 
-        d = {}
-        d[entry] = True
-        d[entry2] = True
-        d[entry3] = True
-        d[entry4] = True
+    assert set((entry, entry2, entry3)) == set(d.keys())
 
-        self.assertItemsEqual([entry, entry2, entry3], list(d.keys()))
+def test_repr(parser):
+    entry = parser.parse_entry("  Expenses:Books    55 EUR")
+    s = str(entry)
 
-    def testRepr(self):
-        entry = self.parser.parse_entry("  Expenses:Books    55 EUR")
-        s = str(entry)
+    assert re.search(r'Expenses:Books', s)
+    assert re.search(r'55.00 EUR', s)
 
-        self.assertRegex(s, "Expenses:Books")
-        self.assertRegex(s, "55.00 EUR")
+def test_entry_date(parser):
+    entry = parser.parse_entry("  Expenses:Books       61 EUR   ; [2011/03/03]")
+    entry2 = parser.parse_entry("  Expenses:Books       61 EUR")
+    transaction = FakeTransaction(date=date(2011, 3, 1))
 
-    def testEntryDate(self):
-        entry = self.parser.parse_entry("  Expenses:Books       61 EUR   ; [2011/03/03]")
-        entry2 = self.parser.parse_entry("  Expenses:Books       61 EUR")
-        transaction = FakeTransaction(date=date(2011, 0o3, 0o1))
+    assert entry.date(transaction) == date(2011, 3, 3)
+    assert entry2.date(transaction) == date(2011, 3, 1)
 
-        self.assertEqual(date(2011, 0o3, 0o3), entry.date(transaction))
-        self.assertEqual(date(2011, 0o3, 0o1), entry2.date(transaction))
+def test_entry_of_transaction(parser):
+    transaction = FakeTransaction(date=date(2011, 0o3, 0o1))
+    entry = parser.parse_entry("  Expenses:Books       61 EUR   ; [2011/03/03]").of(transaction)
+    entry2 = parser.parse_entry("  Expenses:Books       61 EUR").of(transaction)
 
-    def testEntryOfTransaction(self):
-        transaction = FakeTransaction(date=date(2011, 0o3, 0o1))
-        entry = self.parser.parse_entry("  Expenses:Books       61 EUR   ; [2011/03/03]").of(transaction)
-        entry2 = self.parser.parse_entry("  Expenses:Books       61 EUR").of(transaction)
-
-        self.assertEqual(date(2011, 0o3, 0o3), entry.date)
-        self.assertEqual(date(2011, 0o3, 0o1), entry2.date)
+    assert entry.date == date(2011, 3, 3)
+    assert entry2.date == date(2011, 3, 1)
