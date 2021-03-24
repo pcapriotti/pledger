@@ -1,35 +1,34 @@
-import unittest
 from pledger.parser import Parser
+import pytest
 
-class AccountTest(unittest.TestCase):
-    def setUp(self):
-        self.parser = Parser()
-        self.account = self.parser.parse_account("Assets:Bank")
+@pytest.fixture
+def account(named_account):
+    return named_account("Assets:Bank")
 
-    def testAccountAdd(self):
-        amount = self.parser.parse_value("150 EUR")
-        entry = self.account + amount
-        self.assertEqual(self.account, entry.account)
-        self.assertEqual(amount, entry.amount)
+def test_account_add(parser, account):
+    amount = parser.parse_value("150 EUR")
+    entry = account + amount
+    assert entry.account == account
+    assert entry.amount == amount
 
-    def testAccountSub(self):
-        amount = self.parser.parse_value("150 EUR")
-        entry = self.account - amount
-        self.assertEqual(self.account, entry.account)
-        self.assertEqual(-amount, entry.amount)
+def test_account_sub(parser, account):
+    amount = parser.parse_value("150 EUR")
+    entry = account - amount
+    assert entry.account == account
+    assert entry.amount == -amount
 
-    def testRoot(self):
-        self.assertEqual(self.parser.accounts["Assets"], self.account.root())
+def test_root(parser, account):
+    assert account.root() == parser.accounts["Assets"]
 
-    def testShortenedName(self):
-        account = self.account["Joint:Savings:Yearly:Interest:Compound:Open"]
-        size = 30
-        name = account.shortened_name(size)
+def test_shortened_name(account):
+    account = account["Joint:Savings:Yearly:Interest:Compound:Open"]
+    size = 30
+    name = account.shortened_name(size)
 
-        self.assertLessEqual(len(name), size)
-        self.assertEqual(7, len([x for x in name if x == ':']))
+    assert len(name) < size
+    assert len([x for x in name if x == ':']) == 7
 
-    def testSubName(self):
-        account = self.account["Checking"]
-        self.assertEqual('Bank:Checking', self.account.parent.sub_name(account))
-        self.assertIsNone(self.account.sub_name(self.parser.accounts["Test"]))
+def test_sub_name(parser, account):
+    checking = account["Checking"]
+    assert account.parent.sub_name(checking) == "Bank:Checking"
+    assert account.sub_name(parser.accounts["Test"]) is None

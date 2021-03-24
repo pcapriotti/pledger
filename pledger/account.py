@@ -41,13 +41,13 @@ class Account(AccountBase, TagFilterable):
         delta = len(full) - size
         if delta <= 0: return full
         components = self.name_components()
-        n = len(components) - 1
-        component_delta = delta / n
+        n = len(components)
+        component_delta = (delta + n - 1) // n
         extra = delta - component_delta * n
-        components = \
-            [x[:len(x) - component_delta - 1] for x in components[:extra]] + \
-            [x[:len(x) - component_delta] for x in components[extra:-1]] + \
-            [components[-1]]
+        c1 = [x[:len(x) - component_delta - 1] for x in components[:extra]]
+        c2 = [x[:len(x) - component_delta] for x in components[extra:-1]]
+        c3 = [components[-1]]
+        components = c1 + c2 + c3
         return ":".join(components)
 
     def name_components(self):
