@@ -21,8 +21,7 @@
 from pledger.flag import FlagMetaclass
 from pledger.value import ZERO
 
-class Filter(object):
-    __metaclass__ = FlagMetaclass
+class Filter(object, metaclass=FlagMetaclass):
     flags = []
 
     def __init__(self, predicate):

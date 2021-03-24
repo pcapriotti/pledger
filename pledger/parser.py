@@ -52,11 +52,11 @@ class Parser(object):
     def parse_ledger(self, filename, str = None):
         if str is None:
             str = codecs.open(filename, "r", "utf-8").read()
-        f = lambda (number, line): line == ""
-        lines = itertools.izip(itertools.count(1), str.split("\n"))
+        f = lambda number_line: number_line[1] == ""
+        lines = zip(itertools.count(1), str.split("\n"))
         try:
             transactions = [self.parse_transaction(group) for group in itersplit(f, lines)]
-        except PledgerException, e:
+        except PledgerException as e:
             e.filename = filename
             raise e
         return Ledger(filename, [t for t in transactions if t], self)
@@ -76,7 +76,7 @@ class Parser(object):
 
     def parse_transaction(self, lines):
         if hasattr(lines, "split"):
-            lines = list(itertools.izip(itertools.count(1), iter(lines.split("\n"))))
+            lines = list(zip(itertools.count(1), iter(lines.split("\n"))))
 
         tags = { }
 
@@ -115,13 +115,13 @@ class Parser(object):
             if tags: transaction.tags = tags
             if cleared: transaction.tags["cleared"] = True
             return transaction
-        except UnbalancedTransaction, e:
+        except UnbalancedTransaction as e:
             e.line_number = n
             raise e
-        except UndefinedTransaction, e:
+        except UndefinedTransaction as e:
             e.line_number = line_numbers[e.index]
             raise e
-        except MalformedHeader, e:
+        except MalformedHeader as e:
             e.line_number = n
             raise e
 

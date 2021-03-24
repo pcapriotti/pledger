@@ -51,7 +51,7 @@ class EntryTest(unittest.TestCase):
         entry = self.parser.parse_entry("  Expenses:Books       61 EUR   ; :gift:")
         self.assertEqual("Expenses:Books", entry.account.name)
         self.assertEqual(Value.parse("61 EUR"), entry.amount)
-        self.assertItemsEqual(["gift"], entry.tags.keys())
+        self.assertItemsEqual(["gift"], list(entry.tags.keys()))
 
     def testEntryDict(self):
         entry = self.parser.parse_entry("  Expenses:Books       61 EUR   ; :gift:")
@@ -65,27 +65,27 @@ class EntryTest(unittest.TestCase):
         d[entry3] = True
         d[entry4] = True
 
-        self.assertItemsEqual([entry, entry2, entry3], d.keys())
+        self.assertItemsEqual([entry, entry2, entry3], list(d.keys()))
 
     def testRepr(self):
         entry = self.parser.parse_entry("  Expenses:Books    55 EUR")
         s = str(entry)
 
-        self.assertRegexpMatches(s, "Expenses:Books")
-        self.assertRegexpMatches(s, "55.00 EUR")
+        self.assertRegex(s, "Expenses:Books")
+        self.assertRegex(s, "55.00 EUR")
 
     def testEntryDate(self):
         entry = self.parser.parse_entry("  Expenses:Books       61 EUR   ; [2011/03/03]")
         entry2 = self.parser.parse_entry("  Expenses:Books       61 EUR")
-        transaction = FakeTransaction(date=date(2011, 03, 01))
+        transaction = FakeTransaction(date=date(2011, 0o3, 0o1))
 
-        self.assertEqual(date(2011, 03, 03), entry.date(transaction))
-        self.assertEqual(date(2011, 03, 01), entry2.date(transaction))
+        self.assertEqual(date(2011, 0o3, 0o3), entry.date(transaction))
+        self.assertEqual(date(2011, 0o3, 0o1), entry2.date(transaction))
 
     def testEntryOfTransaction(self):
-        transaction = FakeTransaction(date=date(2011, 03, 01))
+        transaction = FakeTransaction(date=date(2011, 0o3, 0o1))
         entry = self.parser.parse_entry("  Expenses:Books       61 EUR   ; [2011/03/03]").of(transaction)
         entry2 = self.parser.parse_entry("  Expenses:Books       61 EUR").of(transaction)
 
-        self.assertEqual(date(2011, 03, 03), entry.date)
-        self.assertEqual(date(2011, 03, 01), entry2.date)
+        self.assertEqual(date(2011, 0o3, 0o3), entry.date)
+        self.assertEqual(date(2011, 0o3, 0o1), entry2.date)

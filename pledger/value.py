@@ -27,7 +27,7 @@ class Value(object):
         self.precision = precision
 
     def currencies(self):
-        return (currency for currency,amount in self.values.iteritems() if amount != 0)
+        return (currency for currency,amount in self.values.items() if amount != 0)
 
     def components(self, currencies = None):
         if currencies is None:
@@ -45,12 +45,12 @@ class Value(object):
             return [ZERO]
 
     def null(self):
-        for currency, amount in self.values.iteritems():
+        for currency, amount in self.values.items():
             if amount != 0: return False
         return True
 
     def negative(self):
-        for currency, amount in self.values.iteritems():
+        for currency, amount in self.values.items():
             if amount > 0: return False
         return not self.null()
 
@@ -103,7 +103,7 @@ class Value(object):
         q = Decimal(10) ** -places      # 2 places --> '0.01'
         sign, digits, exp = value.quantize(q).as_tuple()
         result = []
-        digits = map(str, digits)
+        digits = list(map(str, digits))
         build, next = result.append, digits.pop
         build(" " + curr)
         for i in range(places):
@@ -123,11 +123,11 @@ class Value(object):
             return "0"
         else:
             return ", ".join([self.format_value(curr, value) for
-                              curr, value in self.values.iteritems()])
+                              curr, value in self.values.items()])
 
     def __repr__(self):
         return "<%s>" % " ".join([self.format_value("?", value) for
-                                 curr, value in self.values.iteritems()])
+                                 curr, value in self.values.items()])
 
     def __hash__(self):
         return hash(tuple(sorted(self.values.items())))

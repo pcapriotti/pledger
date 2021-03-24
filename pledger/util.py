@@ -103,7 +103,7 @@ class PrefixTree(object):
     def all_words(self, base):
         if isinstance(base, dict):
             result = []
-            for sub in base.itervalues():
+            for sub in base.values():
                 result += self.all_words(sub)
             return result
         else:

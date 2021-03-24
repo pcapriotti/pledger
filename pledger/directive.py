@@ -32,8 +32,8 @@ class UnsupportedDirective(Exception):
     def __str__(self):
         return self.name
 
-class Directive(object):
-    __metaclass__ = DirectiveMetaclass
+class Directive(object, metaclass=DirectiveMetaclass):
+    pass
 Directive.directives = {}
 
 class AccountDirective(Directive):

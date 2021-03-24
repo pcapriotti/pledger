@@ -78,4 +78,4 @@ class LedgerProcessor(Observable):
                 e.amount += entry.amount
             else:
                 result[key] = Entry(entry.account, entry.amount, entry.tags)
-        return result.values()
+        return list(result.values())

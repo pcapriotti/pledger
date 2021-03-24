@@ -23,9 +23,9 @@ from pledger import util
 
 class UtilTest(unittest.TestCase):
     def testItersplit(self):
-        items = range(20)
-        result =  [range(5), range(6, 10),
-                   range(11, 15), range(16, 20)]
+        items = list(range(20))
+        result =  [list(range(5)), list(range(6, 10)),
+                   list(range(11, 15)), list(range(16, 20))]
         p = lambda x: x % 5 == 0
         self.assertEqual(result, list(util.itersplit(p, items)))
 

@@ -32,7 +32,7 @@ class RuleCollection(object):
     def apply(self, transaction, entry):
         entries = [entry]
 
-        levels = self.rules.keys()
+        levels = list(self.rules.keys())
         levels.sort()
 
         for level in levels:

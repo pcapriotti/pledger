@@ -52,7 +52,7 @@ class DirectiveTest(unittest.TestCase):
         with self.assertRaises(UnsupportedDirective) as cm:
             self.parser.parse_directive("!nonexisting")
 
-        self.assertRegexpMatches(str(cm.exception), "nonexisting")
+        self.assertRegex(str(cm.exception), "nonexisting")
 
     def testAccountDirective(self):
         directive = AccountDirective("Assets")

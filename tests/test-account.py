@@ -47,9 +47,9 @@ class AccountTest(unittest.TestCase):
         name = account.shortened_name(size)
 
         self.assertLessEqual(len(name), size)
-        self.assertEqual(7, len(filter(lambda x: x == ':', name)))
+        self.assertEqual(7, len([x for x in name if x == ':']))
 
     def testSubName(self):
         account = self.account["Checking"]
-        self.assertEqual(u'Bank:Checking', self.account.parent.sub_name(account))
+        self.assertEqual('Bank:Checking', self.account.parent.sub_name(account))
         self.assertIsNone(self.account.sub_name(self.parser.accounts["Test"]))

@@ -133,7 +133,7 @@ class Report(object):
 class ReportRegistry(object):
     def __init__(self, reps):
         self.reps = reps
-        self.prefix_tree = PrefixTree(reps.keys())
+        self.prefix_tree = PrefixTree(list(reps.keys()))
 
     def get(self, prefix):
         candidates = self.prefix_tree.from_prefix(prefix)

@@ -54,8 +54,8 @@ class TestFilter(unittest.TestCase):
 
     def testFilterParse(self):
         filter = Filter.parse(self.parser, lambda tr, entry: entry.account.name.startswith("Assets"))
-        self.assertTrue(filter(self.tr1, self.tr1.entries[0]))
-        self.assertFalse(filter(self.tr1, self.tr1.entries[1]))
+        self.assertTrue(list(filter(self.tr1, self.tr1.entries[0])))
+        self.assertFalse(list(filter(self.tr1, self.tr1.entries[1])))
 
     def testFilterInvert(self):
         self.assertTrue((~self.three_entries)(self.tr1, self.tr1.entries[0]))
@@ -65,23 +65,23 @@ class TestFilter(unittest.TestCase):
 
     def testFilterAnd(self):
         filter = self.three_entries & self.in_euro
-        self.assertFalse(filter(self.tr1, self.tr1.entries[0]))
-        self.assertFalse(filter(self.tr2, self.tr2.entries[0]))
+        self.assertFalse(list(filter(self.tr1, self.tr1.entries[0])))
+        self.assertFalse(list(filter(self.tr2, self.tr2.entries[0])))
 
     def testFilterOr(self):
         filter = self.three_entries | self.in_euro
-        self.assertTrue(filter(self.tr1, self.tr1.entries[0]))
-        self.assertTrue(filter(self.tr2, self.tr2.entries[0]))
+        self.assertTrue(list(filter(self.tr1, self.tr1.entries[0])))
+        self.assertTrue(list(filter(self.tr2, self.tr2.entries[0])))
 
     def testHasAccountFilter(self):
         filter = Filter.has_account(self.parser.parse_account("Assets:Bank"))
-        self.assertTrue(filter(self.tr1, self.tr1.entries[0]))
-        self.assertFalse(filter(self.tr1, self.tr1.entries[1]))
+        self.assertTrue(list(filter(self.tr1, self.tr1.entries[0])))
+        self.assertFalse(list(filter(self.tr1, self.tr1.entries[1])))
 
     def testMatchesFilter(self):
         filter = Filter.matches(re.compile(r"ank"))
-        self.assertTrue(filter(self.tr1, self.tr1.entries[0]))
-        self.assertFalse(filter(self.tr1, self.tr1.entries[1]))
+        self.assertTrue(list(filter(self.tr1, self.tr1.entries[0])))
+        self.assertFalse(list(filter(self.tr1, self.tr1.entries[1])))
 
 class TestTagFilters(unittest.TestCase):
     def setUp(self):
@@ -98,46 +98,46 @@ class TestTagFilters(unittest.TestCase):
 
     def testAccountTagFilter(self):
         filter = Account.tag_filter("foo", "bar")
-        self.assertTrue(filter(self.tr, self.bank))
-        self.assertFalse(filter(self.tr, self.books))
+        self.assertTrue(list(filter(self.tr, self.bank)))
+        self.assertFalse(list(filter(self.tr, self.books)))
 
     def testAccountTagFilterEmpty(self):
         filter = Account.tag_filter("foo")
-        self.assertTrue(filter(self.tr, self.bank))
-        self.assertFalse(filter(self.tr, self.books))
+        self.assertTrue(list(filter(self.tr, self.bank)))
+        self.assertFalse(list(filter(self.tr, self.books)))
 
     def testAccountTagFilterWrong(self):
         filter = Account.tag_filter("baz")
-        self.assertFalse(filter(self.tr, self.bank))
-        self.assertFalse(filter(self.tr, self.books))
+        self.assertFalse(list(filter(self.tr, self.bank)))
+        self.assertFalse(list(filter(self.tr, self.books)))
 
     def testTransactionTagFilter(self):
         filter = Transaction.tag_filter("baz", "hello world")
-        self.assertTrue(filter(self.tr, self.bank))
-        self.assertTrue(filter(self.tr, self.books))
-        self.assertTrue(filter(self.tr, None))
+        self.assertTrue(list(filter(self.tr, self.bank)))
+        self.assertTrue(list(filter(self.tr, self.books)))
+        self.assertTrue(list(filter(self.tr, None)))
 
     def testTransactionTagFilterEmpty(self):
         filter = Transaction.tag_filter("baz", None)
-        self.assertTrue(filter(self.tr, self.bank))
-        self.assertTrue(filter(self.tr, self.books))
-        self.assertTrue(filter(self.tr, None))
+        self.assertTrue(list(filter(self.tr, self.bank)))
+        self.assertTrue(list(filter(self.tr, self.books)))
+        self.assertTrue(list(filter(self.tr, None)))
 
     def testTransactionTagFilterWrong(self):
         filter = Transaction.tag_filter("foo", None)
-        self.assertFalse(filter(self.tr, self.bank))
-        self.assertFalse(filter(self.tr, self.books))
-        self.assertFalse(filter(self.tr, None))
+        self.assertFalse(list(filter(self.tr, self.bank)))
+        self.assertFalse(list(filter(self.tr, self.books)))
+        self.assertFalse(list(filter(self.tr, None)))
 
     def testTransactionAccountFilter(self):
         filter = Transaction.account_tag_filter("foo", "bar")
-        self.assertTrue(filter(self.tr, None))
+        self.assertTrue(list(filter(self.tr, None)))
 
     def testEntryTagFilter(self):
         filter = Entry.tag_filter("title", "Necronomicon")
-        self.assertTrue(filter(self.tr, self.books))
-        self.assertFalse(filter(self.tr, self.bank))
-        self.assertFalse(filter(self.tr, None))
+        self.assertTrue(list(filter(self.tr, self.books)))
+        self.assertFalse(list(filter(self.tr, self.bank)))
+        self.assertFalse(list(filter(self.tr, None)))
 
 class TestCLIFilters(unittest.TestCase):
     def setUp(self):
@@ -166,28 +166,28 @@ class TestCLIFilters(unittest.TestCase):
 
     def testBeginFilter(self):
         filter = BeginFilter.parse(self.parser, "2010")
-        self.assertFalse(filter(self.tr1, self.tr1.entries[0]))
-        self.assertTrue(filter(self.tr2, self.tr2.entries[0]))
-        self.assertFalse(filter(self.tr2, self.tr2.entries[1]))
+        self.assertFalse(list(filter(self.tr1, self.tr1.entries[0])))
+        self.assertTrue(list(filter(self.tr2, self.tr2.entries[0])))
+        self.assertFalse(list(filter(self.tr2, self.tr2.entries[1])))
 
     def testEndFilter(self):
         filter = EndFilter.parse(self.parser, "2010")
-        self.assertTrue(filter(self.tr1, self.tr1.entries[0]))
-        self.assertFalse(filter(self.tr2, self.tr2.entries[0]))
-        self.assertTrue(filter(self.tr2, self.tr2.entries[1]))
+        self.assertTrue(list(filter(self.tr1, self.tr1.entries[0])))
+        self.assertFalse(list(filter(self.tr2, self.tr2.entries[0])))
+        self.assertTrue(list(filter(self.tr2, self.tr2.entries[1])))
 
     def testExpressionFilter(self):
         filter = ExpressionFilter.parse(self.parser, "entry.account.name.startswith('Assets')")
-        self.assertTrue(filter(self.tr1, self.tr1.entries[0]))
-        self.assertFalse(filter(self.tr1, self.tr1.entries[1]))
+        self.assertTrue(list(filter(self.tr1, self.tr1.entries[0])))
+        self.assertFalse(list(filter(self.tr1, self.tr1.entries[1])))
 
     def testExpressionFilterDate(self):
         filter = ExpressionFilter.parse(self.parser, "entry.date < date('2010')")
-        self.assertTrue(filter(self.tr1, self.tr1.entries[0]))
-        self.assertFalse(filter(self.tr2, self.tr2.entries[0]))
-        self.assertTrue(filter(self.tr2, self.tr2.entries[1]))
+        self.assertTrue(list(filter(self.tr1, self.tr1.entries[0])))
+        self.assertFalse(list(filter(self.tr2, self.tr2.entries[0])))
+        self.assertTrue(list(filter(self.tr2, self.tr2.entries[1])))
 
     def testExpressionFilterTag(self):
         filter = ExpressionFilter.parse(self.parser, "entry.foo")
-        self.assertFalse(filter(self.tr1, self.tr1.entries[0]))
-        self.assertTrue(filter(self.tr1, self.tr1.entries[1]))
+        self.assertFalse(list(filter(self.tr1, self.tr1.entries[0])))
+        self.assertTrue(list(filter(self.tr1, self.tr1.entries[1])))

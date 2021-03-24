@@ -37,7 +37,7 @@ sorting = MapSorting(lambda x: x.date)
 template = default_template
 
 def output(line):
-    print line.encode("utf-8")
+    print(line.encode("utf-8"))
 
 def run_cli():
     global filter

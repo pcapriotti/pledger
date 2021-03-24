@@ -40,10 +40,10 @@ class RegisterReportTest(unittest.TestCase):
 
         self.assertEqual(4, len(records))
         self.assertEqual(
-            [(u'Assets:Bank', Value.parse('1500 EUR'), Value.parse('1500 EUR')),
-             (u'Equity:Capital', Value.parse('-1500 EUR'), ZERO),
-             (u'Expenses:Books', Value.parse('35 EUR'), Value.parse('35 EUR')),
-             (u'Assets:Bank', Value.parse('-35 EUR'), ZERO)],
+            [('Assets:Bank', Value.parse('1500 EUR'), Value.parse('1500 EUR')),
+             ('Equity:Capital', Value.parse('-1500 EUR'), ZERO),
+             ('Expenses:Books', Value.parse('35 EUR'), Value.parse('35 EUR')),
+             ('Assets:Bank', Value.parse('-35 EUR'), ZERO)],
             [(record.entry.account.name, record.entry.amount, record.total) for record in records])
 
 
@@ -53,7 +53,7 @@ class RegisterReportTest(unittest.TestCase):
         report = self.report_factory(ledger, RuleCollection(), Filter.null, sorting)
 
         self.assertEqual(
-            [unicode(chr(i)) for i in xrange(ord('A'), ord('N') + 1) for _ in xrange(2)],
+            [str(chr(i)) for i in range(ord('A'), ord('N') + 1) for _ in range(2)],
             [record.transaction.label for record in report.generate()])
 
     def testEmptyRegister(self):
@@ -76,9 +76,9 @@ class BalanceReportTest(unittest.TestCase):
         report = self.report_factory(ledger, RuleCollection(), Filter.null, sorting)
 
         self.assertEqual(
-            [(u'Assets:Bank', Value.parse("1465 EUR")),
-             (u'Equity:Capital', Value.parse("-1500 EUR")),
-             (u'Expenses:Books', Value.parse("35 EUR"))],
+            [('Assets:Bank', Value.parse("1465 EUR")),
+             ('Equity:Capital', Value.parse("-1500 EUR")),
+             ('Expenses:Books', Value.parse("35 EUR"))],
             [(record.account, record.amount) for record in report.generate() if record.account])
 
     def testEmptyBalance(self):

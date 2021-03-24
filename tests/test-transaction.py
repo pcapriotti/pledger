@@ -38,7 +38,7 @@ class TransactionTest(unittest.TestCase):
         entry1 = Entry(self.bank, -value)
         entry2 = Entry(self.expenses, value)
         tr = Transaction([entry1, entry2])
-        self.assertEquals(tr, self.parser.parse_transaction(str))
+        self.assertEqual(tr, self.parser.parse_transaction(str))
 
     def testParsingComments(self):
         str = "; gift for wife\n" + \
@@ -111,7 +111,7 @@ class TransactionTest(unittest.TestCase):
         entry1 = Entry(self.bank, value)
         entry2 = Entry(self.expenses, None)
         tr = Transaction([entry1, entry2])
-        self.assertRegexpMatches(repr(tr), "Transaction")
+        self.assertRegex(repr(tr), "Transaction")
 
     def testTransactionEntries(self):
         value = self.parser.parse_value("50 EUR")

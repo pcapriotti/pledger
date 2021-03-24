@@ -35,11 +35,11 @@ class TestSorting(unittest.TestCase):
 
     def testSimpleSorting(self):
         s = Sorting(lambda x: sorted(x))
-        self.assertEqual(range(10), s(self.data))
+        self.assertEqual(list(range(10)), s(self.data))
 
     def testInvertedSorting(self):
         s = ~Sorting(lambda x: sorted(x))
-        self.assertEqual(list(reversed(xrange(10))), s(self.data))
+        self.assertEqual(list(reversed(range(10))), s(self.data))
 
     def testMapSorting(self):
         s = MapSorting(lambda x: x * (x - 4))

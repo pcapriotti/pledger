@@ -56,7 +56,7 @@ class TemplateTest(unittest.TestCase):
 
     def testColoredPad(self):
         text = self.template.pad("hello", 10, 'red')
-        self.assertRegexpMatches(text, "     .*hello.*")
+        self.assertRegex(text, "     .*hello.*")
 
     def testLPad(self):
         text = self.template.lpad("hello", 10)
@@ -64,15 +64,15 @@ class TemplateTest(unittest.TestCase):
 
     def testColoredLPad(self):
         text = self.template.lpad("hello", 10, 'red')
-        self.assertRegexpMatches(text, ".*hello.*     ")
+        self.assertRegex(text, ".*hello.*     ")
 
     def testPrintValue(self):
         value = Value.parse("44 EUR")
-        self.assertRegexpMatches(self.template.print_value(value), r'^ *44.00 EUR$')
+        self.assertRegex(self.template.print_value(value), r'^ *44.00 EUR$')
 
     def testPrintNegativeValue(self):
         value = Value.parse("-44 EUR")
-        self.assertRegexpMatches(self.template.print_value(value), r'^ *\S+-44.00 EUR\S+$')
+        self.assertRegex(self.template.print_value(value), r'^ *\S+-44.00 EUR\S+$')
 
     def testPrintNullValue(self):
         self.assertEqual("", self.template.print_value(None))
@@ -80,20 +80,20 @@ class TemplateTest(unittest.TestCase):
     def testPrintAccount(self):
         account = self.parser.accounts["Assets:Bank:Checking:Joint"]
         text = self.template.print_account(account, None)
-        self.assertRegexpMatches(text, "Assets:Bank:Checking:Joint")
+        self.assertRegex(text, "Assets:Bank:Checking:Joint")
 
     def testPrintAccountShortened(self):
         account = self.parser.accounts["Assets:Bank:Checking:Joint"]
         text = self.template.print_account(account, 20)
-        self.assertRegexpMatches(text, ".*:.*:.*:Joint")
-        self.assertLessEqual(len(filter(unicode.isalpha, text)), 20)
+        self.assertRegex(text, ".*:.*:.*:Joint")
+        self.assertLessEqual(len(list(filter(str.isalpha, text))), 20)
 
     def testPrintLabel(self):
         ledger = self.parser.parse_ledger(fixture_path("simple.dat"))
         transaction = ledger.transactions[1]
         self.assertEqual("Bookshop", transaction.label)
         text = self.template.print_label(transaction, 30)
-        self.assertRegexpMatches(text, r' *\S+Bookshop')
+        self.assertRegex(text, r' *\S+Bookshop')
 
     def testPrintClearedLabel(self):
         ledger = self.parser.parse_ledger(fixture_path("simple.dat"))
@@ -101,4 +101,4 @@ class TemplateTest(unittest.TestCase):
         transaction.tags["cleared"] = True
         self.assertEqual("Bookshop", transaction.label)
         text = self.template.print_label(transaction, 30)
-        self.assertRegexpMatches(text, r' *Bookshop')
+        self.assertRegex(text, r' *Bookshop')

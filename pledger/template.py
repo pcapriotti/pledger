@@ -36,20 +36,20 @@ class Template(object):
             output(line)
 
     def pad(self, item, size, color = None):
-        text = unicode(item)[:size]
+        text = str(item)[:size]
         padlength = size - len(text)
         if (padlength < 0): padlength = 0
-        return u"%s%s" % (" " * padlength, self.colored(color, text))
+        return "%s%s" % (" " * padlength, self.colored(color, text))
 
     def lpad(self, item, size, color = None):
-        text = unicode(item)[:size]
+        text = str(item)[:size]
         padlength = size - len(text)
         if (padlength < 0): padlength = 0
-        return u"%s%s" % (self.colored(color, text), " " * padlength)
+        return "%s%s" % (self.colored(color, text), " " * padlength)
 
     def print_value(self, value):
         if value:
-            text = unicode(value)
+            text = str(value)
             color = None
             if value.negative():
                 color = "red"
@@ -80,7 +80,7 @@ class BalanceTemplate(Template):
     def generate(self, report):
         it = report.generate()
         # save total
-        total = it.next()
+        total = next(it)
         count = 0
         for entry in it:
             components = entry.amount.components()
@@ -91,7 +91,7 @@ class BalanceTemplate(Template):
                   self.colored(self.ACCOUNT_COLOR, entry.account)
             count += 1
         if count > 0:
-            yield u"-" * 20
+            yield "-" * 20
             for component in total.amount.components():
                 yield self.print_value(component)
 
@@ -111,7 +111,7 @@ class RegisterTemplate(Template):
         currencies = sorted(set(entry.entry.amount.currencies()).union(entry.total.currencies()))
         components = entry.entry.amount.components(currencies)
         total_components = entry.total.components(currencies)
-        yield u"%s %s %s %s %s" % (
+        yield "%s %s %s %s %s" % (
             self.lpad(entry.date.strftime("%y-%b-%d"), 9),
             self.print_label(entry.transaction, 34),
             self.print_account(entry.entry.account),
@@ -124,7 +124,7 @@ class RegisterTemplate(Template):
         currencies = sorted(set(entry.entry.amount.currencies()).union(entry.total.currencies()))
         components = entry.entry.amount.components(currencies)
         total_components = entry.total.components(currencies)
-        yield u"%s %s %s %s" % (
+        yield "%s %s %s %s" % (
             " " * 44,
             self.print_account(entry.entry.account),
             self.print_value(components[0]),
@@ -133,8 +133,8 @@ class RegisterTemplate(Template):
             yield line
 
     def print_extra_components(self, entry, components, total_components):
-        for i in xrange(len(components)):
-            yield u"%s %s %s" % (
+        for i in range(len(components)):
+            yield "%s %s %s" % (
                 " " * 104,
                 self.print_value(components[i]),
                 self.print_value(total_components[i]))
