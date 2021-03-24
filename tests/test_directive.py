@@ -1,7 +1,7 @@
-import unittest
 from pledger.parser import Parser
 from pledger.directive import *
 from pledger.ledger_processor import LedgerProcessor
+import pytest
 
 
 class ProcessorStub(object):
@@ -18,40 +18,38 @@ class ProcessorStub(object):
     def include(self, filename):
         self.included.append(filename)
 
+@pytest.fixture
+def processor(parser):
+    return ProcessorStub(parser.accounts)
 
-class DirectiveTest(unittest.TestCase):
-    def setUp(self):
-        self.parser = Parser()
-        self.processor = ProcessorStub(self.parser.accounts)
+def test_directive_registry():
+    assert Directive.directives['account'] == AccountDirective
+    assert Directive.directives.get('non-existing-directive') is None
 
-    def testDirectiveRegistry(self):
-        self.assertEqual(AccountDirective, Directive.directives['account'])
-        self.assertIsNone(Directive.directives.get('non-existing-directive'))
+def test_unsupported_directive(parser):
+    with pytest.raises(UnsupportedDirective) as e:
+        parser.parse_directive("!nonexisting")
 
-    def testUnsupportedDirective(self):
-        with self.assertRaises(UnsupportedDirective) as cm:
-            self.parser.parse_directive("!nonexisting")
+    assert 'nonexisting' == str(e.value)
 
-        self.assertRegex(str(cm.exception), "nonexisting")
+def test_account_directive(processor):
+    directive = AccountDirective("Assets")
+    assert processor.account.name is None
+    directive.execute(processor)
+    assert processor.account.name == "Assets"
 
-    def testAccountDirective(self):
-        directive = AccountDirective("Assets")
-        self.assertIsNone(self.processor.account.name)
-        directive.execute(self.processor)
-        self.assertEqual("Assets", self.processor.account.name)
+def test_end_account_directive(processor):
+    directive = EndAccountDirective()
+    processor.add_account_prefix("Assets")
+    directive.execute(processor)
+    assert processor.account.name is None
 
-    def testEndAccountDirective(self):
-        directive = EndAccountDirective()
-        self.processor.add_account_prefix("Assets")
-        directive.execute(self.processor)
-        self.assertIsNone(self.processor.account.name)
+def test_include_directive(processor):
+    directive = IncludeDirective("test.dat")
+    assert processor.included == []
+    directive.execute(processor)
+    assert processor.included == ["test.dat"]
 
-    def testIncludeDirective(self):
-        directive = IncludeDirective("test.dat")
-        self.assertEqual([], self.processor.included)
-        directive.execute(self.processor)
-        self.assertEqual(["test.dat"], self.processor.included)
-
-    def testDirectiveParsing(self):
-        directive = self.parser.parse_directive("!include test.dat")
-        self.assertEqual("test.dat", directive.filename)
+def test_directive_parsing(parser):
+    directive = parser.parse_directive("!include test.dat")
+    assert directive.filename == "test.dat"
