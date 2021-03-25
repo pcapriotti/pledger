@@ -1,43 +1,36 @@
-import unittest
-from pledger.parser import Parser
 from pledger.util import PledgerException
-from tests.fixtures import fixture_path
 from datetime import date
+import pytest
 
+def test_simple_ledger(parser, data_file):
+    ledger = parser.parse_ledger(data_file("simple.dat"))
+    assert len(ledger.transactions) == 2
 
-class ParserTest(unittest.TestCase):
-    def setUp(self):
-        self.parser = Parser()
+def test_ledger_with_tags(parser, data_file):
+    ledger = parser.parse_ledger(data_file("tags.dat"))
+    assert len(ledger.transactions) == 2
+    tr1 = ledger.transactions[0]
+    assert tr1.tags["balance"] is not None
+    assert tr1.entries[1].date(tr1) == date(2011, 1, 1)
+    tr2 = ledger.transactions[1]
+    assert tr2.entries[0].tags["title"] == "Dracula"
 
-    def testSimpleLedger(self):
-        ledger = self.parser.parse_ledger(fixture_path("simple.dat"))
-        self.assertEqual(2, len(ledger.transactions))
+def test_tags(parser):
+    assert parser.parse_tags("; foo:bar \t ") == { "foo":"bar" }
+    assert parser.parse_tags("; :baz: foo:1 \tbar:2") \
+        == { "foo":"1", "bar":"2", "baz":"" }
 
-    def testLedgerWithTags(self):
-        ledger = self.parser.parse_ledger(fixture_path("tags.dat"))
-        self.assertEqual(2, len(ledger.transactions))
-        tr1 = ledger.transactions[0]
-        self.assertIsNotNone(tr1.tags["balance"])
-        self.assertEqual(date(2011, 1, 1), tr1.entries[1].date(tr1))
-        tr2 = ledger.transactions[1]
-        self.assertEqual("Dracula", tr2.entries[0].tags["title"])
+def test_tags_with_spaces(parser):
+    assert parser.parse_tags('; foo:"hello world"') \
+        == { "foo":"hello world" }
+    assert parser.parse_tags('; foo:\'hello "world"\'') \
+        == { "foo":'hello "world"' }
+    assert parser.parse_tags(';bar:0 foo:"hello world" baz:5') \
+        == { "foo":"hello world", "bar":"0", "baz":"5" }
 
-    def testTags(self):
-        self.assertEqual({ "foo":"bar" }, self.parser.parse_tags("; foo:bar \t "))
-        self.assertEqual({ "foo":"1", "bar":"2", "baz":"" },
-                self.parser.parse_tags("; :baz: foo:1 \tbar:2"))
+def test_parse_error(parser, data_file):
+    with pytest.raises(PledgerException) as e:
+        parser.parse_ledger(data_file("errors.dat"))
 
-    def testTagsWithSpaces(self):
-        self.assertEqual({ "foo":"hello world" },
-                self.parser.parse_tags('; foo:"hello world"'))
-        self.assertEqual({ "foo":'hello "world"' },
-                self.parser.parse_tags('; foo:\'hello "world"\''))
-        self.assertEqual({ "foo":"hello world", "bar":"0", "baz":"5" },
-                self.parser.parse_tags(';bar:0 foo:"hello world" baz:5'))
-
-    def testParseError(self):
-        with self.assertRaises(PledgerException) as cm:
-            self.parser.parse_ledger(fixture_path("errors.dat"))
-
-        self.assertEqual(3, cm.exception.line_number)
-        self.assertEqual(fixture_path("errors.dat"), cm.exception.filename)
+    assert e.value.line_number == 2
+    assert e.value.filename == data_file("errors.dat")
