@@ -1,13 +1,11 @@
-import unittest
 from decimal import Decimal
 from pledger.account import Account
 from pledger.filter import Filter
 from pledger.parser import Parser
 from pledger.rule import Rule, RuleCollection, Generator
 from pledger.transaction import Transaction
-from tests.fixtures import fixture_path
 
-class RuleTest(unittest.TestCase):
+class RuleTest:
     def setUp(self):
         self.parser = Parser()
         self.bank_account = self.parser.parse_account("Assets:Bank")
@@ -57,7 +55,7 @@ class RuleTest(unittest.TestCase):
 
         self.assertItemsEqual(expected, result)
 
-class GeneratorTest(unittest.TestCase):
+class GeneratorTest:
     def testNullGenerator(self):
         g = Generator.null
         transaction = object()

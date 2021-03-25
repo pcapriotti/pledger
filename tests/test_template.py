@@ -1,8 +1,6 @@
-import unittest
 from pledger.parser import Parser
 from pledger.template import Template
 from pledger.value import Value
-from tests.fixtures import fixture_path
 
 
 class FakeTemplate(Template):
@@ -19,7 +17,7 @@ class FakeReport(Template):
         return iter(self.records)
 
 
-class TemplateTest(unittest.TestCase):
+class TemplateTest:
     def setUp(self):
         self.template = FakeTemplate()
         self.parser = Parser()

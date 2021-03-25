@@ -1,10 +1,8 @@
-import unittest
 from pledger.entry import Entry
 from pledger.ledger_processor import LedgerProcessor
 from pledger.parser import Parser
 from pledger.rule import RuleCollection
 from pledger.value import Value
-from tests.fixtures import fixture_path
 
 import pytest
 
@@ -21,7 +19,7 @@ class TransactionCollector(object):
 
 
 def test_account_prefix(parser, rules):
-    ledger = parser.parse_ledger(fixture_path("simple.dat"))
+    ledger = parser.parse_ledger(data_file("simple.dat"))
     processor = LedgerProcessor(ledger, rules)
     collector = TransactionCollector()
     processor.add_listener(collector)
@@ -34,7 +32,7 @@ def test_account_prefix(parser, rules):
             assert entry.account.root().name == "Business"
 
 def test_remove_account_prefix(parser, rules):
-    ledger = parser.parse_ledger(fixture_path("simple.dat"))
+    ledger = parser.parse_ledger(data_file("simple.dat"))
     processor = LedgerProcessor(ledger, rules)
     collector = TransactionCollector()
     processor.add_listener(collector)
@@ -58,7 +56,7 @@ def test_remove_account_prefix(parser, rules):
             assert entry.account.root().name != "Business"
 
 def test_include(parser, rules):
-    ledger = parser.parse_ledger(fixture_path("simple.dat"))
+    ledger = parser.parse_ledger(data_file("simple.dat"))
     processor = LedgerProcessor(ledger, rules)
     collector = TransactionCollector()
     processor.add_listener(collector)
@@ -69,7 +67,7 @@ def test_include(parser, rules):
     assert len(collector.transactions) == 3
 
 def test_compact(parser, rules):
-    ledger = parser.parse_ledger(fixture_path("simple.dat"))
+    ledger = parser.parse_ledger(data_file("simple.dat"))
     processor = LedgerProcessor(ledger, rules)
     entry = ledger.transactions[1].entries[0]
     assert entry.amount == Value.parse("35 EUR")
