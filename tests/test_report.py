@@ -1,91 +1,94 @@
-import unittest
-from tests.fixtures import fixture_path
 from pledger.filter import Filter
 from pledger.parser import Parser
 from pledger.report import reports, ReportRegistry
 from pledger.rule import RuleCollection
 from pledger.sorting import Sorting, MapSorting
 from pledger.value import Value, ZERO
+import pytest
 
-class RegisterReportTest(unittest.TestCase):
-    def setUp(self):
-        self.parser = Parser()
-        self.report_factory = reports.get("register")
+@pytest.fixture
+def registry():
+    return ReportRegistry({})
 
-    def testSimpleReport(self):
-        ledger = self.parser.parse_ledger(fixture_path("simple.dat"))
-        sorting = MapSorting(lambda x: x.date)
-        report = self.report_factory(ledger, RuleCollection(), Filter.null, sorting)
-        records = list(report.generate())
+def test_simple_report(parser, data_file):
+    ledger = parser.parse_ledger(data_file("simple.dat"))
+    sorting = MapSorting(lambda x: x.date)
+    report = reports.get("register")(ledger,
+                                     RuleCollection(),
+                                     Filter.null,
+                                     sorting)
+    records = list(report.generate())
 
-        self.assertEqual(4, len(records))
-        self.assertEqual(
-            [('Assets:Bank', Value.parse('1500 EUR'), Value.parse('1500 EUR')),
-             ('Equity:Capital', Value.parse('-1500 EUR'), ZERO),
-             ('Expenses:Books', Value.parse('35 EUR'), Value.parse('35 EUR')),
-             ('Assets:Bank', Value.parse('-35 EUR'), ZERO)],
-            [(record.entry.account.name, record.entry.amount, record.total) for record in records])
+    assert len(records) == 4
+    assert [(record.entry.account.name,
+             record.entry.amount,
+             record.total) for record in records] == \
+        [('Assets:Bank', Value.parse('1500 EUR'), Value.parse('1500 EUR')),
+        ('Equity:Capital', Value.parse('-1500 EUR'), ZERO),
+        ('Expenses:Books', Value.parse('35 EUR'), Value.parse('35 EUR')),
+        ('Assets:Bank', Value.parse('-35 EUR'), ZERO)]
 
 
-    def testReportOrdering(self):
-        ledger = self.parser.parse_ledger(fixture_path("sorting.dat"))
-        sorting = MapSorting(lambda x: x.date)
-        report = self.report_factory(ledger, RuleCollection(), Filter.null, sorting)
+def test_report_ordering(parser, data_file):
+    ledger = parser.parse_ledger(data_file("sorting.dat"))
+    sorting = MapSorting(lambda x: x.date)
+    report = reports.get("register")(ledger,
+                                     RuleCollection(),
+                                     Filter.null,
+                                     sorting)
 
-        self.assertEqual(
-            [str(chr(i)) for i in range(ord('A'), ord('N') + 1) for _ in range(2)],
-            [record.transaction.label for record in report.generate()])
+    assert [record.transaction.label for record in report.generate()] == \
+        [str(chr(i)) for i in range(ord('A'), ord('N') + 1) for _ in range(2)]
 
-    def testEmptyRegister(self):
-        ledger = self.parser.parse_ledger(fixture_path("simple.dat"))
-        sorting = MapSorting(lambda x: x.date)
-        filter = self.parser.accounts["Expenses"]["Clothing"].filter()
-        report = self.report_factory(ledger, RuleCollection(), filter, sorting)
-        records = list(report.generate())
+def test_empty_register(parser, data_file):
+    ledger = parser.parse_ledger(data_file("simple.dat"))
+    sorting = MapSorting(lambda x: x.date)
+    filter = parser.accounts["Expenses"]["Clothing"].filter()
+    report = reports.get("register")(ledger, RuleCollection(), filter, sorting)
+    records = list(report.generate())
 
-        self.assertEqual(0, len(records))
+    assert len(records) == 0
 
-class BalanceReportTest(unittest.TestCase):
-    def setUp(self):
-        self.parser = Parser()
-        self.report_factory = reports.get("balance")
+def test_simple_report(parser, data_file):
+    ledger = parser.parse_ledger(data_file("simple.dat"))
+    sorting = Sorting(lambda x: x)
+    report = reports.get("balance")(ledger,
+                                    RuleCollection(),
+                                    Filter.null,
+                                    sorting)
 
-    def testSimpleReport(self):
-        ledger = self.parser.parse_ledger(fixture_path("simple.dat"))
-        sorting = Sorting(lambda x: x)
-        report = self.report_factory(ledger, RuleCollection(), Filter.null, sorting)
+    assert [(record.account, record.amount)
+            for record in report.generate()
+            if record.account] == \
+        [('Assets:Bank', Value.parse("1465 EUR")),
+         ('Equity:Capital', Value.parse("-1500 EUR")),
+         ('Expenses:Books', Value.parse("35 EUR"))]
 
-        self.assertEqual(
-            [('Assets:Bank', Value.parse("1465 EUR")),
-             ('Equity:Capital', Value.parse("-1500 EUR")),
-             ('Expenses:Books', Value.parse("35 EUR"))],
-            [(record.account, record.amount) for record in report.generate() if record.account])
+def test_empty_balance(parser):
+    ledger = parser.parse_ledger("<test>", "")
+    sorting = Sorting(lambda x: x)
+    report = reports.get("balance")(ledger,
+                                    RuleCollection(),
+                                    Filter.null,
+                                    sorting)
+    records = list(report.generate())
 
-    def testEmptyBalance(self):
-        ledger = self.parser.parse_ledger("<test>", "")
-        sorting = Sorting(lambda x: x)
-        report = self.report_factory(ledger, RuleCollection(), Filter.null, sorting)
-        records = list(report.generate())
+    assert len(records) == 1
+    assert records[0].level is None
 
-        self.assertEqual(1, len(records))
-        self.assertIsNone(records[0].level)
+def test_get(registry):
+    registry.add('register', 'register factory')
+    registry.add('balance', 'balance factory')
+    assert registry['register'] == 'register factory'
+    assert registry.get('reg') == 'register factory'
 
-class ReportRegistryTest(unittest.TestCase):
-    def setUp(self):
-        self.registry = ReportRegistry({})
+def test_add_multiple(registry):
+    registry.add('register', 'register factory')
+    with pytest.raises(Exception):
+        registry.add('register', 'register factory 2')
 
-    def testGet(self):
-        self.registry.add('register', 'register factory')
-        self.registry.add('balance', 'balance factory')
-        self.assertEqual('register factory', self.registry['register'])
-        self.assertEqual('register factory', self.registry.get('reg'))
+def testAmbiguous(registry):
+    registry.add('register', 'register factory')
+    registry.add('reimbursements', 'reimbursement factory')
 
-    def testAddMultiple(self):
-        self.registry.add('register', 'register factory')
-        self.assertRaises(Exception, self.registry.add, 'register', 'register factory 2')
-
-    def testAmbiguous(self):
-        self.registry.add('register', 'register factory')
-        self.registry.add('reimbursements', 'reimbursement factory')
-
-        self.assertIsNone(self.registry.get('re'))
+    assert registry.get('re') is None

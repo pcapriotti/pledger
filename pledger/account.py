@@ -112,6 +112,9 @@ class AccountRepository(AccountBase, Taggable):
     def name(self):
         pass
 
+    def __lt__(self, other):
+        return str(self.name) < str(other.name)
+
 class NamedAccount(Account, AccountRepository):
     def __init__(self, name, parent = None):
         super(NamedAccount, self).__init__()
@@ -123,9 +126,3 @@ class NamedAccount(Account, AccountRepository):
 
     def __repr__(self):
         return "<%s>" % self.name
-
-    def __cmp__(self, other):
-        if other:
-            return cmp(self.name, other.name)
-        else:
-            return 1
