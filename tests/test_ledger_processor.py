@@ -4,12 +4,6 @@ from pledger.parser import Parser
 from pledger.rule import RuleCollection
 from pledger.value import Value
 
-import pytest
-
-@pytest.fixture
-def rules():
-    return RuleCollection()
-
 class TransactionCollector(object):
     def __init__(self):
         self.transactions = []

@@ -21,3 +21,7 @@ def data_file(data_dir):
     def f(name):
         return os.path.join(data_dir, name)
     return f
+
+@pytest.fixture
+def rules():
+    return RuleCollection()

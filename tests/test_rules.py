@@ -5,8 +5,8 @@ from pledger.parser import Parser
 from pledger.rule import Rule, RuleCollection, Generator
 from pledger.transaction import Transaction
 
-class RuleTest:
-    def setUp(self):
+class TestRules:
+    def setup_method(self):
         self.parser = Parser()
         self.bank_account = self.parser.parse_account("Assets:Bank")
         self.books_account = self.parser.parse_account("Expenses:Books")
@@ -25,7 +25,7 @@ class RuleTest:
             yield self.cash_account + amount
         self.discount = discount
 
-    def testRuleOnLedger(self):
+    def test_rule_on_ledger(self):
         rule = Rule(Filter.has_account(self.books_account), self.discount)
         self.rules.add_rule(rule)
 
@@ -38,9 +38,9 @@ class RuleTest:
                     self.cash_account + self.parser.parse_value("3.30 EUR"),
                     self.books_account - self.parser.parse_value("3.30 EUR")]
 
-        self.assertItemsEqual(expected, result)
+        assert set(result) == set(expected)
 
-    def testAccountTagRule(self):
+    def test_account_tag_rule(self):
         self.books_account.tags["discount"] = self.discount
         self.rules.add_rule(Account.tag_rule("discount"))
 
@@ -53,28 +53,27 @@ class RuleTest:
                     self.cash_account + self.parser.parse_value("3.30 EUR"),
                     self.books_account - self.parser.parse_value("3.30 EUR")]
 
-        self.assertItemsEqual(expected, result)
+        assert set(result) == set(expected)
 
-class GeneratorTest:
-    def testNullGenerator(self):
-        g = Generator.null
-        transaction = object()
-        entry = object()
+def test_null_generator():
+    g = Generator.null
+    transaction = object()
+    entry = object()
 
-        self.assertEqual([], list(g(transaction, entry)))
+    assert list(g(transaction, entry)) == []
 
-    def testGeneratorSum(self):
-        @Generator
-        def g1(transaction, entry):
-            yield entry
+def test_generator_sum():
+    @Generator
+    def g1(transaction, entry):
+        yield entry
 
-        @Generator
-        def g2(transaction, entry):
-            yield entry
-            yield entry
+    @Generator
+    def g2(transaction, entry):
+        yield entry
+        yield entry
 
-        g = g1 + g2
-        transaction = object()
-        entry = object()
+    g = g1 + g2
+    transaction = object()
+    entry = object()
 
-        self.assertEqual(3, len(list(g(transaction, entry))))
+    assert len(list(g(transaction, entry))) == 3
