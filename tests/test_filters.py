@@ -1,173 +1,171 @@
 import unittest
 import re
+from dataclasses import dataclass
 from datetime import date
 from pledger.account import Account
 from pledger.entry import Entry
 from pledger.filter import *
 from pledger.parser import Parser
 from pledger.transaction import Transaction
+import pytest
 
-class TestFilter(unittest.TestCase):
-    def setUp(self):
-        self.three_entries = Filter(lambda tr, entry: len(tr.entries) == 3)
-        self.in_euro = Filter(lambda tr, entry: list(entry.amount.currencies()) == ["EUR"])
+three_entries = Filter(lambda tr, entry: len(tr.entries) == 3)
+in_euro = Filter(lambda tr, entry: list(entry.amount.currencies()) == ["EUR"])
 
-        self.parser = Parser()
-        bank_account = self.parser.parse_account("Assets:Bank")
-        books_account = self.parser.parse_account("Expenses:Books")
-        cash_account = self.parser.parse_account("Assets:Cash")
+@pytest.fixture
+def transactions(parser):
+    bank_account = parser.parse_account("Assets:Bank")
+    books_account = parser.parse_account("Expenses:Books")
+    cash_account = parser.parse_account("Assets:Cash")
 
-        bank = bank_account - self.parser.parse_value("33 EUR")
-        books = books_account + self.parser.parse_value("33 EUR")
-        self.tr1 = Transaction([bank, books])
+    bank = bank_account - parser.parse_value("33 EUR")
+    books = books_account + parser.parse_value("33 EUR")
+    tr1 = Transaction([bank, books])
 
-        bank = bank_account - self.parser.parse_value("91 $")
-        books = books_account + self.parser.parse_value("40 $")
-        cash = cash_account + self.parser.parse_value("51 $")
-        self.tr2 = Transaction([bank, books, cash])
-        
-    def testFilter(self):
-        self.assertFalse(self.three_entries(self.tr1, self.tr1.entries[0]))
-        self.assertTrue(self.three_entries(self.tr2, self.tr2.entries[0]))
-        self.assertTrue(self.in_euro(self.tr1, self.tr1.entries[0]))
-        self.assertFalse(self.in_euro(self.tr2, self.tr2.entries[0]))
+    bank = bank_account - parser.parse_value("91 $")
+    books = books_account + parser.parse_value("40 $")
+    cash = cash_account + parser.parse_value("51 $")
+    tr2 = Transaction([bank, books, cash])
 
-    def testFilterParse(self):
-        filter = Filter.parse(self.parser, lambda tr, entry: entry.account.name.startswith("Assets"))
-        self.assertTrue(list(filter(self.tr1, self.tr1.entries[0])))
-        self.assertFalse(list(filter(self.tr1, self.tr1.entries[1])))
+    bank2_account = parser.parse_account("Assets:Bank2")
+    bank2_account.tags["foo"] = "bar"
 
-    def testFilterInvert(self):
-        self.assertTrue((~self.three_entries)(self.tr1, self.tr1.entries[0]))
-        self.assertFalse((~self.three_entries)(self.tr2, self.tr2.entries[0]))
-        self.assertFalse((~self.in_euro)(self.tr1, self.tr1.entries[0]))
-        self.assertTrue((~self.in_euro)(self.tr2, self.tr2.entries[0]))
+    bank = bank2_account - parser.parse_value("33 $")
+    books = books_account + parser.parse_value("33 $")
+    tr3 = Transaction([bank, books])
+    tr3.tags["baz"] = "hello world"
+    books.tags["title"] = "Necronomicon"
 
-    def testFilterAnd(self):
-        filter = self.three_entries & self.in_euro
-        self.assertFalse(list(filter(self.tr1, self.tr1.entries[0])))
-        self.assertFalse(list(filter(self.tr2, self.tr2.entries[0])))
+    bank = bank_account - parser.parse_value("33 EUR")
+    books = books_account + parser.parse_value("33 EUR")
+    books.tags["foo"] = "bar"
+    tr4 = Transaction([bank, books], date=date(2009, 12, 31))
 
-    def testFilterOr(self):
-        filter = self.three_entries | self.in_euro
-        self.assertTrue(list(filter(self.tr1, self.tr1.entries[0])))
-        self.assertTrue(list(filter(self.tr2, self.tr2.entries[0])))
+    bank = bank_account - parser.parse_value("91 $")
+    books = books_account + parser.parse_value("40 $")
+    books.tags["date"] = date(2009, 3, 1)
+    cash = cash_account + parser.parse_value("51 $")
+    tr5 = Transaction([bank, books, cash], date=date(2010, 1, 1))
 
-    def testHasAccountFilter(self):
-        filter = Filter.has_account(self.parser.parse_account("Assets:Bank"))
-        self.assertTrue(list(filter(self.tr1, self.tr1.entries[0])))
-        self.assertFalse(list(filter(self.tr1, self.tr1.entries[1])))
+    return tr1, tr2, tr3, tr4, tr5
 
-    def testMatchesFilter(self):
-        filter = Filter.matches(re.compile(r"ank"))
-        self.assertTrue(list(filter(self.tr1, self.tr1.entries[0])))
-        self.assertFalse(list(filter(self.tr1, self.tr1.entries[1])))
+def test_filter(transactions):
+    assert not three_entries(transactions[0],
+                             transactions[0].entries[0])
+    assert three_entries(transactions[1], transactions[1].entries[0])
+    assert in_euro(transactions[0], transactions[0].entries[0])
+    assert not in_euro(transactions[1], transactions[1].entries[0])
 
-class TestTagFilters(unittest.TestCase):
-    def setUp(self):
-        self.parser = Parser()
-        bank_account = self.parser.parse_account("Assets:Bank")
-        books_account = self.parser.parse_account("Expenses:Books")
-        bank_account.tags["foo"] = "bar"
+def test_filter_parse(parser, transactions):
+    filter = Filter.parse(
+        parser,
+        lambda tr, entry: entry.account.name.startswith("Assets"))
+    assert filter(transactions[0], transactions[0].entries[0])
+    assert not filter(transactions[0], transactions[0].entries[1])
 
-        self.bank = bank_account - self.parser.parse_value("33 $")
-        self.books = books_account + self.parser.parse_value("33 $")
-        self.tr = Transaction([self.bank, self.books])
-        self.tr.tags["baz"] = "hello world"
-        self.books.tags["title"] = "Necronomicon"
+def test_filter_invert(transactions):
+    assert (~three_entries)(transactions[0], transactions[0].entries[0])
+    assert not (~three_entries)(transactions[1], transactions[1].entries[0])
+    assert not (~in_euro)(transactions[0], transactions[0].entries[0])
+    assert (~in_euro)(transactions[1], transactions[1].entries[0])
 
-    def testAccountTagFilter(self):
-        filter = Account.tag_filter("foo", "bar")
-        self.assertTrue(list(filter(self.tr, self.bank)))
-        self.assertFalse(list(filter(self.tr, self.books)))
+def test_filter_and(transactions):
+    filter = three_entries & in_euro
+    assert not filter(transactions[0], transactions[0].entries[0])
+    assert not filter(transactions[1], transactions[1].entries[0])
 
-    def testAccountTagFilterEmpty(self):
-        filter = Account.tag_filter("foo")
-        self.assertTrue(list(filter(self.tr, self.bank)))
-        self.assertFalse(list(filter(self.tr, self.books)))
+def test_filter_or(transactions):
+    filter = three_entries | in_euro
+    assert filter(transactions[0], transactions[0].entries[0])
+    assert filter(transactions[1], transactions[1].entries[0])
 
-    def testAccountTagFilterWrong(self):
-        filter = Account.tag_filter("baz")
-        self.assertFalse(list(filter(self.tr, self.bank)))
-        self.assertFalse(list(filter(self.tr, self.books)))
+def test_has_account_filter(parser, transactions):
+    filter = Filter.has_account(parser.parse_account("Assets:Bank"))
+    assert filter(transactions[0], transactions[0].entries[0])
+    assert not filter(transactions[0], transactions[0].entries[1])
 
-    def testTransactionTagFilter(self):
-        filter = Transaction.tag_filter("baz", "hello world")
-        self.assertTrue(list(filter(self.tr, self.bank)))
-        self.assertTrue(list(filter(self.tr, self.books)))
-        self.assertTrue(list(filter(self.tr, None)))
+def test_matches_filter(transactions):
+    filter = Filter.matches(re.compile(r"ank"))
+    assert filter(transactions[0], transactions[0].entries[0])
+    assert not filter(transactions[0], transactions[0].entries[1])
 
-    def testTransactionTagFilterEmpty(self):
-        filter = Transaction.tag_filter("baz", None)
-        self.assertTrue(list(filter(self.tr, self.bank)))
-        self.assertTrue(list(filter(self.tr, self.books)))
-        self.assertTrue(list(filter(self.tr, None)))
+def test_account_tag_filter(parser, transactions):
+    filter = Account.tag_filter("foo", "bar")
+    assert filter(transactions[2], transactions[2].entries[0])
+    assert not filter(transactions[2], transactions[2].entries[1])
 
-    def testTransactionTagFilterWrong(self):
-        filter = Transaction.tag_filter("foo", None)
-        self.assertFalse(list(filter(self.tr, self.bank)))
-        self.assertFalse(list(filter(self.tr, self.books)))
-        self.assertFalse(list(filter(self.tr, None)))
+def test_account_tag_filter_empty(transactions):
+    filter = Account.tag_filter("foo")
+    assert filter(transactions[2], transactions[2].entries[0])
+    assert not filter(transactions[2], transactions[2].entries[1])
 
-    def testTransactionAccountFilter(self):
-        filter = Transaction.account_tag_filter("foo", "bar")
-        self.assertTrue(list(filter(self.tr, None)))
+def test_account_tag_filter_wrong(transactions):
+    filter = Account.tag_filter("baz")
+    assert not filter(transactions[2], transactions[2].entries[0])
+    assert not filter(transactions[2], transactions[2].entries[1])
 
-    def testEntryTagFilter(self):
-        filter = Entry.tag_filter("title", "Necronomicon")
-        self.assertTrue(list(filter(self.tr, self.books)))
-        self.assertFalse(list(filter(self.tr, self.bank)))
-        self.assertFalse(list(filter(self.tr, None)))
+def test_transaction_tag_filter(transactions):
+    filter = Transaction.tag_filter("baz", "hello world")
+    assert filter(transactions[2], transactions[2].entries[0])
+    assert filter(transactions[2], transactions[2].entries[1])
+    assert filter(transactions[2], None)
 
-class TestCLIFilters(unittest.TestCase):
-    def setUp(self):
-        self.parser = Parser()
-        bank_account = self.parser.parse_account("Assets:Bank")
-        books_account = self.parser.parse_account("Expenses:Books")
-        cash_account = self.parser.parse_account("Assets:Cash")
+def test_transaction_tag_filter_empty(transactions):
+    filter = Transaction.tag_filter("baz", None)
+    assert filter(transactions[2], transactions[2].entries[0])
+    assert filter(transactions[2], transactions[2].entries[1])
+    assert filter(transactions[2], None)
 
-        bank = bank_account - self.parser.parse_value("33 EUR")
-        books = books_account + self.parser.parse_value("33 EUR")
-        books.tags["foo"] = "bar"
-        self.tr1 = Transaction([bank, books], date=date(2009, 12, 31))
+def test_transaction_tag_filter_wrong(transactions):
+    filter = Transaction.tag_filter("foo", None)
+    assert not filter(transactions[2], transactions[2].entries[0])
+    assert not filter(transactions[2], transactions[2].entries[1])
+    assert not filter(transactions[2], None)
 
-        bank = bank_account - self.parser.parse_value("91 $")
-        books = books_account + self.parser.parse_value("40 $")
-        books.tags["date"] = date(2009, 3, 1)
-        cash = cash_account + self.parser.parse_value("51 $")
-        self.tr2 = Transaction([bank, books, cash], date=date(2010, 1, 1))
+def test_transaction_account_filter(transactions):
+    filter = Transaction.account_tag_filter("foo", "bar")
+    assert filter(transactions[2], None)
 
-    def testDateFilter(self):
-        filter = DateFilter.parse(self.parser, "2010/10/01")
-        self.assertEqual(date(2010, 10, 1), filter.date)
+def test_entry_tag_filter(transactions):
+    filter = Entry.tag_filter("title", "Necronomicon")
+    assert filter(transactions[2], transactions[2].entries[1])
+    assert not filter(transactions[2], transactions[2].entries[0])
+    assert not filter(transactions[2], None)
 
-        self.assertRaises(ValueError, DateFilter.parse, self.parser, "foo")
-        self.assertRaises(ValueError, DateFilter.parse, self.parser, "2011/15/12")
+def test_date_filter(parser):
+    filter = DateFilter.parse(parser, "2010/10/01")
+    assert filter.date == date(2010, 10, 1)
 
-    def testBeginFilter(self):
-        filter = BeginFilter.parse(self.parser, "2010")
-        self.assertFalse(list(filter(self.tr1, self.tr1.entries[0])))
-        self.assertTrue(list(filter(self.tr2, self.tr2.entries[0])))
-        self.assertFalse(list(filter(self.tr2, self.tr2.entries[1])))
+    with pytest.raises(ValueError):
+        DateFilter.parse(parser, "foo")
+    with pytest.raises(ValueError):
+        DateFilter.parse(parser, "2011/15/12")
 
-    def testEndFilter(self):
-        filter = EndFilter.parse(self.parser, "2010")
-        self.assertTrue(list(filter(self.tr1, self.tr1.entries[0])))
-        self.assertFalse(list(filter(self.tr2, self.tr2.entries[0])))
-        self.assertTrue(list(filter(self.tr2, self.tr2.entries[1])))
+def test_begin_filter(parser, transactions):
+    filter = BeginFilter.parse(parser, "2010")
+    assert not filter(transactions[3], transactions[3].entries[0])
+    assert filter(transactions[4], transactions[4].entries[0])
+    assert not filter(transactions[4], transactions[4].entries[1])
 
-    def testExpressionFilter(self):
-        filter = ExpressionFilter.parse(self.parser, "entry.account.name.startswith('Assets')")
-        self.assertTrue(list(filter(self.tr1, self.tr1.entries[0])))
-        self.assertFalse(list(filter(self.tr1, self.tr1.entries[1])))
+def test_end_filter(parser, transactions):
+    filter = EndFilter.parse(parser, "2010")
+    assert filter(transactions[3], transactions[3].entries[0])
+    assert not filter(transactions[4], transactions[4].entries[0])
+    assert filter(transactions[4], transactions[4].entries[1])
 
-    def testExpressionFilterDate(self):
-        filter = ExpressionFilter.parse(self.parser, "entry.date < date('2010')")
-        self.assertTrue(list(filter(self.tr1, self.tr1.entries[0])))
-        self.assertFalse(list(filter(self.tr2, self.tr2.entries[0])))
-        self.assertTrue(list(filter(self.tr2, self.tr2.entries[1])))
+def test_expression_filter(parser, transactions):
+    filter = ExpressionFilter.parse(
+        parser, "entry.account.name.startswith('Assets')")
+    assert filter(transactions[3], transactions[3].entries[0])
+    assert not filter(transactions[3], transactions[3].entries[1])
 
-    def testExpressionFilterTag(self):
-        filter = ExpressionFilter.parse(self.parser, "entry.foo")
-        self.assertFalse(list(filter(self.tr1, self.tr1.entries[0])))
-        self.assertTrue(list(filter(self.tr1, self.tr1.entries[1])))
+def testExpressionFilterDate(parser, transactions):
+    filter = ExpressionFilter.parse(parser, "entry.date < date('2010')")
+    assert filter(transactions[3], transactions[3].entries[0])
+    assert not filter(transactions[4], transactions[4].entries[0])
+    assert filter(transactions[4], transactions[4].entries[1])
+
+def testExpressionFilterTag(parser, transactions):
+    filter = ExpressionFilter.parse(parser, "entry.foo")
+    assert not filter(transactions[3], transactions[3].entries[0])
+    assert filter(transactions[3], transactions[3].entries[1])
