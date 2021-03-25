@@ -1,4 +1,5 @@
 from pledger.parser import Parser
+from pledger.rule import RuleCollection
 import os
 import pytest
 

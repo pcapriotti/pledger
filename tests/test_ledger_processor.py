@@ -1,7 +1,6 @@
 from pledger.entry import Entry
 from pledger.ledger_processor import LedgerProcessor
 from pledger.parser import Parser
-from pledger.rule import RuleCollection
 from pledger.value import Value
 
 class TransactionCollector(object):
@@ -12,7 +11,7 @@ class TransactionCollector(object):
         self.transactions.append((transaction, entries))
 
 
-def test_account_prefix(parser, rules):
+def test_account_prefix(parser, rules, data_file):
     ledger = parser.parse_ledger(data_file("simple.dat"))
     processor = LedgerProcessor(ledger, rules)
     collector = TransactionCollector()
@@ -25,7 +24,7 @@ def test_account_prefix(parser, rules):
         for entry in entries:
             assert entry.account.root().name == "Business"
 
-def test_remove_account_prefix(parser, rules):
+def test_remove_account_prefix(parser, rules, data_file):
     ledger = parser.parse_ledger(data_file("simple.dat"))
     processor = LedgerProcessor(ledger, rules)
     collector = TransactionCollector()
@@ -49,7 +48,7 @@ def test_remove_account_prefix(parser, rules):
         for entry in entries:
             assert entry.account.root().name != "Business"
 
-def test_include(parser, rules):
+def test_include(parser, rules, data_file):
     ledger = parser.parse_ledger(data_file("simple.dat"))
     processor = LedgerProcessor(ledger, rules)
     collector = TransactionCollector()
@@ -60,7 +59,7 @@ def test_include(parser, rules):
 
     assert len(collector.transactions) == 3
 
-def test_compact(parser, rules):
+def test_compact(parser, rules, data_file):
     ledger = parser.parse_ledger(data_file("simple.dat"))
     processor = LedgerProcessor(ledger, rules)
     entry = ledger.transactions[1].entries[0]

@@ -1,91 +1,86 @@
-import unittest
 from decimal import Decimal, InvalidOperation
 from pledger.value import Value, ZERO
+import pytest
 
-class SingleCurrency(unittest.TestCase):
-    def testSumNull(self):
-        value = Value({ "EUR": Decimal(32) })
-        self.assertEqual(value, value + ZERO)
+def test_sum_null():
+    value = Value({ "EUR": Decimal(32) })
+    assert value + ZERO == value
 
-    def testParsing(self):
-        value = Value({ "EUR": Decimal("35.1") })
-        self.assertEqual(value, Value.parse("35.1 EUR"))
+def test_parsing():
+    value = Value({ "EUR": Decimal("35.1") })
+    assert Value.parse("35.1 EUR") == value
 
-    def testParseNoCurrency(self):
-        self.assertRaises(InvalidOperation, Value.parse("35.1"))
+def test_parse_no_currency():
+    assert Value.parse("35.1") is None
 
-    def testParseInvalidDecimal(self):
-        self.assertRaises(ValueError, Value.parse("12.1.1 EUR"))
+def test_parse_invalid_decimal():
+    assert Value.parse("12.1.1 EUR") is None
 
-    def testCurrencies(self):
-        value = Value({ "EUR": Decimal("21.36") })
-        self.assertEqual(["EUR"], list(value.currencies()))
+def test_currencies():
+    value = Value({ "EUR": Decimal("21.36") })
+    assert list(value.currencies()) == ["EUR"]
 
-    def testComponents(self):
-        value = Value({ "EUR": Decimal("31.99") })
-        self.assertEqual([value], list(value.components()))
-        self.assertEqual([value], list(value.components(["EUR"])))
-        self.assertEqual([ZERO], list(value.components(["USD"])))
-        self.assertEqual([ZERO], list(value.components([])))
+def test_components_single():
+    value = Value({ "EUR": Decimal("31.99") })
+    assert list(value.components()) == [value]
+    assert list(value.components(["EUR"])) == [value]
+    assert list(value.components(["USD"])) == [ZERO]
+    assert list(value.components([])) == [ZERO]
 
-    def testNeg(self):
-        amount = Decimal("21.36")
-        value = Value({ "EUR": amount })
-        self.assertEqual(Value({ "EUR": -amount }), -value)
+def test_neg():
+    amount = Decimal("21.36")
+    value = Value({ "EUR": amount })
+    assert -value == Value({ "EUR": -amount })
 
-    def testNegative(self):
-        value = Value({ "EUR": Decimal("31.99") })
-        self.assertFalse(value.negative())
-        self.assertTrue((-value).negative())
+def test_negative():
+    value = Value({ "EUR": Decimal("31.99") })
+    assert not value.negative()
+    assert (-value).negative()
 
-    def testEquality(self):
-        value = Value({ "EUR": Decimal("31.99") })
-        value2 = Value({ "EUR": Decimal("31.99") })
-        value3 = Value({ "EUR": Decimal("31.98") })
-        self.assertTrue(value == value2)
-        self.assertFalse(value == value3)
-        self.assertFalse(value == None)
+def test_equality():
+    value = Value({ "EUR": Decimal("31.99") })
+    value2 = Value({ "EUR": Decimal("31.99") })
+    value3 = Value({ "EUR": Decimal("31.98") })
+    assert value == value2
+    assert value != value3
+    assert not value == None
 
-    def testMultiplication(self):
-        value = Value({ "EUR": Decimal("31.99") })
-        value2 = Value({ "EUR": Decimal("63.98") })
-        self.assertEqual(value2, value * Decimal(2))
-        self.assertEqual(value2, value * Decimal("2.00001"))
+def test_multiplication():
+    value = Value({ "EUR": Decimal("31.99") })
+    value2 = Value({ "EUR": Decimal("63.98") })
+    assert value * Decimal(2) == value2
+    assert value * Decimal("2.00001") == value2
 
-    def testFormat(self):
-        value = Value({ "EUR": Decimal("31.992371") })
-        self.assertEqual("31.99 EUR", str(value))
-        self.assertEqual("0", str(ZERO))
+def test_format():
+    value = Value({ "EUR": Decimal("31.992371") })
+    assert str(value) == "31.99 EUR"
+    assert str(ZERO) == "0"
 
-    def testComparison(self):
-        value = Value({ "EUR": Decimal("31.99") })
-        value2 = Value({ "EUR": Decimal("21.36") })
-        self.assertGreater(value, value2)
-        self.assertLess(value2, value)
-        self.assertGreaterEqual(value, value2)
-        self.assertGreaterEqual(value, value)
-        self.assertLessEqual(value2, value)
-        self.assertLessEqual(value2, value2)
+def test_comparison():
+    value = Value({ "EUR": Decimal("31.99") })
+    value2 = Value({ "EUR": Decimal("21.36") })
+    assert value > value2
+    assert value2 < value
+    assert value >= value2
+    assert value >= value
+    assert value2 <= value
+    assert value2 <= value2
 
-    def testParsePositive(self):
-        value = Value.parse("3819 USD")
-        self.assertEqual(2, value.precision)
+def test_parse_positive():
+    value = Value.parse("3819 USD")
+    assert value.precision == 2
 
-    def testParseNegative(self):
-        value = Value.parse("-440 EUR")
-        self.assertEqual(2, value.precision)
+def test_parse_negative():
+    value = Value.parse("-440 EUR")
+    assert value.precision == 2
 
-    def testParsePrecision(self):
-        value = Value.parse("1.4123 GBP")
-        self.assertEqual(4, value.precision)
+def test_parse_precision():
+    value = Value.parse("1.4123 GBP")
+    assert value.precision == 4
 
-class MultipleCurrencies(unittest.TestCase):
-    def testComponents(self):
-        value1 = Value({ "EUR" : Decimal("81.45") })
-        value2 = Value({ "USD" : Decimal("-12.44") })
-        value = Value({"EUR" : Decimal("81.45"),
-                       "USD" : Decimal("-12.44") })
-        self.assertItemsEqual([value1, value2], value.components())
-
-if __name__ == '__main__':
-    unittest.main()
+def test_components():
+    value1 = Value({ "EUR" : Decimal("81.45") })
+    value2 = Value({ "USD" : Decimal("-12.44") })
+    value = Value({"EUR" : Decimal("81.45"),
+                    "USD" : Decimal("-12.44") })
+    assert value.components() == [value1, value2]
