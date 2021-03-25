@@ -1,6 +1,8 @@
 from pledger.parser import Parser
 from pledger.template import Template
 from pledger.value import Value
+import pytest
+import re
 
 
 class FakeTemplate(Template):
@@ -17,66 +19,66 @@ class FakeReport(Template):
         return iter(self.records)
 
 
-class TemplateTest:
-    def setUp(self):
-        self.template = FakeTemplate()
-        self.parser = Parser()
+@pytest.fixture
+def template():
+    return FakeTemplate()
 
-    def testCall(self):
-        lines = []
-        report = FakeReport([1, 2, 3])
-        self.template(report, lambda x: lines.append(x))
-        self.assertEqual(["1", "2", "3"], lines)
 
-    def testPad(self):
-        text = self.template.pad("hello", 10)
-        self.assertEqual("     hello", text)
+def test_call(template):
+    lines = []
+    report = FakeReport([1, 2, 3])
+    template(report, lambda x: lines.append(x))
+    assert lines == ["1", "2", "3"]
 
-    def testColoredPad(self):
-        text = self.template.pad("hello", 10, 'red')
-        self.assertRegex(text, "     .*hello.*")
+def test_pad(template):
+    text = template.pad("hello", 10)
+    assert text == "     hello"
 
-    def testLPad(self):
-        text = self.template.lpad("hello", 10)
-        self.assertEqual("hello     ", text)
+def test_colored_pad(template):
+    text = template.pad("hello", 10, 'red')
+    assert re.search("     .*hello.*", text)
 
-    def testColoredLPad(self):
-        text = self.template.lpad("hello", 10, 'red')
-        self.assertRegex(text, ".*hello.*     ")
+def test_lpad(template):
+    text = template.lpad("hello", 10)
+    assert text == "hello     "
 
-    def testPrintValue(self):
-        value = Value.parse("44 EUR")
-        self.assertRegex(self.template.print_value(value), r'^ *44.00 EUR$')
+def test_colored_lpad(template):
+    text = template.lpad("hello", 10, 'red')
+    assert re.search(".*hello.*     ", text)
 
-    def testPrintNegativeValue(self):
-        value = Value.parse("-44 EUR")
-        self.assertRegex(self.template.print_value(value), r'^ *\S+-44.00 EUR\S+$')
+def test_print_value(template):
+    value = Value.parse("44 EUR")
+    assert re.match(r' *44\.00 EUR$', template.print_value(value))
 
-    def testPrintNullValue(self):
-        self.assertEqual("", self.template.print_value(None))
+def test_print_negative_value(template):
+    value = Value.parse("-44 EUR")
+    assert re.match(r' *\S+-44.00 EUR\S+$', template.print_value(value))
 
-    def testPrintAccount(self):
-        account = self.parser.accounts["Assets:Bank:Checking:Joint"]
-        text = self.template.print_account(account, None)
-        self.assertRegex(text, "Assets:Bank:Checking:Joint")
+def test_print_null_value(template):
+    assert template.print_value(None) == ""
 
-    def testPrintAccountShortened(self):
-        account = self.parser.accounts["Assets:Bank:Checking:Joint"]
-        text = self.template.print_account(account, 20)
-        self.assertRegex(text, ".*:.*:.*:Joint")
-        self.assertLessEqual(len(list(filter(str.isalpha, text))), 20)
+def test_print_account(parser, template):
+    account = parser.accounts["Assets:Bank:Checking:Joint"]
+    text = template.print_account(account, None)
+    assert re.search("Assets:Bank:Checking:Joint", text)
 
-    def testPrintLabel(self):
-        ledger = self.parser.parse_ledger(fixture_path("simple.dat"))
-        transaction = ledger.transactions[1]
-        self.assertEqual("Bookshop", transaction.label)
-        text = self.template.print_label(transaction, 30)
-        self.assertRegex(text, r' *\S+Bookshop')
+def test_print_account_shortened(parser, template):
+    account = parser.accounts["Assets:Bank:Checking:Joint"]
+    text = template.print_account(account, 20)
+    assert re.search(".*:.*:.*:Joint", text)
+    assert len(list(filter(str.isalpha, text))) <= 20
 
-    def testPrintClearedLabel(self):
-        ledger = self.parser.parse_ledger(fixture_path("simple.dat"))
-        transaction = ledger.transactions[1]
-        transaction.tags["cleared"] = True
-        self.assertEqual("Bookshop", transaction.label)
-        text = self.template.print_label(transaction, 30)
-        self.assertRegex(text, r' *Bookshop')
+def test_print_label(parser, template, data_file):
+    ledger = parser.parse_ledger(data_file("simple.dat"))
+    transaction = ledger.transactions[1]
+    assert transaction.label == "Bookshop"
+    text = template.print_label(transaction, 30)
+    assert re.search(r' *\S+Bookshop', text)
+
+def test_print_cleared_label(parser, template, data_file):
+    ledger = parser.parse_ledger(data_file("simple.dat"))
+    transaction = ledger.transactions[1]
+    transaction.tags["cleared"] = True
+    assert transaction.label == "Bookshop"
+    text = template.print_label(transaction, 30)
+    assert re.search(r' *Bookshop', text)
