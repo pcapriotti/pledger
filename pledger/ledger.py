@@ -1,5 +1,5 @@
-from pledger.transaction import Transaction
-from pledger.ledger_processor import LedgerProcessor
+from .transaction import Transaction
+from .ledger_processor import LedgerProcessor
 import itertools
 import os.path
 

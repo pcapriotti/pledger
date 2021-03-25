@@ -1,5 +1,5 @@
-from pledger.flag import FlagMetaclass
-from pledger.value import ZERO
+from .flag import FlagMetaclass
+from .value import ZERO
 
 class Filter(object, metaclass=FlagMetaclass):
     flags = []

@@ -1,7 +1,7 @@
-from pledger.value import ZERO
-from pledger.entry import Entry
-from pledger.transaction import Transaction
-from pledger.util import Observable
+from .value import ZERO
+from .entry import Entry
+from .transaction import Transaction
+from .util import Observable
 from collections import OrderedDict
 
 class LedgerProcessor(Observable):

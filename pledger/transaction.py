@@ -1,7 +1,7 @@
-from pledger.value import ZERO
-from pledger.directive import Directive
-from pledger.util import PledgerException
-from pledger.tags import TagFilterable
+from .value import ZERO
+from .directive import Directive
+from .util import PledgerException
+from .tags import TagFilterable
 
 class UnbalancedTransaction(PledgerException):
     def __init__(self, tr):

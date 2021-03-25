@@ -1,7 +1,7 @@
-from pledger.entry import Entry
-from pledger.tags import TagFilterable, Taggable
-from pledger.filter import Filter
-from pledger.rule import Rule, Generator
+from .entry import Entry
+from .tags import TagFilterable, Taggable
+from .filter import Filter
+from .rule import Rule, Generator
 
 class AccountBase(object):
     def __init__(self):

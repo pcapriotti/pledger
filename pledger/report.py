@@ -1,7 +1,7 @@
-from pledger.value import ZERO
-from pledger.util import linearized, PrefixTree
-from pledger.template import BalanceTemplate, RegisterTemplate
-from pledger.ledger_processor import LedgerProcessor
+from .value import ZERO
+from .util import linearized, PrefixTree
+from .template import BalanceTemplate, RegisterTemplate
+from .ledger_processor import LedgerProcessor
 from collections import namedtuple
 
 class BalanceEntryProcessor(object):

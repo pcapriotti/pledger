@@ -1,13 +1,13 @@
 from argparse import ArgumentParser
-from pledger.account import Account
-from pledger.report import reports
-from pledger.filter import Filter, BeginFilter, EndFilter
-from pledger.pattern import PatternParser
-from pledger.parser import Parser
-from pledger.sorting import MapSorting, ExpressionSorting
-from pledger.rule import RuleCollection
-from pledger.template import default_template
-from pledger._version import __version__
+from .account import Account
+from .report import reports
+from .filter import Filter, BeginFilter, EndFilter
+from .pattern import PatternParser
+from .parser import Parser
+from .sorting import MapSorting, ExpressionSorting
+from .rule import RuleCollection
+from .template import default_template
+from ._version import __version__
 import re, os, sys
 
 parser = Parser()

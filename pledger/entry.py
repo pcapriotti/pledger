@@ -1,5 +1,5 @@
-from pledger.value import Value
-from pledger.tags import TagFilterable
+from .value import Value
+from .tags import TagFilterable
 
 class Entry(TagFilterable):
     def __init__(self, account, amount, tags=None):

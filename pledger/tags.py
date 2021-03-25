@@ -1,5 +1,5 @@
-from pledger.rule import Rule, Generator
-from pledger.filter import Filter
+from .rule import Rule, Generator
+from .filter import Filter
 
 class Taggable(object):
     def __init__(self):
