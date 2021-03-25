@@ -1,12 +1,16 @@
-import unittest
-from pledger.parser import Parser
-from tests.fixtures import fixture_path
+import os
+import pytest
 
+@pytest.fixture
+def data_dir(request):
+    return os.path.join(request.fspath.dirname, 'fixtures')
 
-class TestLedger(unittest.TestCase):
-    def setUp(self):
-        self.parser = Parser()
+@pytest.fixture
+def data_file(data_dir):
+    def f(name):
+        return os.path.join(data_dir, name)
+    return f
 
-    def testFilename(self):
-        ledger = self.parser.parse_ledger(fixture_path("simple.dat"))
-        self.assertEqual(fixture_path("test.dat"), ledger.absolute_filename("test.dat"))
+def test_filename(parser, data_file):
+    ledger = parser.parse_ledger(data_file("simple.dat"))
+    assert ledger.absolute_filename("test.dat") == data_file("test.dat")
