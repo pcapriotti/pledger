@@ -115,7 +115,7 @@ class RegisterTemplate(Template):
     def print_extra_components(self, entry, components, total_components):
         for i in range(len(components)):
             yield "%s %s %s" % (
-                " " * 104,
+                " " * 84,
                 self.print_value(components[i]),
                 self.print_value(total_components[i]))
 
