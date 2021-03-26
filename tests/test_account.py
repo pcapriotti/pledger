@@ -32,3 +32,7 @@ def test_sub_name(parser, account):
     checking = account["Checking"]
     assert account.parent.sub_name(checking) == "Bank:Checking"
     assert account.sub_name(parser.accounts["Test"]) is None
+
+def test_root_account_parsing(parser, account):
+    loan = account["::Liabilities:Loan"]
+    assert loan.name == "Liabilities:Loan"

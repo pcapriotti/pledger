@@ -90,6 +90,8 @@ class AccountRepository(AccountBase, Taggable):
             return account
 
     def __getitem__(self, name):
+        if name.startswith('::'):
+            return self.root().parent[name[2:]]
         components = name.split(":")
         return self.get_account(*components)
 
