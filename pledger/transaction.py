@@ -31,15 +31,13 @@ class Transaction:
 
         undef = None
         balance = ZERO
-        i = 0
-        for e in self.entries:
+        for i, e in enumerate(self.entries):
             if e.amount is None:
                 if undef:
                     raise UndefinedTransaction(self, i)
                 undef = e
             else:
                 balance += e.amount
-            i += 1
         if undef:
             undef.amount = -balance
         elif not balance.null():
