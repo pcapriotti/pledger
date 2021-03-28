@@ -9,18 +9,18 @@ from .rule import Generator, Rule
 @dataclass(frozen=True, order=True)
 class AccountPath:
     components: tuple
-    is_root: bool
+    absolute: bool
 
     @classmethod
     def root(cls):
-        return cls((), is_root=True)
+        return cls((), absolute=True)
 
     @classmethod
     def parse(cls, name):
-        is_root = name.startswith('::')
-        if is_root:
+        absolute = name.startswith('::')
+        if absolute:
             name = name[2:]
-        return cls(tuple(name.split(':')), is_root)
+        return cls(tuple(name.split(':')), absolute)
 
     @property
     def base_name(self):
@@ -33,7 +33,7 @@ class AccountPath:
     @property
     def parent(self):
         if self.components:
-            return type(self)(self.components[:-1], self.is_root)
+            return type(self)(self.components[:-1], self.absolute)
 
     def __getitem__(self, name):
         path = type(self).parse(name)
@@ -58,10 +58,10 @@ class AccountPath:
                    for i in range(len(self.components)))
 
     def sub(self, path):
-        if path.is_root:
+        if path.absolute:
             return path
         return self.__class__(self.components + path.components,
-                              self.is_root)
+                              self.absolute)
 
 
 class AccountFactory:
