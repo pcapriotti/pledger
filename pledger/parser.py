@@ -2,7 +2,7 @@ import itertools
 import re
 import codecs
 from datetime import datetime, date
-from .account import AccountRepository, NamedAccount
+from .account import Account, AccountFactory
 from .value import Value
 from .ledger import Ledger
 from .transaction import Transaction, UndefinedTransaction, UnbalancedTransaction
@@ -20,11 +20,11 @@ class MalformedHeader(PledgerException):
 
 class Parser(object):
     def __init__(self):
-        self.accounts = AccountRepository()
         self.precision = 2
+        self.repo = AccountFactory()
 
-    def parse_account(self, str):
-        return self.accounts[str]
+    def parse_account(self, name):
+        return self.repo.parse(name)
 
     def parse_value(self, str):
         return Value.parse(str)
@@ -42,7 +42,7 @@ class Parser(object):
         return Ledger(filename, [t for t in transactions if t], self)
 
     def parse_entry(self, str):
-        tags = self.parse_tags(str)
+        tags = self.parse_tags(str) or {}
         str = re.sub(";.*$", "", str)
 
         elements = [e for e in re.split(r"  +", str) if e]

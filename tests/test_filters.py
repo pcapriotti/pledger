@@ -28,7 +28,7 @@ def transactions(parser):
     tr2 = Transaction([bank, books, cash])
 
     bank2_account = parser.parse_account("Assets:Bank2")
-    bank2_account.tags["foo"] = "bar"
+    bank2_account.tags['foo'] = 'bar'
 
     bank = bank2_account - parser.parse_value("33 $")
     books = books_account + parser.parse_value("33 $")
@@ -89,45 +89,41 @@ def test_matches_filter(transactions):
     assert filter(transactions[0], transactions[0].entries[0])
     assert not filter(transactions[0], transactions[0].entries[1])
 
-def test_account_tag_filter(parser, transactions):
-    filter = Account.tag_filter("foo", "bar")
+def test_account_tag_filter(transactions):
+    filter = Filter.tag(Account, "foo", "bar")
     assert filter(transactions[2], transactions[2].entries[0])
     assert not filter(transactions[2], transactions[2].entries[1])
 
 def test_account_tag_filter_empty(transactions):
-    filter = Account.tag_filter("foo")
+    filter = Filter.tag(Account, "foo")
     assert filter(transactions[2], transactions[2].entries[0])
     assert not filter(transactions[2], transactions[2].entries[1])
 
 def test_account_tag_filter_wrong(transactions):
-    filter = Account.tag_filter("baz")
+    filter = Filter.tag(Account, "baz")
     assert not filter(transactions[2], transactions[2].entries[0])
     assert not filter(transactions[2], transactions[2].entries[1])
 
 def test_transaction_tag_filter(transactions):
-    filter = Transaction.tag_filter("baz", "hello world")
+    filter = Filter.tag(Transaction, "baz", "hello world")
     assert filter(transactions[2], transactions[2].entries[0])
     assert filter(transactions[2], transactions[2].entries[1])
     assert filter(transactions[2], None)
 
 def test_transaction_tag_filter_empty(transactions):
-    filter = Transaction.tag_filter("baz", None)
+    filter = Filter.tag(Transaction, "baz", None)
     assert filter(transactions[2], transactions[2].entries[0])
     assert filter(transactions[2], transactions[2].entries[1])
     assert filter(transactions[2], None)
 
 def test_transaction_tag_filter_wrong(transactions):
-    filter = Transaction.tag_filter("foo", None)
+    filter = Filter.tag(Transaction, "foo", None)
     assert not filter(transactions[2], transactions[2].entries[0])
     assert not filter(transactions[2], transactions[2].entries[1])
     assert not filter(transactions[2], None)
 
-def test_transaction_account_filter(transactions):
-    filter = Transaction.account_tag_filter("foo", "bar")
-    assert filter(transactions[2], None)
-
 def test_entry_tag_filter(transactions):
-    filter = Entry.tag_filter("title", "Necronomicon")
+    filter = Filter.tag(Entry, "title", "Necronomicon")
     assert filter(transactions[2], transactions[2].entries[1])
     assert not filter(transactions[2], transactions[2].entries[0])
     assert not filter(transactions[2], None)

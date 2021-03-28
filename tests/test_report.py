@@ -1,3 +1,4 @@
+from pledger.account import Account
 from pledger.filter import Filter
 from pledger.parser import Parser
 from pledger.report import reports, ReportRegistry
@@ -43,7 +44,7 @@ def test_report_ordering(parser, data_file):
 def test_empty_register(parser, data_file):
     ledger = parser.parse_ledger(data_file("simple.dat"))
     sorting = MapSorting(lambda x: x.date)
-    filter = parser.accounts["Expenses"]["Clothing"].filter()
+    filter = parser.parse_account("Expenses:Clothing").filter()
     report = reports.get("register")(ledger, RuleCollection(), filter, sorting)
     records = list(report.generate())
 

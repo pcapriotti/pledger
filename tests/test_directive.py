@@ -1,3 +1,4 @@
+from pledger.account import Account, AccountFactory
 from pledger.parser import Parser
 from pledger.directive import *
 from pledger.ledger_processor import LedgerProcessor
@@ -5,9 +6,10 @@ import pytest
 
 
 class ProcessorStub(object):
-    def __init__(self, root):
-        self.account = root
-        self.included  = []
+    def __init__(self):
+        self.repo = AccountFactory()
+        self.account = self.repo.root()
+        self.included = []
 
     def add_account_prefix(self, prefix):
         self.account = self.account[prefix]
@@ -20,7 +22,7 @@ class ProcessorStub(object):
 
 @pytest.fixture
 def processor(parser):
-    return ProcessorStub(parser.accounts)
+    return ProcessorStub()
 
 def test_directive_registry():
     assert Directive.directives['account'] == AccountDirective
@@ -34,7 +36,7 @@ def test_unsupported_directive(parser):
 
 def test_account_directive(processor):
     directive = AccountDirective("Assets")
-    assert processor.account.name is None
+    assert processor.account.name == ""
     directive.execute(processor)
     assert processor.account.name == "Assets"
 
@@ -42,7 +44,7 @@ def test_end_account_directive(processor):
     directive = EndAccountDirective()
     processor.add_account_prefix("Assets")
     directive.execute(processor)
-    assert processor.account.name is None
+    assert processor.account.name == ""
 
 def test_include_directive(processor):
     directive = IncludeDirective("test.dat")

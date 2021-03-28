@@ -29,27 +29,6 @@ def test_entry_parser(parser):
     assert entry.amount == Value.parse("61 EUR")
     assert list(entry.tags.keys()) == ["gift"]
 
-def test_entry_dict(parser):
-    entry = parser.parse_entry("  Expenses:Books       61 EUR   ; :gift:")
-    entry2 = parser.parse_entry("  Expenses:Books       61 EUR")
-    entry3 = parser.parse_entry("  Expenses:Books       51 EUR")
-    entry4 = parser.parse_entry("    Expenses:Books       51 EUR")
-
-    d = {}
-    d[entry] = True
-    d[entry2] = True
-    d[entry3] = True
-    d[entry4] = True
-
-    assert set((entry, entry2, entry3)) == set(d.keys())
-
-def test_repr(parser):
-    entry = parser.parse_entry("  Expenses:Books    55 EUR")
-    s = str(entry)
-
-    assert re.search(r'Expenses:Books', s)
-    assert re.search(r'55.00 EUR', s)
-
 def test_entry_date(parser):
     entry = parser.parse_entry("  Expenses:Books       61 EUR   ; [2011/03/03]")
     entry2 = parser.parse_entry("  Expenses:Books       61 EUR")
@@ -58,10 +37,10 @@ def test_entry_date(parser):
     assert entry.date(transaction) == date(2011, 3, 3)
     assert entry2.date(transaction) == date(2011, 3, 1)
 
-def test_entry_of_transaction(parser):
-    transaction = FakeTransaction(date=date(2011, 0o3, 0o1))
-    entry = parser.parse_entry("  Expenses:Books       61 EUR   ; [2011/03/03]").of(transaction)
-    entry2 = parser.parse_entry("  Expenses:Books       61 EUR").of(transaction)
+def test_entry_info(parser, repo):
+    transaction = FakeTransaction(date=date(2011, 3, 1))
+    entry = parser.parse_entry("  Expenses:Books       61 EUR   ; [2011/03/03]")
+    entry2 = parser.parse_entry("  Expenses:Books       61 EUR")
 
-    assert entry.date == date(2011, 3, 3)
-    assert entry2.date == date(2011, 3, 1)
+    assert entry.info(transaction).date == date(2011, 3, 3)
+    assert entry2.info(transaction).date == date(2011, 3, 1)

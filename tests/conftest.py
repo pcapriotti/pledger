@@ -1,3 +1,4 @@
+from pledger.account import AccountFactory
 from pledger.parser import Parser
 from pledger.rule import RuleCollection
 import os
@@ -26,3 +27,7 @@ def data_file(data_dir):
 @pytest.fixture
 def rules():
     return RuleCollection()
+
+@pytest.fixture
+def repo():
+    return AccountFactory()

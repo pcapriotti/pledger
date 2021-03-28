@@ -1,17 +1,113 @@
+from collections import defaultdict
+from dataclasses import dataclass
+
 from .entry import Entry
-from .tags import TagFilterable, Taggable
 from .filter import Filter
-from .rule import Rule, Generator
+from .rule import Generator, Rule
 
-class AccountBase(object):
-    def __init__(self):
-        super(AccountBase, self).__init__()
-        self.parent = None
-        self.base_name = None
+@dataclass(frozen=True, order=True)
+class AccountPath:
+    components: tuple
+    is_root: bool
 
-class Account(AccountBase, TagFilterable):
+    @classmethod
+    def root(cls):
+        return cls((), is_root=True)
+
+    @classmethod
+    def parse(cls, name):
+        is_root = name.startswith('::')
+        if is_root: name = name[2:]
+        return cls(tuple(name.split(':')), is_root)
+
+    @property
+    def base_name(self):
+        if self.components:
+            return self.components[-1]
+
+    def __str__(self):
+        return ":".join(self.components)
+
+    @property
+    def parent(self):
+        if self.components:
+            return type(self)(self.components[:-1], self.is_root)
+
+    def __getitem__(self, name):
+        account = type(self).parse(name)
+        if account.is_root:
+            return account
+        return type(self)(self.components + account.components,
+                          self.is_root)
+
+    def shortened(self, size):
+        full = str(self)
+        delta = len(full) - size
+        if delta <= 0: return full
+        n = len(self.components)
+        component_delta = (delta + n - 1) // n
+        extra = delta - component_delta * n
+        c1 = [x[:len(x) - component_delta - 1] for x in self.components[:extra]]
+        c2 = [x[:len(x) - component_delta] for x in self.components[extra:-1]]
+        c3 = [self.components[-1]]
+        return ":".join(c1 + c2 + c3)
+
+    def is_ancestor(self, other):
+        return all(self.components[i] == other.components[i]
+                   for i in range(len(self.components)))
+
+class AccountFactory:
     def __init__(self):
-        super(Account, self).__init__()
+        self.tags = defaultdict(dict)
+
+    def __call__(self, path):
+        if path is not None:
+            return Account(path, self)
+
+    def parse(self, name):
+        return self(AccountPath.parse(name))
+
+    def root(self):
+        return self(AccountPath.root())
+
+class Account:
+    def __init__(self, path, repo):
+        self.path = path
+        self.repo = repo
+
+    def __eq__(self, other):
+        return (self.path, self.repo) \
+            == (other.path, other.repo)
+
+    @property
+    def tags(self):
+        return self.repo.tags[self.path]
+
+    @property
+    def parent(self):
+        return self.repo(self.path.parent)
+
+    def __getitem__(self, name):
+        return self.repo(self.path[name])
+
+    @property
+    def name(self):
+        return str(self.path)
+
+    def shortened_name(self, size):
+        return self.path.shortened(size)
+
+    @classmethod
+    def from_entry(cls, transaction, entry):
+        return entry.account
+
+    @classmethod
+    def tag_rule(cls, tag, filter=Filter.null):
+        @Generator
+        def generator(entry):
+            gen = entry.account.tags.get(tag)
+            if gen: yield from gen(entry)
+        return Rule(filter, generator)
 
     def __add__(self, value):
         return Entry(self, value)
@@ -19,112 +115,8 @@ class Account(AccountBase, TagFilterable):
     def __sub__(self, value):
         return Entry(self, -value)
 
-    @classmethod
-    def from_entry(cls, transaction, entry):
-        return entry.account
-
-    @classmethod
-    def tag_rule(cls, tag, filter = Filter.null):
-        @Generator
-        def generator(entry):
-            return entry.account.get_tag(tag)(entry)
-        return Rule(cls.tag_filter(tag) & filter, generator)
-
-    def root(self):
-        if self.parent and self.parent.name:
-            return self.parent.root()
-        else:
-            return self
-
-    def shortened_name(self, size):
-        full = self.name
-        delta = len(full) - size
-        if delta <= 0: return full
-        components = self.name_components()
-        n = len(components)
-        component_delta = (delta + n - 1) // n
-        extra = delta - component_delta * n
-        c1 = [x[:len(x) - component_delta - 1] for x in components[:extra]]
-        c2 = [x[:len(x) - component_delta] for x in components[extra:-1]]
-        c3 = [components[-1]]
-        components = c1 + c2 + c3
-        return ":".join(components)
-
-    def name_components(self):
-        if self.parent and self.parent.name:
-            return self.parent.name_components() + [self.base_name]
-        else:
-            return [self.base_name]
-
-    @property
-    def name(self):
-        return ":".join(self.name_components())
-
-    def is_ancestor(self, account):
-        if self == account:
-            return True
-        elif account.parent and account.parent.name:
-            return self.is_ancestor(account.parent)
-        else:
-            return False
-
     def filter(self):
         @Filter
         def result(transaction, entry):
-            return self.is_ancestor(entry.account)
+            return self.path.is_ancestor(entry.account.path)
         return result
-
-class AccountRepository(AccountBase, Taggable):
-    def __init__(self):
-        super(AccountRepository, self).__init__()
-        self.accounts = { }
-
-    def get_account(self, name, *args):
-        account = self.accounts.get(name)
-        if account is None:
-            account = self.create_subaccount(name)
-            self.accounts[name] = account
-        if len(args):
-            return account.get_account(*args)
-        else:
-            return account
-
-    def __getitem__(self, name):
-        if name.startswith('::'):
-            return self.root().parent[name[2:]]
-        components = name.split(":")
-        return self.get_account(*components)
-
-    def create_subaccount(self, name):
-        return NamedAccount(name, self)
-
-    def sub_name(self, account):
-        def sub_name_components(account):
-            if account == self:
-                return []
-            elif account.parent.base_name is None:
-                return None
-            else:
-                return sub_name_components(account.parent) + [account.base_name]
-        components = sub_name_components(account)
-        if components:
-            return ":".join(components)
-
-    @property
-    def name(self):
-        pass
-
-    def __lt__(self, other):
-        return str(self.name) < str(other.name)
-
-class NamedAccount(Account, AccountRepository):
-    def __init__(self, name, parent = None):
-        super(NamedAccount, self).__init__()
-        self.base_name = name
-        self.parent = parent
-
-    def __str__(self):
-        return self.name
-
-    def __repr__(self):
-        return "<%s>" % self.name

@@ -1,5 +1,5 @@
 from decimal import Decimal
-from pledger.account import Account
+from pledger.account import Account, AccountFactory
 from pledger.filter import Filter
 from pledger.parser import Parser
 from pledger.rule import Rule, RuleCollection, Generator
@@ -38,10 +38,11 @@ class TestRules:
                     self.cash_account + self.parser.parse_value("3.30 EUR"),
                     self.books_account - self.parser.parse_value("3.30 EUR")]
 
-        assert set(result) == set(expected)
+        assert set((entry.account.path, entry.amount) for entry in result) \
+            == set((entry.account.path, entry.amount) for entry in expected)
 
     def test_account_tag_rule(self):
-        self.books_account.tags["discount"] = self.discount
+        self.books_account.tags['discount'] = self.discount
         self.rules.add_rule(Account.tag_rule("discount"))
 
         result = []
@@ -53,7 +54,8 @@ class TestRules:
                     self.cash_account + self.parser.parse_value("3.30 EUR"),
                     self.books_account - self.parser.parse_value("3.30 EUR")]
 
-        assert set(result) == set(expected)
+        assert set((entry.account.path, entry.amount) for entry in result) \
+            == set((entry.account.path, entry.amount) for entry in expected)
 
 def test_null_generator():
     g = Generator.null

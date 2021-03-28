@@ -47,13 +47,6 @@ class Rule(object):
 
     def apply(self, transaction, entry):
         if self.filter(transaction, entry):
-            return self.generator(entry.of(transaction))
+            return self.generator(entry.info(transaction))
         else:
             return []
-
-class TransactionRule(Rule):
-    def apply(self, transaction):
-        if self.filter(transaction, None):
-            return self.generator(transaction)
-        else:
-            return transaction

@@ -1,5 +1,6 @@
 from .flag import FlagMetaclass
 from .value import ZERO
+from .tags import has_tag, get_tag
 
 class Filter(object, metaclass=FlagMetaclass):
     flags = []
@@ -46,6 +47,14 @@ class Filter(object, metaclass=FlagMetaclass):
     def parse(cls, parser, *args):
         return cls(*args)
 
+    @classmethod
+    def tag(cls, factory, tag, value=None):
+        @cls
+        def result(transaction, entry):
+            obj = factory.from_entry(transaction, entry)
+            return has_tag(obj, tag, value)
+        return result
+
 Filter.null = Filter(lambda transaction, entry: True)
 
 class DateFilter(Filter):
@@ -80,22 +89,24 @@ class ExpressionFilter(Filter):
 
     @classmethod
     def parse(cls, parser, expression):
-        return cls(parser, expression)
+        return cls(parser, expression, parser.repo)
 
-    def __init__(self, parser, expression):
+    def __init__(self, parser, expression, repo):
         self.parser = parser
         self.expression = compile(expression, "<commandline>", "eval")
+        self.repo = repo
 
     def __call__(self, transaction, entry):
         context = {
                 "transaction" : SmartWrapper(transaction),
-                "entry" : SmartWrapper(entry.of(transaction)),
+                "entry" : SmartWrapper(entry.info(transaction)),
                 "date" : self.parse_date,
                 "ZERO": ZERO }
         return eval(self.expression, context)
 
     def parse_date(self, str):
         return self.parser.parse_fuzzy_date(str)
+
 
 class SmartWrapper(object):
     def __init__(self, obj):
@@ -105,4 +116,4 @@ class SmartWrapper(object):
         try:
             return getattr(self.obj, name)
         except AttributeError:
-            return self.obj.get_tag(name)
+            return get_tag(self.obj, name)

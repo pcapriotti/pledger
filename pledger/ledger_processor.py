@@ -1,3 +1,4 @@
+from .account import Account, AccountFactory
 from .value import ZERO
 from .entry import Entry
 from .transaction import Transaction
@@ -10,7 +11,7 @@ class LedgerProcessor(Observable):
         self.ledger = ledger
         self.rules = rules
         self.parser = self.ledger.parser
-        self.account = self.parser.accounts
+        self.account = self.parser.repo.root()
 
     def run(self):
         for transaction in self.ledger.transactions:
@@ -35,9 +36,10 @@ class LedgerProcessor(Observable):
     def filter(self, transaction):
         result = []
         for entry in transaction.entries:
-            account = self.account[entry.account.name]
-            amount = entry.amount
-            result += self.rules.apply(transaction, Entry(account, amount, tags=entry.tags))
+            entry = Entry(self.account[entry.account.name],
+                          entry.amount,
+                          entry.tags)
+            result += self.rules.apply(transaction, entry)
         return self.compact(result)
 
     def process_transaction(self, transaction, entries):
@@ -52,10 +54,10 @@ class LedgerProcessor(Observable):
     def compact(self, entries):
         result = OrderedDict()
         for entry in entries:
-            key = (entry.account, tuple(sorted(entry.tags.items())))
+            key = (entry.account.path, tuple(sorted(entry.tags.items())))
             e = result.get(key)
             if e:
                 e.amount += entry.amount
             else:
-                result[key] = Entry(entry.account, entry.amount, entry.tags)
+                result[key] = entry.clone()
         return list(result.values())

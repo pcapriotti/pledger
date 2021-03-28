@@ -58,12 +58,12 @@ def test_print_null_value(template):
     assert template.print_value(None) == ""
 
 def test_print_account(parser, template):
-    account = parser.accounts["Assets:Bank:Checking:Joint"]
+    account = parser.parse_account("Assets:Bank:Checking:Joint")
     text = template.print_account(account, None)
     assert re.search("Assets:Bank:Checking:Joint", text)
 
 def test_print_account_shortened(parser, template):
-    account = parser.accounts["Assets:Bank:Checking:Joint"]
+    account = parser.parse_account("Assets:Bank:Checking:Joint")
     text = template.print_account(account, 20)
     assert re.search(".*:.*:.*:Joint", text)
     assert len(list(filter(str.isalpha, text))) <= 20

@@ -1,38 +1,36 @@
-from .value import Value
-from .tags import TagFilterable
+from dataclasses import dataclass, field, replace
 
-class Entry(TagFilterable):
-    def __init__(self, account, amount, tags=None):
-        super(Entry, self).__init__()
-        self.account = account
-        self.amount = amount
-        if tags: self.tags = tags
-
-    def __eq__(self, other):
-        return self.account == other.account and \
-               self.amount == other.amount
-
-    def __str__(self):
-        return "%s (%s)" % (self.account, self.amount)
-
-    def __repr__(self):
-        return "<Entry %s>" % str(self)
-
-    def __hash__(self):
-        return hash((self.account, self.amount, tuple(sorted(self.tags.items()))))
+@dataclass(order=True)
+class Entry:
+    account: object
+    amount: object
+    tags: dict = field(default_factory=dict)
 
     def date(self, transaction):
-        result = self.get_tag("date")
+        result = self.tags.get("date")
         if result is None:
-            result = transaction.date
-        return result
+            return transaction.date
+        else:
+            return result
 
-    def of(self, transaction):
-        result = Entry(self.account, self.amount, self.tags)
-        result.date = self.date(transaction)
-        result.parent = transaction
-        return result
+    def info(self, transaction):
+        return EntryInfo(
+            self.account, self.amount,
+            self.tags, self.date(transaction),
+            transaction)
 
     @classmethod
     def from_entry(cls, transaction, entry):
         return entry
+
+    def clone(self):
+        return replace(self)
+
+
+@dataclass(order=True)
+class EntryInfo:
+    account: object
+    amount: object
+    tags: dict
+    date: object
+    parent: object

@@ -8,11 +8,11 @@ import re
 
 @pytest.fixture
 def bank(parser):
-    return parser.accounts["Assets"]["Bank"]
+    return parser.parse_account("Assets:Bank")
 
 @pytest.fixture
 def expenses(parser):
-    return parser.accounts["Expenses"]["Books"]
+    return parser.parse_account("Expenses:Books")
 
 def test_parsing(parser, bank, expenses):
     str = "2011/04/15 * Bookshop\n" + \
@@ -121,6 +121,6 @@ def test_clone(parser, bank, expenses):
     tr = Transaction([entry1, entry2])
     tr2 = tr.clone()
     assert id(tr) != id(tr2)
-    assert set(tr.entries) == set(tr2.entries)
+    assert tr.entries == tr2.entries
     assert tr.date == tr2.date
     assert tr.label == tr2.label

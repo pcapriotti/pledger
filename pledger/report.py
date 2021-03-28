@@ -15,8 +15,8 @@ class BalanceEntryProcessor(object):
         self.add_entry(entry.account, entry.amount)
 
     def add_entry(self, account, amount):
-        self.sheet.setdefault(account, ZERO)
-        self.sheet[account] += amount
+        self.sheet.setdefault(account.path, ZERO)
+        self.sheet[account.path] += amount
         if account.parent:
             self.add_entry(account.parent, amount)
         else:
@@ -30,12 +30,16 @@ class BalanceEntryProcessor(object):
         else:
             return []
 
-    def grouped_accounts(self, root, level, accounts, prefix = ""):
-        children = [account for account in accounts if account.parent == root]
-        if len(children) == 1 and root and root.base_name and self.sheet[root] == self.sheet[children[0]]:
-            return self.grouped_accounts(children[0], level, accounts, prefix + root.base_name + ":")
+    def grouped_accounts(self, root, level, paths, prefix=""):
+        children = [path for path in paths if path.parent == root]
+        if len(children) == 1 and root and \
+           root.base_name and \
+           self.sheet[root] == self.sheet[children[0]]:
+            return self.grouped_accounts(children[0], level, paths,
+                                         prefix + root.base_name + ":")
         else:
-            result = [self.grouped_accounts(child, level + 1, accounts) for child in children]
+            result = [self.grouped_accounts(child, level + 1, paths)
+                      for child in children]
             if root:
                 return ((root, prefix + str(root.base_name), level), result)
             else:

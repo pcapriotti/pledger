@@ -1,7 +1,6 @@
 from .value import ZERO
 from .directive import Directive
 from .util import PledgerException
-from .tags import TagFilterable
 
 class UnbalancedTransaction(PledgerException):
     def __init__(self, tr):
@@ -14,13 +13,13 @@ class UndefinedTransaction(PledgerException):
         self.index = index
         super(UndefinedTransaction, self).__init__()
 
-class Transaction(TagFilterable):
+class Transaction:
     def __init__(self, entries, date = None, label = "", tags = None):
         super(Transaction, self).__init__()
         self.entries = entries
         self.date = date
         self.label = label
-        if tags: self.tags = tags
+        self.tags = tags or {}
         undef = None
         balance = ZERO
         i = 0
@@ -61,9 +60,3 @@ class Transaction(TagFilterable):
 
     def clone(self):
         return self.__class__(self.entries, self.date, self.label, self.tags)
-
-    @classmethod
-    def account_tag_filter(cls, tag, value=None):
-        def get_taggables(transaction, entry):
-            return [e.account for e in transaction.entries]
-        return cls.general_tag_filter(get_taggables, tag, value)

@@ -22,7 +22,7 @@ def test_account_prefix(parser, rules, data_file):
 
     for transaction, entries in collector.transactions:
         for entry in entries:
-            assert entry.account.root().name == "Business"
+            assert entry.account.path.components[0] == "Business"
 
 def test_remove_account_prefix(parser, rules, data_file):
     ledger = parser.parse_ledger(data_file("simple.dat"))
@@ -37,7 +37,7 @@ def test_remove_account_prefix(parser, rules, data_file):
 
     for transaction, entries in collector.transactions:
         for entry in entries:
-            assert entry.account.root().name == "Business"
+            assert entry.account.path.components[0] == "Business"
 
     collector.transactions = []
     processor.remove_account_prefix()
@@ -46,7 +46,7 @@ def test_remove_account_prefix(parser, rules, data_file):
 
     for transaction, entries in collector.transactions:
         for entry in entries:
-            assert entry.account.root().name != "Business"
+            assert entry.account.path.components[0] != "Business"
 
 def test_include(parser, rules, data_file):
     ledger = parser.parse_ledger(data_file("simple.dat"))

@@ -1,3 +1,4 @@
+from pledger.account import AccountPath
 from pledger.parser import Parser
 import pytest
 
@@ -17,8 +18,9 @@ def test_account_sub(parser, account):
     assert entry.account == account
     assert entry.amount == -amount
 
-def test_root(parser, account):
-    assert account.root() == parser.accounts["Assets"]
+def test_path(parser, account):
+    assert account.path == AccountPath.parse("Assets:Bank")
+    assert account.path.components == ("Assets", "Bank")
 
 def test_shortened_name(account):
     account = account["Joint:Savings:Yearly:Interest:Compound:Open"]
@@ -27,11 +29,6 @@ def test_shortened_name(account):
 
     assert len(name) < size
     assert len([x for x in name if x == ':']) == 7
-
-def test_sub_name(parser, account):
-    checking = account["Checking"]
-    assert account.parent.sub_name(checking) == "Bank:Checking"
-    assert account.sub_name(parser.accounts["Test"]) is None
 
 def test_root_account_parsing(parser, account):
     loan = account["::Liabilities:Loan"]

@@ -1,4 +1,5 @@
 from datetime import datetime
+from .tags import has_tag
 
 COLORS = {
     "bold_white" : "\033[1;37m",
@@ -46,7 +47,7 @@ class Template(object):
 
     def print_label(self, transaction, size):
         color = None
-        if not transaction.has_tag("cleared"):
+        if not has_tag(transaction, "cleared"):
             color = "bold_white"
         return self.lpad(transaction.label, size, color)
 
