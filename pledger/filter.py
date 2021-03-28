@@ -2,6 +2,7 @@ from .flag import FlagMetaclass
 from .value import ZERO
 from .tags import has_tag, get_tag
 
+
 class Filter(object, metaclass=FlagMetaclass):
     flags = []
 
@@ -55,7 +56,9 @@ class Filter(object, metaclass=FlagMetaclass):
             return has_tag(obj, tag, value)
         return result
 
+
 Filter.null = Filter(lambda transaction, entry: True)
+
 
 class DateFilter(Filter):
     @classmethod
@@ -69,6 +72,7 @@ class DateFilter(Filter):
     def __init__(self, date):
         self.date = date
 
+
 class BeginFilter(DateFilter):
     flag = "begin"
     args = 1
@@ -76,12 +80,14 @@ class BeginFilter(DateFilter):
     def __call__(self, transaction, entry):
         return entry.date(transaction) >= self.date
 
+
 class EndFilter(DateFilter):
     flag = "end"
     args = 1
 
     def __call__(self, transaction, entry):
         return entry.date(transaction) < self.date
+
 
 class ExpressionFilter(Filter):
     flag = "filter"
@@ -98,10 +104,10 @@ class ExpressionFilter(Filter):
 
     def __call__(self, transaction, entry):
         context = {
-                "transaction" : SmartWrapper(transaction),
-                "entry" : SmartWrapper(entry.info(transaction)),
-                "date" : self.parse_date,
-                "ZERO": ZERO }
+            "transaction": SmartWrapper(transaction),
+            "entry": SmartWrapper(entry.info(transaction)),
+            "date": self.parse_date,
+            "ZERO": ZERO}
         return eval(self.expression, context)
 
     def parse_date(self, str):

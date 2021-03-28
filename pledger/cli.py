@@ -8,13 +8,16 @@ from .sorting import MapSorting, ExpressionSorting
 from .rule import RuleCollection
 from .template import default_template
 from ._version import __version__
-import re, os, sys
+import re
+import os
+import sys
 
 parser = Parser()
 filter = Filter.null
 rules = RuleCollection()
 sorting = MapSorting(lambda x: x.date)
 template = default_template
+
 
 def run_cli():
     global filter
@@ -54,7 +57,8 @@ def run_cli():
         parameters = getattr(args, flag.name)
         if parameters:
             f = flag.filter.parse(parser, *parameters)
-            if f: filter &= f
+            if f:
+                filter &= f
 
     if args.sort:
         sorting = ExpressionSorting(parser, *args.sort)

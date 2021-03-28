@@ -12,6 +12,7 @@ import pytest
 three_entries = Filter(lambda tr, entry: len(tr.entries) == 3)
 in_euro = Filter(lambda tr, entry: list(entry.amount.currencies()) == ["EUR"])
 
+
 @pytest.fixture
 def transactions(parser):
     bank_account = parser.parse_account("Assets:Bank")
@@ -49,12 +50,14 @@ def transactions(parser):
 
     return tr1, tr2, tr3, tr4, tr5
 
+
 def test_filter(transactions):
     assert not three_entries(transactions[0],
                              transactions[0].entries[0])
     assert three_entries(transactions[1], transactions[1].entries[0])
     assert in_euro(transactions[0], transactions[0].entries[0])
     assert not in_euro(transactions[1], transactions[1].entries[0])
+
 
 def test_filter_parse(parser, transactions):
     filter = Filter.parse(
@@ -63,46 +66,55 @@ def test_filter_parse(parser, transactions):
     assert filter(transactions[0], transactions[0].entries[0])
     assert not filter(transactions[0], transactions[0].entries[1])
 
+
 def test_filter_invert(transactions):
     assert (~three_entries)(transactions[0], transactions[0].entries[0])
     assert not (~three_entries)(transactions[1], transactions[1].entries[0])
     assert not (~in_euro)(transactions[0], transactions[0].entries[0])
     assert (~in_euro)(transactions[1], transactions[1].entries[0])
 
+
 def test_filter_and(transactions):
     filter = three_entries & in_euro
     assert not filter(transactions[0], transactions[0].entries[0])
     assert not filter(transactions[1], transactions[1].entries[0])
+
 
 def test_filter_or(transactions):
     filter = three_entries | in_euro
     assert filter(transactions[0], transactions[0].entries[0])
     assert filter(transactions[1], transactions[1].entries[0])
 
+
 def test_has_account_filter(parser, transactions):
     filter = Filter.has_account(parser.parse_account("Assets:Bank"))
     assert filter(transactions[0], transactions[0].entries[0])
     assert not filter(transactions[0], transactions[0].entries[1])
+
 
 def test_matches_filter(transactions):
     filter = Filter.matches(re.compile(r"ank"))
     assert filter(transactions[0], transactions[0].entries[0])
     assert not filter(transactions[0], transactions[0].entries[1])
 
+
 def test_account_tag_filter(transactions):
     filter = Filter.tag(Account, "foo", "bar")
     assert filter(transactions[2], transactions[2].entries[0])
     assert not filter(transactions[2], transactions[2].entries[1])
+
 
 def test_account_tag_filter_empty(transactions):
     filter = Filter.tag(Account, "foo")
     assert filter(transactions[2], transactions[2].entries[0])
     assert not filter(transactions[2], transactions[2].entries[1])
 
+
 def test_account_tag_filter_wrong(transactions):
     filter = Filter.tag(Account, "baz")
     assert not filter(transactions[2], transactions[2].entries[0])
     assert not filter(transactions[2], transactions[2].entries[1])
+
 
 def test_transaction_tag_filter(transactions):
     filter = Filter.tag(Transaction, "baz", "hello world")
@@ -110,11 +122,13 @@ def test_transaction_tag_filter(transactions):
     assert filter(transactions[2], transactions[2].entries[1])
     assert filter(transactions[2], None)
 
+
 def test_transaction_tag_filter_empty(transactions):
     filter = Filter.tag(Transaction, "baz", None)
     assert filter(transactions[2], transactions[2].entries[0])
     assert filter(transactions[2], transactions[2].entries[1])
     assert filter(transactions[2], None)
+
 
 def test_transaction_tag_filter_wrong(transactions):
     filter = Filter.tag(Transaction, "foo", None)
@@ -122,11 +136,13 @@ def test_transaction_tag_filter_wrong(transactions):
     assert not filter(transactions[2], transactions[2].entries[1])
     assert not filter(transactions[2], None)
 
+
 def test_entry_tag_filter(transactions):
     filter = Filter.tag(Entry, "title", "Necronomicon")
     assert filter(transactions[2], transactions[2].entries[1])
     assert not filter(transactions[2], transactions[2].entries[0])
     assert not filter(transactions[2], None)
+
 
 def test_date_filter(parser):
     filter = DateFilter.parse(parser, "2010/10/01")
@@ -137,11 +153,13 @@ def test_date_filter(parser):
     with pytest.raises(ValueError):
         DateFilter.parse(parser, "2011/15/12")
 
+
 def test_begin_filter(parser, transactions):
     filter = BeginFilter.parse(parser, "2010")
     assert not filter(transactions[3], transactions[3].entries[0])
     assert filter(transactions[4], transactions[4].entries[0])
     assert not filter(transactions[4], transactions[4].entries[1])
+
 
 def test_end_filter(parser, transactions):
     filter = EndFilter.parse(parser, "2010")
@@ -149,17 +167,20 @@ def test_end_filter(parser, transactions):
     assert not filter(transactions[4], transactions[4].entries[0])
     assert filter(transactions[4], transactions[4].entries[1])
 
+
 def test_expression_filter(parser, transactions):
     filter = ExpressionFilter.parse(
         parser, "entry.account.name.startswith('Assets')")
     assert filter(transactions[3], transactions[3].entries[0])
     assert not filter(transactions[3], transactions[3].entries[1])
 
+
 def testExpressionFilterDate(parser, transactions):
     filter = ExpressionFilter.parse(parser, "entry.date < date('2010')")
     assert filter(transactions[3], transactions[3].entries[0])
     assert not filter(transactions[4], transactions[4].entries[0])
     assert filter(transactions[4], transactions[4].entries[1])
+
 
 def testExpressionFilterTag(parser, transactions):
     filter = ExpressionFilter.parse(parser, "entry.foo")

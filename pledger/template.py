@@ -2,12 +2,13 @@ from datetime import datetime
 from .tags import has_tag
 
 COLORS = {
-    "bold_white" : "\033[1;37m",
-    "red" : "\033[0;31m",
-    "yellow" : "\033[0;33m",
-    "green" : "\033[0;32m",
-    "nocolor" : "\033[00m",
-    "blue" : "\033[0;34m" }
+    "bold_white": "\033[1;37m",
+    "red": "\033[0;31m",
+    "yellow": "\033[0;33m",
+    "green": "\033[0;32m",
+    "nocolor": "\033[00m",
+    "blue": "\033[0;34m"}
+
 
 class Template(object):
     ACCOUNT_COLOR = "blue"
@@ -16,16 +17,18 @@ class Template(object):
         for line in self.generate(report):
             output(line)
 
-    def pad(self, item, size, color = None):
+    def pad(self, item, size, color=None):
         text = str(item)[:size]
         padlength = size - len(text)
-        if (padlength < 0): padlength = 0
+        if (padlength < 0):
+            padlength = 0
         return "%s%s" % (" " * padlength, self.colored(color, text))
 
-    def lpad(self, item, size, color = None):
+    def lpad(self, item, size, color=None):
         text = str(item)[:size]
         padlength = size - len(text)
-        if (padlength < 0): padlength = 0
+        if (padlength < 0):
+            padlength = 0
         return "%s%s" % (self.colored(color, text), " " * padlength)
 
     def print_value(self, value):
@@ -57,6 +60,7 @@ class Template(object):
         else:
             return text
 
+
 class BalanceTemplate(Template):
     def generate(self, report):
         it = report.generate()
@@ -68,13 +72,14 @@ class BalanceTemplate(Template):
             for component in components[:-1]:
                 yield self.print_value(component)
             yield self.print_value(components[-1]) + \
-                  ("  " * (entry.level - 1)) + \
-                  self.colored(self.ACCOUNT_COLOR, entry.account)
+                ("  " * (entry.level - 1)) + \
+                self.colored(self.ACCOUNT_COLOR, entry.account)
             count += 1
         if count > 0:
             yield "-" * 20
             for component in total.amount.components():
                 yield self.print_value(component)
+
 
 class RegisterTemplate(Template):
     def generate(self, report):
@@ -89,7 +94,8 @@ class RegisterTemplate(Template):
             last_entry = entry
 
     def print_entry(self, entry):
-        currencies = sorted(set(entry.entry.amount.currencies()).union(entry.total.currencies()))
+        currencies = sorted(
+            set(entry.entry.amount.currencies()).union(entry.total.currencies()))
         components = entry.entry.amount.components(currencies)
         total_components = entry.total.components(currencies)
         yield "%s %s %s %s %s" % (
@@ -102,7 +108,8 @@ class RegisterTemplate(Template):
             yield line
 
     def print_secondary_entry(self, entry):
-        currencies = sorted(set(entry.entry.amount.currencies()).union(entry.total.currencies()))
+        currencies = sorted(
+            set(entry.entry.amount.currencies()).union(entry.total.currencies()))
         components = entry.entry.amount.components(currencies)
         total_components = entry.total.components(currencies)
         yield "%s %s %s %s" % (
@@ -119,6 +126,7 @@ class RegisterTemplate(Template):
                 " " * 84,
                 self.print_value(components[i]),
                 self.print_value(total_components[i]))
+
 
 def default_template(report, *args):
     return report.template(report, *args)

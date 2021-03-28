@@ -4,16 +4,19 @@ from .value import ZERO
 from .directive import Directive
 from .util import PledgerException
 
+
 class UnbalancedTransaction(PledgerException):
     def __init__(self, tr):
         self.tr = tr
         super(UnbalancedTransaction, self).__init__()
+
 
 class UndefinedTransaction(PledgerException):
     def __init__(self, tr, index):
         self.tr = tr
         self.index = index
         super(UndefinedTransaction, self).__init__()
+
 
 @dataclass
 class Transaction:
@@ -31,7 +34,8 @@ class Transaction:
         i = 0
         for e in self.entries:
             if e.amount is None:
-                if undef: raise UndefinedTransaction(self, i)
+                if undef:
+                    raise UndefinedTransaction(self, i)
                 undef = e
             else:
                 balance += e.amount

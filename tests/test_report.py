@@ -7,9 +7,11 @@ from pledger.sorting import Sorting, MapSorting
 from pledger.value import Value, ZERO
 import pytest
 
+
 @pytest.fixture
 def registry():
     return ReportRegistry({})
+
 
 def test_simple_report(parser, data_file):
     ledger = parser.parse_ledger(data_file("simple.dat"))
@@ -25,9 +27,9 @@ def test_simple_report(parser, data_file):
              record.entry.amount,
              record.total) for record in records] == \
         [('Assets:Bank', Value.parse('1500 EUR'), Value.parse('1500 EUR')),
-        ('Equity:Capital', Value.parse('-1500 EUR'), ZERO),
-        ('Expenses:Books', Value.parse('35 EUR'), Value.parse('35 EUR')),
-        ('Assets:Bank', Value.parse('-35 EUR'), ZERO)]
+         ('Equity:Capital', Value.parse('-1500 EUR'), ZERO),
+         ('Expenses:Books', Value.parse('35 EUR'), Value.parse('35 EUR')),
+         ('Assets:Bank', Value.parse('-35 EUR'), ZERO)]
 
 
 def test_report_ordering(parser, data_file):
@@ -41,6 +43,7 @@ def test_report_ordering(parser, data_file):
     assert [record.transaction.label for record in report.generate()] == \
         [str(chr(i)) for i in range(ord('A'), ord('N') + 1) for _ in range(2)]
 
+
 def test_empty_register(parser, data_file):
     ledger = parser.parse_ledger(data_file("simple.dat"))
     sorting = MapSorting(lambda x: x.date)
@@ -49,6 +52,7 @@ def test_empty_register(parser, data_file):
     records = list(report.generate())
 
     assert len(records) == 0
+
 
 def test_simple_report(parser, data_file):
     ledger = parser.parse_ledger(data_file("simple.dat"))
@@ -65,6 +69,7 @@ def test_simple_report(parser, data_file):
          ('Equity:Capital', Value.parse("-1500 EUR")),
          ('Expenses:Books', Value.parse("35 EUR"))]
 
+
 def test_empty_balance(parser):
     ledger = parser.parse_ledger("<test>", "")
     sorting = Sorting(lambda x: x)
@@ -77,16 +82,19 @@ def test_empty_balance(parser):
     assert len(records) == 1
     assert records[0].level is None
 
+
 def test_get(registry):
     registry.add('register', 'register factory')
     registry.add('balance', 'balance factory')
     assert registry['register'] == 'register factory'
     assert registry.get('reg') == 'register factory'
 
+
 def test_add_multiple(registry):
     registry.add('register', 'register factory')
     with pytest.raises(Exception):
         registry.add('register', 'register factory 2')
+
 
 def testAmbiguous(registry):
     registry.add('register', 'register factory')

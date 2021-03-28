@@ -1,9 +1,11 @@
 class DirectiveMetaclass(type):
     def __new__(cls, name, bases, attrs):
-        result = super(DirectiveMetaclass, cls).__new__(cls, name, bases, attrs)
+        result = super(DirectiveMetaclass, cls).__new__(
+            cls, name, bases, attrs)
         if name != "Directive":
             Directive.directives[attrs['keyword']] = result
         return result
+
 
 class UnsupportedDirective(Exception):
     def __init__(self, name):
@@ -12,9 +14,13 @@ class UnsupportedDirective(Exception):
     def __str__(self):
         return self.name
 
+
 class Directive(object, metaclass=DirectiveMetaclass):
     pass
+
+
 Directive.directives = {}
+
 
 class AccountDirective(Directive):
     keyword = 'account'
@@ -25,6 +31,7 @@ class AccountDirective(Directive):
     def execute(self, processor):
         processor.add_account_prefix(self.account)
 
+
 class IncludeDirective(Directive):
     keyword = 'include'
 
@@ -33,6 +40,7 @@ class IncludeDirective(Directive):
 
     def execute(self, processor):
         processor.include(self.filename)
+
 
 class EndAccountDirective(Directive):
     keyword = 'end'

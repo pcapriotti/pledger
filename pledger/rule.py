@@ -3,9 +3,9 @@ import itertools
 
 class RuleCollection(object):
     def __init__(self):
-        self.rules = { }
+        self.rules = {}
 
-    def add_rule(self, rule, level = 0):
+    def add_rule(self, rule, level=0):
         self.rules.setdefault(level, [])
         self.rules[level].append(rule)
 
@@ -26,6 +26,7 @@ class RuleCollection(object):
 
         return entries
 
+
 class Generator(object):
     def __init__(self, generator):
         self.generator = generator
@@ -38,7 +39,10 @@ class Generator(object):
         def result(*args):
             return itertools.chain(self(*args), other(*args))
         return result
+
+
 Generator.null = Generator(lambda *args: [])
+
 
 class Rule(object):
     def __init__(self, filter, generator):

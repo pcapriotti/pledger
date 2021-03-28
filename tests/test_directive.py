@@ -20,13 +20,16 @@ class ProcessorStub(object):
     def include(self, filename):
         self.included.append(filename)
 
+
 @pytest.fixture
 def processor(parser):
     return ProcessorStub()
 
+
 def test_directive_registry():
     assert Directive.directives['account'] == AccountDirective
     assert Directive.directives.get('non-existing-directive') is None
+
 
 def test_unsupported_directive(parser):
     with pytest.raises(UnsupportedDirective) as e:
@@ -34,11 +37,13 @@ def test_unsupported_directive(parser):
 
     assert 'nonexisting' == str(e.value)
 
+
 def test_account_directive(processor):
     directive = AccountDirective("Assets")
     assert processor.account.name == ""
     directive.execute(processor)
     assert processor.account.name == "Assets"
+
 
 def test_end_account_directive(processor):
     directive = EndAccountDirective()
@@ -46,11 +51,13 @@ def test_end_account_directive(processor):
     directive.execute(processor)
     assert processor.account.name == ""
 
+
 def test_include_directive(processor):
     directive = IncludeDirective("test.dat")
     assert processor.included == []
     directive.execute(processor)
     assert processor.included == ["test.dat"]
+
 
 def test_directive_parsing(parser):
     directive = parser.parse_directive("!include test.dat")

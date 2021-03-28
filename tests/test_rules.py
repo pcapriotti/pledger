@@ -5,6 +5,7 @@ from pledger.parser import Parser
 from pledger.rule import Rule, RuleCollection, Generator
 from pledger.transaction import Transaction
 
+
 class TestRules:
     def setup_method(self):
         self.parser = Parser()
@@ -57,12 +58,14 @@ class TestRules:
         assert set((entry.account.path, entry.amount) for entry in result) \
             == set((entry.account.path, entry.amount) for entry in expected)
 
+
 def test_null_generator():
     g = Generator.null
     transaction = object()
     entry = object()
 
     assert list(g(transaction, entry)) == []
+
 
 def test_generator_sum():
     @Generator

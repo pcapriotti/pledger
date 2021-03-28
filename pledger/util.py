@@ -9,6 +9,7 @@ def itersplit(p, it):
     if len(elems) > 0:
         yield elems
 
+
 class Observable(object):
     def __init__(self):
         self.listeners = []
@@ -26,12 +27,14 @@ class Observable(object):
             if method:
                 method(*args, **kwargs)
 
+
 def linearized(items):
     result = []
     for item, subitems in items:
         result.append(item)
         result += linearized(subitems)
     return result
+
 
 class PledgerException(Exception):
     def __init__(self):
@@ -42,21 +45,22 @@ class PledgerException(Exception):
     def __str__(self):
         return "%s (%s:%d)" % (self.__class__, self.filename, self.line_number)
 
+
 class PrefixTree(object):
-    def __init__(self, words = []):
-        self.tree = { }
+    def __init__(self, words=[]):
+        self.tree = {}
         for word in words:
             self.insert(word)
 
     def insert_aux(self, word, base, index):
-        c = word[index : index + 1]
+        c = word[index: index + 1]
         sub = base.get(c)
         if sub is None:
             base[c] = word
         elif isinstance(sub, dict):
             self.insert_aux(word, sub, index + 1)
         elif sub != word:
-            base[c] = { sub[index + 1 : index + 2] : sub }
+            base[c] = {sub[index + 1: index + 2]: sub}
             self.insert_aux(word, base, index)
 
     def insert(self, word):

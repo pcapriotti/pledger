@@ -10,9 +10,11 @@ import re
 def bank(parser):
     return parser.parse_account("Assets:Bank")
 
+
 @pytest.fixture
 def expenses(parser):
     return parser.parse_account("Expenses:Books")
+
 
 def test_parsing(parser, bank, expenses):
     str = "2011/04/15 * Bookshop\n" + \
@@ -23,6 +25,7 @@ def test_parsing(parser, bank, expenses):
     entry2 = Entry(expenses, value)
     tr = Transaction.balanced([entry1, entry2])
     assert parser.parse_transaction(str).entries == tr.entries
+
 
 def test_parsing_comments(parser):
     str = "; gift for wife\n" + \
@@ -37,12 +40,14 @@ def test_parsing_comments(parser):
     assert tr.entries[0].amount == -value
     assert tr.entries[1].amount == value
 
+
 def test_empty_transaction(parser):
     str = ""
     assert parser.parse_transaction(str) is None
 
     str = "; hello world"
     assert parser.parse_transaction(str) is None
+
 
 def test_parse_unbalanced(parser):
     str = "2011/02/05 * Bookshop\n" + \
@@ -51,12 +56,14 @@ def test_parse_unbalanced(parser):
     with pytest.raises(UnbalancedTransaction):
         parser.parse_transaction(str)
 
+
 def test_parse_undefined(parser):
     str = "2011/02/05 * Bookshop\n" + \
           "    Assets:Bank\n" + \
           "    Expenses:Book"
     with pytest.raises(UndefinedTransaction):
         parser.parse_transaction(str)
+
 
 def test_malformed_header(parser):
     str = "test 2011/02/05 * Bookshop\n" + \
@@ -65,12 +72,14 @@ def test_malformed_header(parser):
     with pytest.raises(MalformedHeader):
         parser.parse_transaction(str)
 
+
 def test_malformed_header2(parser):
     str = " 2011/02/05 * Bookshop\n" + \
           "    Assets:Bank          -40 EUR\n" + \
           "    Expenses:Book"
     with pytest.raises(MalformedHeader):
         parser.parse_transaction(str)
+
 
 def test_unbalanced(parser, bank, expenses):
     value = parser.parse_value("40 EUR")
@@ -79,11 +88,13 @@ def test_unbalanced(parser, bank, expenses):
     with pytest.raises(UnbalancedTransaction):
         Transaction.balanced([entry1, entry2])
 
+
 def test_undefined(bank, expenses):
     entry1 = Entry(bank, None)
     entry2 = Entry(expenses, None)
     with pytest.raises(UndefinedTransaction):
         Transaction.balanced([entry1, entry2])
+
 
 def test_defined(parser, bank, expenses):
     value = parser.parse_value("40 EUR")
@@ -92,12 +103,14 @@ def test_defined(parser, bank, expenses):
     tr = Transaction.balanced([entry1, entry2])
     assert tr.entries[-1].amount == -value
 
+
 def test_repr(parser):
     value = parser.parse_value("50 EUR")
     entry1 = Entry(bank, value)
     entry2 = Entry(expenses, None)
     tr = Transaction.balanced([entry1, entry2])
     assert re.search("Transaction", repr(tr))
+
 
 def test_transaction_entries(parser, bank, expenses):
     value = parser.parse_value("50 EUR")
@@ -107,12 +120,14 @@ def test_transaction_entries(parser, bank, expenses):
     assert tr[0] == entry1
     assert tr[1] == entry2
 
+
 def test_amount(parser, bank, expenses):
     value = parser.parse_value("40 EUR")
     entry1 = Entry(bank, value)
     entry2 = Entry(expenses, None)
     tr = Transaction.balanced([entry1, entry2])
     assert tr.amount == ZERO
+
 
 def test_clone(parser, bank, expenses):
     value = parser.parse_value("40 EUR")

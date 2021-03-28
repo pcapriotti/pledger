@@ -1,6 +1,7 @@
 from .filter import Filter
 import re
 
+
 class PatternParser(object):
     def __init__(self, tokens):
         self.tokens = tokens
@@ -37,7 +38,8 @@ class PatternParser(object):
         return result
 
     def combine(self, f1, f2, op, neg):
-        if neg: f2 = ~f2
+        if neg:
+            f2 = ~f2
         if f1:
             return op(f1, f2)
         else:

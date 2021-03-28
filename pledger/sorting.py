@@ -11,6 +11,7 @@ class Sorting(object):
     def __call__(self, l):
         return self.sorter(l)
 
+
 class MapSorting(Sorting):
     def __init__(self, map):
         self.map = map
@@ -20,6 +21,7 @@ class MapSorting(Sorting):
         l.sort()
         return [x for (v, i, x) in l]
 
+
 class ExpressionSorting(MapSorting):
     def __init__(self, parser, expression):
         self.parser = parser
@@ -27,8 +29,8 @@ class ExpressionSorting(MapSorting):
 
     def map(self, entry):
         context = {
-                "record": entry,
-                "date": self.parse_date }
+            "record": entry,
+            "date": self.parse_date}
         return eval(self.expression, context)
 
     def parse_date(self, str):

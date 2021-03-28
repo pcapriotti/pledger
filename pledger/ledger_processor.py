@@ -5,6 +5,7 @@ from .transaction import Transaction
 from .util import Observable
 from collections import OrderedDict
 
+
 class LedgerProcessor(Observable):
     def __init__(self, ledger, rules):
         super(LedgerProcessor, self).__init__()

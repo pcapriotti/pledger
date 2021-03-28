@@ -3,9 +3,11 @@ from pledger.transaction import Transaction
 from datetime import date
 import pytest
 
+
 def test_simple_ledger(parser, data_file):
     ledger = parser.parse_ledger(data_file("simple.dat"))
     assert len(ledger.transactions) == 2
+
 
 def test_ledger_with_tags(parser, data_file):
     ledger = parser.parse_ledger(data_file("tags.dat"))
@@ -16,18 +18,21 @@ def test_ledger_with_tags(parser, data_file):
     tr2 = ledger.transactions[1]
     assert tr2.entries[0].tags["title"] == "Dracula"
 
+
 def test_tags(parser):
-    assert parser.parse_tags("; foo:bar \t ") == { "foo":"bar" }
+    assert parser.parse_tags("; foo:bar \t ") == {"foo": "bar"}
     assert parser.parse_tags("; :baz: foo:1 \tbar:2") \
-        == { "foo":"1", "bar":"2", "baz":"" }
+        == {"foo": "1", "bar": "2", "baz": ""}
+
 
 def test_tags_with_spaces(parser):
     assert parser.parse_tags('; foo:"hello world"') \
-        == { "foo":"hello world" }
+        == {"foo": "hello world"}
     assert parser.parse_tags('; foo:\'hello "world"\'') \
-        == { "foo":'hello "world"' }
+        == {"foo": 'hello "world"'}
     assert parser.parse_tags(';bar:0 foo:"hello world" baz:5') \
-        == { "foo":"hello world", "bar":"0", "baz":"5" }
+        == {"foo": "hello world", "bar": "0", "baz": "5"}
+
 
 def test_parse_error(parser, data_file):
     with pytest.raises(PledgerException) as e:

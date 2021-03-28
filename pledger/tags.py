@@ -1,5 +1,6 @@
 from .rule import Rule, Generator
 
+
 def has_tag(obj, tag, value=None):
     actual = get_tag(obj, tag)
     if value is None:
@@ -7,8 +8,10 @@ def has_tag(obj, tag, value=None):
     else:
         return value == actual
 
+
 def get_tag(obj, tag):
-    if obj is None: return None
+    if obj is None:
+        return None
 
     value = obj.tags.get(tag)
     if value is None and hasattr(obj, 'parent'):

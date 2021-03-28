@@ -1,15 +1,16 @@
 from decimal import Decimal, InvalidOperation, ROUND_DOWN
 import re
 
+
 class Value(object):
     def __init__(self, values, precision=2):
         self.values = values
         self.precision = precision
 
     def currencies(self):
-        return (currency for currency,amount in self.values.items() if amount != 0)
+        return (currency for currency, amount in self.values.items() if amount != 0)
 
-    def components(self, currencies = None):
+    def components(self, currencies=None):
         if currencies is None:
             currencies = sorted(self.currencies())
         if len(currencies):
@@ -26,12 +27,14 @@ class Value(object):
 
     def null(self):
         for currency, amount in self.values.items():
-            if amount != 0: return False
+            if amount != 0:
+                return False
         return True
 
     def negative(self):
         for currency, amount in self.values.items():
-            if amount > 0: return False
+            if amount > 0:
+                return False
         return not self.null()
 
     def __eq__(self, other):
@@ -54,13 +57,13 @@ class Value(object):
         return self + (-other)
 
     def __neg__(self):
-        result = { }
+        result = {}
         for currency in self.values:
             result[currency] = -self.values[currency]
         return Value(result, self.precision)
 
     def __mul__(self, num):
-        result = { }
+        result = {}
         for currency in self.values:
             unit = Decimal(10) ** -self.precision
             result[currency] = (self.values[currency] * num).quantize(unit)
@@ -95,7 +98,8 @@ class Value(object):
         while digits:
             build(next())
             i += 1
-        if sign: build('-')
+        if sign:
+            build('-')
         return ''.join(reversed(result))
 
     def __str__(self):
@@ -123,10 +127,11 @@ class Value(object):
                     if p == -1:
                         precision = 2
                     else:
-                        precision = len(elements[0 ]) - p - 1
+                        precision = len(elements[0]) - p - 1
                 currency = elements[1]
-                return Value({ currency: amount }, precision=precision)
+                return Value({currency: amount}, precision=precision)
             except InvalidOperation:
                 return None
+
 
 ZERO = Value({}, 0)

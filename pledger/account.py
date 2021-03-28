@@ -5,6 +5,7 @@ from .entry import Entry
 from .filter import Filter
 from .rule import Generator, Rule
 
+
 @dataclass(frozen=True, order=True)
 class AccountPath:
     components: tuple
@@ -17,7 +18,8 @@ class AccountPath:
     @classmethod
     def parse(cls, name):
         is_root = name.startswith('::')
-        if is_root: name = name[2:]
+        if is_root:
+            name = name[2:]
         return cls(tuple(name.split(':')), is_root)
 
     @property
@@ -40,11 +42,13 @@ class AccountPath:
     def shortened(self, size):
         full = str(self)
         delta = len(full) - size
-        if delta <= 0: return full
+        if delta <= 0:
+            return full
         n = len(self.components)
         component_delta = (delta + n - 1) // n
         extra = delta - component_delta * n
-        c1 = [x[:len(x) - component_delta - 1] for x in self.components[:extra]]
+        c1 = [x[:len(x) - component_delta - 1]
+              for x in self.components[:extra]]
         c2 = [x[:len(x) - component_delta] for x in self.components[extra:-1]]
         c3 = [self.components[-1]]
         return ":".join(c1 + c2 + c3)
@@ -54,9 +58,11 @@ class AccountPath:
                    for i in range(len(self.components)))
 
     def sub(self, path):
-        if path.is_root: return path
+        if path.is_root:
+            return path
         return self.__class__(self.components + path.components,
                               self.is_root)
+
 
 class AccountFactory:
     def __init__(self):
@@ -71,6 +77,7 @@ class AccountFactory:
 
     def root(self):
         return self(AccountPath.root())
+
 
 class Account:
     def __init__(self, path, repo):
@@ -111,7 +118,8 @@ class Account:
         @Generator
         def generator(entry):
             gen = entry.account.tags.get(tag)
-            if gen: yield from gen(entry)
+            if gen:
+                yield from gen(entry)
         return Rule(filter, generator)
 
     def __add__(self, value):

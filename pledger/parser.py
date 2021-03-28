@@ -13,10 +13,12 @@ from .util import PledgerException, itersplit
 date_formats = {
     "default": "%Y/%m/%d",
     "year": "%Y",
-    "month": "%b" }
+    "month": "%b"}
+
 
 class MalformedHeader(PledgerException):
     pass
+
 
 class Parser(object):
     def __init__(self):
@@ -29,13 +31,15 @@ class Parser(object):
     def parse_value(self, str):
         return Value.parse(str)
 
-    def parse_ledger(self, filename, str = None):
+    def parse_ledger(self, filename, str=None):
         if str is None:
             str = codecs.open(filename, "r", "utf-8").read()
-        f = lambda number_line: number_line[1] == ""
+
+        def f(number_line): return number_line[1] == ""
         lines = zip(itertools.count(1), str.split("\n"))
         try:
-            transactions = [self.parse_transaction(group) for group in itersplit(f, lines)]
+            transactions = [self.parse_transaction(
+                group) for group in itersplit(f, lines)]
         except PledgerException as e:
             e.filename = filename
             raise e
@@ -58,7 +62,7 @@ class Parser(object):
         if hasattr(lines, "split"):
             lines = list(zip(itertools.count(1), iter(lines.split("\n"))))
 
-        tags = { }
+        tags = {}
 
         # discard initial comments
         while lines and re.match(r'\s*;', lines[0][1]):
@@ -75,13 +79,15 @@ class Parser(object):
             return None
 
         directive = self.parse_directive(header)
-        if directive: return directive
+        if directive:
+            return directive
 
         # parse transaction tags
         if lines:
             n, line = lines[0]
             tags = self.parse_tags(line, begin=True)
-            if tags: lines = lines[1:]
+            if tags:
+                lines = lines[1:]
 
         try:
             date, label, cleared = self.parse_header(header)
@@ -92,8 +98,10 @@ class Parser(object):
             entries = [self.parse_entry(line) for n, line in lines]
             line_numbers = [n for n, line in lines]
             transaction = Transaction.balanced(entries, date, label)
-            if tags: transaction.tags = tags
-            if cleared: transaction.tags["cleared"] = True
+            if tags:
+                transaction.tags = tags
+            if cleared:
+                transaction.tags["cleared"] = True
             return transaction
         except UnbalancedTransaction as e:
             e.line_number = n
@@ -113,16 +121,19 @@ class Parser(object):
 
     def parse_month(self, str):
         base = self.parse_date(str, "month")
-        if base: return date(date.today().year, base.month, 1)
+        if base:
+            return date(date.today().year, base.month, 1)
 
     def parse_year(self, str):
         base = self.parse_date(str, "year")
-        if base: return date(base.year, 1, 1)
+        if base:
+            return date(base.year, 1, 1)
 
     def parse_fuzzy_date(self, str):
         for parser in [self.parse_date, self.parse_month, self.parse_year]:
             result = parser(str)
-            if result: return result
+            if result:
+                return result
         return None
 
     def parse_header(self, str):
@@ -143,7 +154,8 @@ class Parser(object):
             tag_dict = []
             while True:
                 result = self.parse_tag(tagstring)
-                if result is None: break
+                if result is None:
+                    break
                 tag, index = result
                 tag_dict.append(tag)
                 tagstring = tagstring[index:]

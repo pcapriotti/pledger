@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field, replace
 
+
 @dataclass(order=True)
 class Entry:
     account: object

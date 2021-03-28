@@ -4,11 +4,12 @@ from .template import BalanceTemplate, RegisterTemplate
 from .ledger_processor import LedgerProcessor
 from collections import namedtuple
 
+
 class BalanceEntryProcessor(object):
     Entry = namedtuple("Entry", "level account amount")
 
     def __init__(self):
-        self.sheet = { }
+        self.sheet = {}
         self.total = ZERO
 
     def process_entry(self, transaction, entry):
@@ -58,6 +59,7 @@ class BalanceEntryProcessor(object):
                                        account=name,
                                        amount=self.sheet[account])
 
+
 class RegisterEntryProcessor(object):
     class Entry(namedtuple("Entry_", "transaction entry total")):
         @property
@@ -71,9 +73,9 @@ class RegisterEntryProcessor(object):
 
     def process_entry(self, transaction, entry):
         e = RegisterEntryProcessor.Entry(
-                transaction=transaction,
-                entry=entry,
-                total=ZERO)
+            transaction=transaction,
+            entry=entry,
+            total=ZERO)
         self.unsorted_result.append(e)
 
     def post_process(self):
@@ -82,6 +84,7 @@ class RegisterEntryProcessor(object):
         for record in self.sorting(self.unsorted_result):
             total += record.entry.amount
             self.result.append(record._replace(total=total))
+
 
 class Report(object):
     def __init__(self, ledger, rules, filter, entry_processor, template):
@@ -107,12 +110,13 @@ class Report(object):
     @classmethod
     def balance(cls, ledger, rules, filter, sorting):
         return cls(ledger, rules, filter, BalanceEntryProcessor(),
-                template=BalanceTemplate())
+                   template=BalanceTemplate())
 
     @classmethod
     def register(cls, ledger, rules, filter, sorting):
         return cls(ledger, rules, filter, RegisterEntryProcessor(sorting),
-                template=RegisterTemplate())
+                   template=RegisterTemplate())
+
 
 class ReportRegistry(object):
     def __init__(self, reps):
@@ -133,7 +137,8 @@ class ReportRegistry(object):
         self.reps[name] = factory
         self.prefix_tree.insert(name)
 
+
 reports = ReportRegistry({
-    "balance" : Report.balance,
-    "register" : Report.register
+    "balance": Report.balance,
+    "register": Report.register
 })
