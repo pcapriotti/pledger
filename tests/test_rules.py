@@ -14,7 +14,7 @@ class TestRules:
 
         bank = self.bank_account - self.parser.parse_value("33 EUR")
         books = self.books_account + self.parser.parse_value("33 EUR")
-        self.tr = Transaction([bank, books])
+        self.tr = Transaction.balanced([bank, books])
 
         self.rules = RuleCollection()
 

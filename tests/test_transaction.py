@@ -21,8 +21,8 @@ def test_parsing(parser, bank, expenses):
     value = parser.parse_value("40 EUR")
     entry1 = Entry(bank, -value)
     entry2 = Entry(expenses, value)
-    tr = Transaction([entry1, entry2])
-    assert parser.parse_transaction(str) == tr
+    tr = Transaction.balanced([entry1, entry2])
+    assert parser.parse_transaction(str).entries == tr.entries
 
 def test_parsing_comments(parser):
     str = "; gift for wife\n" + \
@@ -77,33 +77,33 @@ def test_unbalanced(parser, bank, expenses):
     entry1 = Entry(bank, value)
     entry2 = Entry(expenses, value)
     with pytest.raises(UnbalancedTransaction):
-        Transaction([entry1, entry2])
+        Transaction.balanced([entry1, entry2])
 
 def test_undefined(bank, expenses):
     entry1 = Entry(bank, None)
     entry2 = Entry(expenses, None)
     with pytest.raises(UndefinedTransaction):
-        Transaction([entry1, entry2])
+        Transaction.balanced([entry1, entry2])
 
 def test_defined(parser, bank, expenses):
     value = parser.parse_value("40 EUR")
     entry1 = Entry(bank, value)
     entry2 = Entry(expenses, None)
-    tr = Transaction([entry1, entry2])
+    tr = Transaction.balanced([entry1, entry2])
     assert tr.entries[-1].amount == -value
 
 def test_repr(parser):
     value = parser.parse_value("50 EUR")
     entry1 = Entry(bank, value)
     entry2 = Entry(expenses, None)
-    tr = Transaction([entry1, entry2])
+    tr = Transaction.balanced([entry1, entry2])
     assert re.search("Transaction", repr(tr))
 
 def test_transaction_entries(parser, bank, expenses):
     value = parser.parse_value("50 EUR")
     entry1 = Entry(bank, value)
     entry2 = Entry(expenses, None)
-    tr = Transaction([entry1, entry2])
+    tr = Transaction.balanced([entry1, entry2])
     assert tr[0] == entry1
     assert tr[1] == entry2
 
@@ -111,14 +111,14 @@ def test_amount(parser, bank, expenses):
     value = parser.parse_value("40 EUR")
     entry1 = Entry(bank, value)
     entry2 = Entry(expenses, None)
-    tr = Transaction([entry1, entry2])
+    tr = Transaction.balanced([entry1, entry2])
     assert tr.amount == ZERO
 
 def test_clone(parser, bank, expenses):
     value = parser.parse_value("40 EUR")
     entry1 = Entry(bank, value)
     entry2 = Entry(expenses, None)
-    tr = Transaction([entry1, entry2])
+    tr = Transaction.balanced([entry1, entry2])
     tr2 = tr.clone()
     assert id(tr) != id(tr2)
     assert tr.entries == tr2.entries

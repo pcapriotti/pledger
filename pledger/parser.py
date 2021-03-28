@@ -91,7 +91,7 @@ class Parser(object):
 
             entries = [self.parse_entry(line) for n, line in lines]
             line_numbers = [n for n, line in lines]
-            transaction = Transaction(entries, date, label)
+            transaction = Transaction.balanced(entries, date, label)
             if tags: transaction.tags = tags
             if cleared: transaction.tags["cleared"] = True
             return transaction

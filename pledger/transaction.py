@@ -1,3 +1,5 @@
+from dataclasses import dataclass, field, replace
+
 from .value import ZERO
 from .directive import Directive
 from .util import PledgerException
@@ -13,13 +15,17 @@ class UndefinedTransaction(PledgerException):
         self.index = index
         super(UndefinedTransaction, self).__init__()
 
+@dataclass
 class Transaction:
-    def __init__(self, entries, date = None, label = "", tags = None):
-        super(Transaction, self).__init__()
-        self.entries = entries
-        self.date = date
-        self.label = label
-        self.tags = tags or {}
+    entries: list
+    date: object = None
+    label: str = ""
+    tags: dict = field(default_factory=dict)
+
+    @classmethod
+    def balanced(cls, *args, **kwargs):
+        self = cls(*args, **kwargs)
+
         undef = None
         balance = ZERO
         i = 0
@@ -35,11 +41,10 @@ class Transaction:
         elif not balance.null():
             raise UnbalancedTransaction(self)
 
+        return self
+
     def execute(self, processor):
         processor.add_transaction(self)
-
-    def __repr__(self):
-        return "Transaction (%s)" % self.date
 
     @classmethod
     def from_entry(cls, transaction, entry):
@@ -55,8 +60,5 @@ class Transaction:
     def __getitem__(self, i):
         return self.entries[i]
 
-    def __eq__(self, other):
-        return self.entries == other.entries
-
     def clone(self):
-        return self.__class__(self.entries, self.date, self.label, self.tags)
+        return replace(self)

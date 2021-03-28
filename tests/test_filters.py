@@ -20,32 +20,32 @@ def transactions(parser):
 
     bank = bank_account - parser.parse_value("33 EUR")
     books = books_account + parser.parse_value("33 EUR")
-    tr1 = Transaction([bank, books])
+    tr1 = Transaction.balanced([bank, books])
 
     bank = bank_account - parser.parse_value("91 $")
     books = books_account + parser.parse_value("40 $")
     cash = cash_account + parser.parse_value("51 $")
-    tr2 = Transaction([bank, books, cash])
+    tr2 = Transaction.balanced([bank, books, cash])
 
     bank2_account = parser.parse_account("Assets:Bank2")
     bank2_account.tags['foo'] = 'bar'
 
     bank = bank2_account - parser.parse_value("33 $")
     books = books_account + parser.parse_value("33 $")
-    tr3 = Transaction([bank, books])
+    tr3 = Transaction.balanced([bank, books])
     tr3.tags["baz"] = "hello world"
     books.tags["title"] = "Necronomicon"
 
     bank = bank_account - parser.parse_value("33 EUR")
     books = books_account + parser.parse_value("33 EUR")
     books.tags["foo"] = "bar"
-    tr4 = Transaction([bank, books], date=date(2009, 12, 31))
+    tr4 = Transaction.balanced([bank, books], date=date(2009, 12, 31))
 
     bank = bank_account - parser.parse_value("91 $")
     books = books_account + parser.parse_value("40 $")
     books.tags["date"] = date(2009, 3, 1)
     cash = cash_account + parser.parse_value("51 $")
-    tr5 = Transaction([bank, books, cash], date=date(2010, 1, 1))
+    tr5 = Transaction.balanced([bank, books, cash], date=date(2010, 1, 1))
 
     return tr1, tr2, tr3, tr4, tr5
 
