@@ -8,7 +8,7 @@ class TransactionCollector(object):
         self.transactions = []
 
     def on_transaction(self, transaction, entries):
-        self.transactions.append((transaction, entries))
+        self.transactions.append(transaction)
 
 
 def test_account_prefix(parser, rules, data_file):
@@ -20,8 +20,8 @@ def test_account_prefix(parser, rules, data_file):
     processor.add_account_prefix("Business")
     processor.run()
 
-    for transaction, entries in collector.transactions:
-        for entry in entries:
+    for transaction in collector.transactions:
+        for entry in transaction.entries:
             assert entry.account.path.components[0] == "Business"
 
 def test_remove_account_prefix(parser, rules, data_file):
@@ -35,8 +35,8 @@ def test_remove_account_prefix(parser, rules, data_file):
     processor.add_account_prefix("Business")
     ledger.transactions[0].execute(processor)
 
-    for transaction, entries in collector.transactions:
-        for entry in entries:
+    for transaction in collector.transactions:
+        for entry in transaction.entries:
             assert entry.account.path.components[0] == "Business"
 
     collector.transactions = []
@@ -44,8 +44,8 @@ def test_remove_account_prefix(parser, rules, data_file):
 
     ledger.transactions[0].execute(processor)
 
-    for transaction, entries in collector.transactions:
-        for entry in entries:
+    for transaction in collector.transactions:
+        for entry in transaction.entries:
             assert entry.account.path.components[0] != "Business"
 
 def test_include(parser, rules, data_file):
@@ -75,7 +75,18 @@ def test_compact(parser, rules, data_file):
     processor.run()
 
     assert len(collector.transactions) == 2
-    _, entries = collector.transactions[1]
-    assert len(entries) == 2
+    assert len(collector.transactions[1].entries) == 2
+    assert collector.transactions[1][0].amount == Value.parse("30 EUR")
 
-    assert entries[0].amount == Value.parse("30 EUR")
+def test_parse_account_root(parser, rules, data_file):
+    ledger = parser.parse_ledger(data_file("root.dat"))
+    processor = LedgerProcessor(ledger, rules)
+    collector = TransactionCollector()
+    processor.add_listener(collector)
+    processor.run()
+
+    assert len(collector.transactions) == 1
+
+    tr = collector.transactions[0]
+    assert tr[0].account.name == "Personal:Assets:Bank"
+    assert tr[1].account.name == "Business:Expenses:Salary"

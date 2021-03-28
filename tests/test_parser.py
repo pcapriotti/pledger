@@ -1,4 +1,5 @@
 from pledger.util import PledgerException
+from pledger.transaction import Transaction
 from datetime import date
 import pytest
 

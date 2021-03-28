@@ -34,11 +34,8 @@ class AccountPath:
             return type(self)(self.components[:-1], self.is_root)
 
     def __getitem__(self, name):
-        account = type(self).parse(name)
-        if account.is_root:
-            return account
-        return type(self)(self.components + account.components,
-                          self.is_root)
+        path = type(self).parse(name)
+        return self.sub(path)
 
     def shortened(self, size):
         full = str(self)
@@ -55,6 +52,11 @@ class AccountPath:
     def is_ancestor(self, other):
         return all(self.components[i] == other.components[i]
                    for i in range(len(self.components)))
+
+    def sub(self, path):
+        if path.is_root: return path
+        return self.__class__(self.components + path.components,
+                              self.is_root)
 
 class AccountFactory:
     def __init__(self):
@@ -89,6 +91,9 @@ class Account:
 
     def __getitem__(self, name):
         return self.repo(self.path[name])
+
+    def sub(self, path):
+        return self.repo(self.path.sub(path))
 
     @property
     def name(self):

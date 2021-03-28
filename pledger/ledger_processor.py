@@ -36,7 +36,7 @@ class LedgerProcessor(Observable):
     def filter(self, transaction):
         result = []
         for entry in transaction.entries:
-            entry = Entry(self.account[entry.account.name],
+            entry = Entry(self.account.sub(entry.account.path),
                           entry.amount,
                           entry.tags)
             result += self.rules.apply(transaction, entry)
