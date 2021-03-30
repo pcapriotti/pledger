@@ -63,6 +63,16 @@ def test_include(parser, rules, data_file):
     assert len(collector.transactions) == 3
 
 
+def test_multiple(parser, rules, data_file):
+    processor = LedgerProcessor(parser, rules)
+    collector = TransactionCollector()
+    processor.add_listener(collector)
+
+    processor.run(parser.parse_ledger(data_file("simple.dat")))
+    processor.run(parser.parse_ledger(data_file("extra.dat")))
+
+    assert len(collector.transactions) == 3
+
 def test_compact(parser, rules, data_file):
     ledger = parser.parse_ledger(data_file("simple.dat"))
     processor = LedgerProcessor(parser, rules)
