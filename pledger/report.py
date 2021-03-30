@@ -87,15 +87,16 @@ class RegisterEntryProcessor(object):
 
 
 class Report(object):
-    def __init__(self, ledger, rules, filter, entry_processor, template):
-        self.ledger_processor = LedgerProcessor(ledger, rules)
+    def __init__(self, parser, rules, filter, entry_processor, template):
+        self.ledger_processor = LedgerProcessor(parser, rules)
         self.ledger_processor.add_listener(self)
         self.filter = filter
         self.entry_processor = entry_processor
         self.template = template
 
-    def generate(self):
-        self.ledger_processor.run()
+    def generate(self, ledgers):
+        for ledger in ledgers:
+            self.ledger_processor.run(ledger)
         self.entry_processor.post_process()
         return self.result()
 
@@ -108,13 +109,13 @@ class Report(object):
         return self.entry_processor.result
 
     @classmethod
-    def balance(cls, ledger, rules, filter, sorting):
-        return cls(ledger, rules, filter, BalanceEntryProcessor(),
+    def balance(cls, parser, rules, filter, sorting):
+        return cls(parser, rules, filter, BalanceEntryProcessor(),
                    template=BalanceTemplate())
 
     @classmethod
-    def register(cls, ledger, rules, filter, sorting):
-        return cls(ledger, rules, filter, RegisterEntryProcessor(sorting),
+    def register(cls, parser, rules, filter, sorting):
+        return cls(parser, rules, filter, RegisterEntryProcessor(sorting),
                    template=RegisterTemplate())
 
 

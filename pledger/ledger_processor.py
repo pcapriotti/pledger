@@ -7,14 +7,15 @@ from collections import OrderedDict
 
 
 class LedgerProcessor(Observable):
-    def __init__(self, ledger, rules):
+    def __init__(self, parser, rules):
         super(LedgerProcessor, self).__init__()
-        self.ledger = ledger
         self.rules = rules
-        self.parser = self.ledger.parser
+        self.parser = parser
         self.account = self.parser.repo.root()
+        self.ledger = None
 
-    def run(self):
+    def run(self, ledger):
+        self.ledger = ledger
         for transaction in self.ledger.transactions:
             transaction.execute(self)
 
@@ -32,7 +33,7 @@ class LedgerProcessor(Observable):
     def include(self, filename):
         filename = self.ledger.absolute_filename(filename)
         subledger = self.parser.parse_ledger(filename)
-        self.create_child(subledger).run()
+        self.create_child().run(subledger)
 
     def filter(self, transaction):
         result = []
@@ -46,8 +47,8 @@ class LedgerProcessor(Observable):
     def process_transaction(self, transaction, entries):
         return Transaction(entries, transaction.date, transaction.label, transaction.tags)
 
-    def create_child(self, ledger):
-        child = self.__class__(ledger, self.rules)
+    def create_child(self):
+        child = self.__class__(self.parser, self.rules)
         child.account = self.account
         child.listeners = self.listeners
         return child

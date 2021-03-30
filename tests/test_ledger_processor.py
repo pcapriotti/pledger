@@ -14,12 +14,12 @@ class TransactionCollector(object):
 
 def test_account_prefix(parser, rules, data_file):
     ledger = parser.parse_ledger(data_file("simple.dat"))
-    processor = LedgerProcessor(ledger, rules)
+    processor = LedgerProcessor(parser, rules)
     collector = TransactionCollector()
     processor.add_listener(collector)
 
     processor.add_account_prefix("Business")
-    processor.run()
+    processor.run(ledger)
 
     for transaction in collector.transactions:
         for entry in transaction.entries:
@@ -28,7 +28,7 @@ def test_account_prefix(parser, rules, data_file):
 
 def test_remove_account_prefix(parser, rules, data_file):
     ledger = parser.parse_ledger(data_file("simple.dat"))
-    processor = LedgerProcessor(ledger, rules)
+    processor = LedgerProcessor(parser, rules)
     collector = TransactionCollector()
     processor.add_listener(collector)
 
@@ -53,11 +53,11 @@ def test_remove_account_prefix(parser, rules, data_file):
 
 def test_include(parser, rules, data_file):
     ledger = parser.parse_ledger(data_file("simple.dat"))
-    processor = LedgerProcessor(ledger, rules)
+    processor = LedgerProcessor(parser, rules)
     collector = TransactionCollector()
     processor.add_listener(collector)
 
-    processor.run()
+    processor.run(ledger)
     processor.include("extra.dat")
 
     assert len(collector.transactions) == 3
@@ -65,7 +65,7 @@ def test_include(parser, rules, data_file):
 
 def test_compact(parser, rules, data_file):
     ledger = parser.parse_ledger(data_file("simple.dat"))
-    processor = LedgerProcessor(ledger, rules)
+    processor = LedgerProcessor(parser, rules)
     entry = ledger.transactions[1].entries[0]
     assert entry.amount == Value.parse("35 EUR")
     # add entry
@@ -76,7 +76,7 @@ def test_compact(parser, rules, data_file):
 
     collector = TransactionCollector()
     processor.add_listener(collector)
-    processor.run()
+    processor.run(ledger)
 
     assert len(collector.transactions) == 2
     assert len(collector.transactions[1].entries) == 2
@@ -85,10 +85,10 @@ def test_compact(parser, rules, data_file):
 
 def test_parse_account_root(parser, rules, data_file):
     ledger = parser.parse_ledger(data_file("root.dat"))
-    processor = LedgerProcessor(ledger, rules)
+    processor = LedgerProcessor(parser, rules)
     collector = TransactionCollector()
     processor.add_listener(collector)
-    processor.run()
+    processor.run(ledger)
 
     assert len(collector.transactions) == 1
 

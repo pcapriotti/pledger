@@ -26,7 +26,7 @@ def run_cli():
     argparser = ArgumentParser()
     argparser.add_argument("report", action="store")
     argparser.add_argument("--version", action="version", version=__version__)
-    argparser.add_argument("--filename", action="store", nargs=1)
+    argparser.add_argument("--filename", '-f', action="append", type=str)
     for flag in Filter.flags:
         argparser.add_argument("--%s" % flag.name, nargs=flag.args)
     argparser.add_argument("--sort", nargs=1)
@@ -43,15 +43,16 @@ def run_cli():
         pattern_parser = PatternParser(args.patterns)
         filter &= pattern_parser.parse_filter()
 
-    filename = args.filename and args.filename[0] or None
-    if filename is None:
-        filename = os.environ.get("PLEDGER")
+    filenames = args.filename
+    if filenames is None:
+        path = os.environ.get("PLEDGER")
+        if path: filenames = [path]
 
-    if filename is None:
+    if filenames is None:
         sys.stderr.write("No ledger specified\n")
         sys.exit(1)
 
-    ledger = parser.parse_ledger(filename)
+    ledgers = [parser.parse_ledger(path) for path in filenames]
 
     for flag in Filter.flags:
         parameters = getattr(args, flag.name)
@@ -65,5 +66,5 @@ def run_cli():
     elif args.sortb:
         sorting = ~ExpressionSorting(parser, *args.sortb)
 
-    report = report_factory(ledger, rules, filter, sorting)
-    return template(report, print)
+    report = report_factory(parser, rules, filter, sorting)
+    return template(ledgers, report, print)

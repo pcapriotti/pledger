@@ -13,8 +13,8 @@ COLORS = {
 class Template(object):
     ACCOUNT_COLOR = "blue"
 
-    def __call__(self, report, output):
-        for line in self.generate(report):
+    def __call__(self, ledgers, report, output):
+        for line in self.generate(ledgers, report):
             output(line)
 
     def pad(self, item, size, color=None):
@@ -62,8 +62,8 @@ class Template(object):
 
 
 class BalanceTemplate(Template):
-    def generate(self, report):
-        it = report.generate()
+    def generate(self, ledgers, report):
+        it = report.generate(ledgers)
         # save total
         total = next(it)
         count = 0
@@ -82,9 +82,9 @@ class BalanceTemplate(Template):
 
 
 class RegisterTemplate(Template):
-    def generate(self, report):
+    def generate(self, ledgers, report):
         last_entry = None
-        for entry in report.generate():
+        for entry in report.generate(ledgers):
             if last_entry and id(last_entry.transaction) == id(entry.transaction):
                 for line in self.print_secondary_entry(entry):
                     yield line
@@ -128,5 +128,5 @@ class RegisterTemplate(Template):
                 self.print_value(total_components[i]))
 
 
-def default_template(report, *args):
-    return report.template(report, *args)
+def default_template(ledgers, report, *args):
+    return report.template(ledgers, report, *args)
