@@ -85,7 +85,9 @@ A rule consists of a filter, together with a function, called generator, which t
 
 pledger's command line interface can be invoked by importing the `cli` module and executing
 
-    cli.run_cli()
+```python
+cli.run_cli()
+```
 
 The `cli` module also contains a number of global variables that can be used to customize pledger's behavior.
 
@@ -112,8 +114,10 @@ which should be pretty self-explanatory.
 
 To set tags on accounts in your startup script, use code such as the following
 
-    accounts = cli.parser.accounts
-    accounts["Assets"]["Bank"].tags["checking"] = True
+```python
+accounts = cli.parser.accounts
+accounts["Assets"]["Bank"].tags["checking"] = True
+```
 
 When filtering on the command line, you can access tags as though they were properties of an object. For example:
 
