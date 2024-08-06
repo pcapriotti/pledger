@@ -5,3 +5,5 @@ MANIFEST
 dist
 *egg-info
 htmlcov
+.envrc
+.venv
