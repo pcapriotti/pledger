@@ -11,11 +11,18 @@ COLORS = {
 }
 
 
+class Layout:
+    def __init__(self, description, account):
+        self.description = description
+        self.account = account
+
+
 class Template(object):
     ACCOUNT_COLOR = "blue"
 
-    def __call__(self, ledgers, report, output):
-        for line in self.generate(ledgers, report):
+    def __call__(self, width, ledgers, report, output):
+        layout = Layout(width // 4, width // 4)
+        for line in self.generate(layout, ledgers, report):
             output(line)
 
     def pad(self, item, size, color=None):
@@ -42,7 +49,7 @@ class Template(object):
         else:
             return ""
 
-    def print_account(self, account, size=39):
+    def print_account(self, account, size):
         if size is None:
             return self.colored(self.ACCOUNT_COLOR, account.name)
         else:
@@ -63,7 +70,7 @@ class Template(object):
 
 
 class BalanceTemplate(Template):
-    def generate(self, ledgers, report):
+    def generate(self, layout, ledgers, report):
         it = report.generate(ledgers)
         # save total
         total = next(it)
@@ -83,18 +90,18 @@ class BalanceTemplate(Template):
 
 
 class RegisterTemplate(Template):
-    def generate(self, ledgers, report):
+    def generate(self, layout, ledgers, report):
         last_entry = None
         for entry in report.generate(ledgers):
             if last_entry and id(last_entry.transaction) == id(entry.transaction):
-                for line in self.print_secondary_entry(entry):
+                for line in self.print_secondary_entry(layout, entry):
                     yield line
             else:
-                for line in self.print_entry(entry):
+                for line in self.print_entry(layout, entry):
                     yield line
             last_entry = entry
 
-    def print_entry(self, entry):
+    def print_entry(self, layout, entry):
         currencies = sorted(
             set(entry.entry.amount.currencies()).union(entry.total.currencies())
         )
@@ -102,41 +109,41 @@ class RegisterTemplate(Template):
         total_components = entry.total.components(currencies)
         yield "%s %s %s %s %s" % (
             self.lpad(entry.date.strftime("%y-%b-%d"), 9),
-            self.print_label(entry.transaction, 34),
-            self.print_account(entry.entry.account),
+            self.print_label(entry.transaction, layout.description),
+            self.print_account(entry.entry.account, layout.account),
             self.print_value(components[0]),
             self.print_value(total_components[0]),
         )
         for line in self.print_extra_components(
-            entry, components[1:], total_components[1:]
+            layout, entry, components[1:], total_components[1:]
         ):
             yield line
 
-    def print_secondary_entry(self, entry):
+    def print_secondary_entry(self, layout, entry):
         currencies = sorted(
             set(entry.entry.amount.currencies()).union(entry.total.currencies())
         )
         components = entry.entry.amount.components(currencies)
         total_components = entry.total.components(currencies)
         yield "%s %s %s %s" % (
-            " " * 44,
-            self.print_account(entry.entry.account),
+            " " * (layout.description + 10),
+            self.print_account(entry.entry.account, layout.account),
             self.print_value(components[0]),
             self.print_value(total_components[0]),
         )
         for line in self.print_extra_components(
-            entry, components[1:], total_components[1:]
+            layout, entry, components[1:], total_components[1:]
         ):
             yield line
 
-    def print_extra_components(self, entry, components, total_components):
+    def print_extra_components(self, layout, entry, components, total_components):
         for i in range(len(components)):
             yield "%s %s %s" % (
-                " " * 84,
+                " " * (layout.description + layout.account + 11),
                 self.print_value(components[i]),
                 self.print_value(total_components[i]),
             )
 
 
-def default_template(ledgers, report, *args):
-    return report.template(ledgers, report, *args)
+def default_template(width, ledgers, report, *args):
+    return report.template(width, ledgers, report, *args)

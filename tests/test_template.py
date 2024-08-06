@@ -6,7 +6,7 @@ import re
 
 
 class FakeTemplate(Template):
-    def generate(self, ledgers, report):
+    def generate(self, layout, ledgers, report):
         for record in report.generate(ledgers):
             yield repr(record)
 
@@ -27,7 +27,7 @@ def template():
 def test_call(template):
     lines = []
     report = FakeReport([1, 2, 3])
-    template([], report, lambda x: lines.append(x))
+    template(80, [], report, lambda x: lines.append(x))
     assert lines == ["1", "2", "3"]
 
 

@@ -16,7 +16,6 @@ parser = Parser()
 filter = Filter.null
 rules = RuleCollection()
 sorting = MapSorting(lambda x: x.date)
-template = default_template
 
 
 def run_cli():
@@ -67,4 +66,6 @@ def run_cli():
         sorting = ~ExpressionSorting(parser, *args.sortb)
 
     report = report_factory(parser, rules, filter, sorting)
-    return template(ledgers, report, print)
+    width = os.get_terminal_size().columns
+    template = default_template
+    return template(width, ledgers, report, print)
