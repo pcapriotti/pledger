@@ -14,20 +14,20 @@ class PatternParser(object):
 
         while self.has_tokens():
             token = self.get()
-            if token == '(':
+            if token == "(":
                 filter = self.parse_filter()
                 result = self.combine(result, filter, last_operator, negated)
                 last_operator = Filter.__or__
                 negated = False
-            elif token == ')':
+            elif token == ")":
                 return result
-            elif token == 'and':
+            elif token == "and":
                 last_operator = Filter.__and__
                 negated = False
-            elif token == 'or':
+            elif token == "or":
                 last_operator = Filter.__or__
                 negated = False
-            elif token == 'not':
+            elif token == "not":
                 negated = True
             else:
                 filter = Filter.matches(re.compile(token))

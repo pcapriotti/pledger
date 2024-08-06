@@ -16,18 +16,21 @@ class Filter(object, metaclass=FlagMetaclass):
         @Filter
         def result(*args):
             return self(*args) and other(*args)
+
         return result
 
     def __or__(self, other):
         @Filter
         def result(*args):
             return self(*args) or other(*args)
+
         return result
 
     def __invert__(self):
         @Filter
         def result(*args):
             return not self(*args)
+
         return result
 
     @classmethod
@@ -35,6 +38,7 @@ class Filter(object, metaclass=FlagMetaclass):
         @cls
         def result(transaction, entry):
             return entry.account == account
+
         return result
 
     @classmethod
@@ -42,6 +46,7 @@ class Filter(object, metaclass=FlagMetaclass):
         @cls
         def result(transaction, entry):
             return regexp.search(entry.account.name) is not None
+
         return result
 
     @classmethod
@@ -54,6 +59,7 @@ class Filter(object, metaclass=FlagMetaclass):
         def result(transaction, entry):
             obj = factory.from_entry(transaction, entry)
             return has_tag(obj, tag, value)
+
         return result
 
 
@@ -107,7 +113,8 @@ class ExpressionFilter(Filter):
             "transaction": SmartWrapper(transaction),
             "entry": SmartWrapper(entry.info(transaction)),
             "date": self.parse_date,
-            "ZERO": ZERO}
+            "ZERO": ZERO,
+        }
         return eval(self.expression, context)
 
     def parse_date(self, str):

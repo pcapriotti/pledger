@@ -26,13 +26,12 @@ def run_cli():
     argparser = ArgumentParser()
     argparser.add_argument("report", action="store")
     argparser.add_argument("--version", action="version", version=__version__)
-    argparser.add_argument("--filename", '-f', action="append", type=str)
+    argparser.add_argument("--filename", "-f", action="append", type=str)
     for flag in Filter.flags:
         argparser.add_argument("--%s" % flag.name, nargs=flag.args)
     argparser.add_argument("--sort", nargs=1)
     argparser.add_argument("--sortb", nargs=1)
-    argparser.add_argument("patterns", metavar="PATTERN", type=str,
-                           nargs="*")
+    argparser.add_argument("patterns", metavar="PATTERN", type=str, nargs="*")
 
     args = argparser.parse_args()
 
@@ -46,7 +45,8 @@ def run_cli():
     filenames = args.filename
     if filenames is None:
         path = os.environ.get("PLEDGER")
-        if path: filenames = [path]
+        if path:
+            filenames = [path]
 
     if filenames is None:
         sys.stderr.write("No ledger specified\n")

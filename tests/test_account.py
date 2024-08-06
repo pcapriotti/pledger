@@ -33,7 +33,7 @@ def test_shortened_name(account):
     name = account.shortened_name(size)
 
     assert len(name) < size
-    assert len([x for x in name if x == ':']) == 7
+    assert len([x for x in name if x == ":"]) == 7
 
 
 def test_root_account_parsing(parser, account):

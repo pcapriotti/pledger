@@ -24,6 +24,7 @@ class TestRules:
             amount = entry.amount * Decimal("0.1")
             yield entry.account - amount
             yield self.cash_account + amount
+
         self.discount = discount
 
     def test_rule_on_ledger(self):
@@ -34,29 +35,35 @@ class TestRules:
         result += self.rules.apply(self.tr, self.tr.entries[0])
         result += self.rules.apply(self.tr, self.tr.entries[1])
 
-        expected = [self.bank_account - self.parser.parse_value("33.00 EUR"),
-                    self.books_account + self.parser.parse_value("33.00 EUR"),
-                    self.cash_account + self.parser.parse_value("3.30 EUR"),
-                    self.books_account - self.parser.parse_value("3.30 EUR")]
+        expected = [
+            self.bank_account - self.parser.parse_value("33.00 EUR"),
+            self.books_account + self.parser.parse_value("33.00 EUR"),
+            self.cash_account + self.parser.parse_value("3.30 EUR"),
+            self.books_account - self.parser.parse_value("3.30 EUR"),
+        ]
 
-        assert set((entry.account.path, entry.amount) for entry in result) \
-            == set((entry.account.path, entry.amount) for entry in expected)
+        assert set((entry.account.path, entry.amount) for entry in result) == set(
+            (entry.account.path, entry.amount) for entry in expected
+        )
 
     def test_account_tag_rule(self):
-        self.books_account.tags['discount'] = self.discount
+        self.books_account.tags["discount"] = self.discount
         self.rules.add_rule(Account.tag_rule("discount"))
 
         result = []
         result += self.rules.apply(self.tr, self.tr.entries[0])
         result += self.rules.apply(self.tr, self.tr.entries[1])
 
-        expected = [self.bank_account - self.parser.parse_value("33.00 EUR"),
-                    self.books_account + self.parser.parse_value("33.00 EUR"),
-                    self.cash_account + self.parser.parse_value("3.30 EUR"),
-                    self.books_account - self.parser.parse_value("3.30 EUR")]
+        expected = [
+            self.bank_account - self.parser.parse_value("33.00 EUR"),
+            self.books_account + self.parser.parse_value("33.00 EUR"),
+            self.cash_account + self.parser.parse_value("3.30 EUR"),
+            self.books_account - self.parser.parse_value("3.30 EUR"),
+        ]
 
-        assert set((entry.account.path, entry.amount) for entry in result) \
-            == set((entry.account.path, entry.amount) for entry in expected)
+        assert set((entry.account.path, entry.amount) for entry in result) == set(
+            (entry.account.path, entry.amount) for entry in expected
+        )
 
 
 def test_null_generator():

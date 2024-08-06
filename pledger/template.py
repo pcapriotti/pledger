@@ -7,7 +7,8 @@ COLORS = {
     "yellow": "\033[0;33m",
     "green": "\033[0;32m",
     "nocolor": "\033[00m",
-    "blue": "\033[0;34m"}
+    "blue": "\033[0;34m",
+}
 
 
 class Template(object):
@@ -20,14 +21,14 @@ class Template(object):
     def pad(self, item, size, color=None):
         text = str(item)[:size]
         padlength = size - len(text)
-        if (padlength < 0):
+        if padlength < 0:
             padlength = 0
         return "%s%s" % (" " * padlength, self.colored(color, text))
 
     def lpad(self, item, size, color=None):
         text = str(item)[:size]
         padlength = size - len(text)
-        if (padlength < 0):
+        if padlength < 0:
             padlength = 0
         return "%s%s" % (self.colored(color, text), " " * padlength)
 
@@ -71,9 +72,9 @@ class BalanceTemplate(Template):
             components = entry.amount.components()
             for component in components[:-1]:
                 yield self.print_value(component)
-            yield self.print_value(components[-1]) + \
-                ("  " * (entry.level - 1)) + \
-                self.colored(self.ACCOUNT_COLOR, entry.account)
+            yield self.print_value(components[-1]) + (
+                "  " * (entry.level - 1)
+            ) + self.colored(self.ACCOUNT_COLOR, entry.account)
             count += 1
         if count > 0:
             yield "-" * 20
@@ -95,7 +96,8 @@ class RegisterTemplate(Template):
 
     def print_entry(self, entry):
         currencies = sorted(
-            set(entry.entry.amount.currencies()).union(entry.total.currencies()))
+            set(entry.entry.amount.currencies()).union(entry.total.currencies())
+        )
         components = entry.entry.amount.components(currencies)
         total_components = entry.total.components(currencies)
         yield "%s %s %s %s %s" % (
@@ -103,21 +105,28 @@ class RegisterTemplate(Template):
             self.print_label(entry.transaction, 34),
             self.print_account(entry.entry.account),
             self.print_value(components[0]),
-            self.print_value(total_components[0]))
-        for line in self.print_extra_components(entry, components[1:], total_components[1:]):
+            self.print_value(total_components[0]),
+        )
+        for line in self.print_extra_components(
+            entry, components[1:], total_components[1:]
+        ):
             yield line
 
     def print_secondary_entry(self, entry):
         currencies = sorted(
-            set(entry.entry.amount.currencies()).union(entry.total.currencies()))
+            set(entry.entry.amount.currencies()).union(entry.total.currencies())
+        )
         components = entry.entry.amount.components(currencies)
         total_components = entry.total.components(currencies)
         yield "%s %s %s %s" % (
             " " * 44,
             self.print_account(entry.entry.account),
             self.print_value(components[0]),
-            self.print_value(total_components[0]))
-        for line in self.print_extra_components(entry, components[1:], total_components[1:]):
+            self.print_value(total_components[0]),
+        )
+        for line in self.print_extra_components(
+            entry, components[1:], total_components[1:]
+        ):
             yield line
 
     def print_extra_components(self, entry, components, total_components):
@@ -125,7 +134,8 @@ class RegisterTemplate(Template):
             yield "%s %s %s" % (
                 " " * 84,
                 self.print_value(components[i]),
-                self.print_value(total_components[i]))
+                self.print_value(total_components[i]),
+            )
 
 
 def default_template(ledgers, report, *args):

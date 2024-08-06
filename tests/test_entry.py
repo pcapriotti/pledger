@@ -34,8 +34,7 @@ def test_entry_parser(parser):
 
 
 def test_entry_date(parser):
-    entry = parser.parse_entry(
-        "  Expenses:Books       61 EUR   ; [2011/03/03]")
+    entry = parser.parse_entry("  Expenses:Books       61 EUR   ; [2011/03/03]")
     entry2 = parser.parse_entry("  Expenses:Books       61 EUR")
     transaction = FakeTransaction(date=date(2011, 3, 1))
 
@@ -45,8 +44,7 @@ def test_entry_date(parser):
 
 def test_entry_info(parser, repo):
     transaction = FakeTransaction(date=date(2011, 3, 1))
-    entry = parser.parse_entry(
-        "  Expenses:Books       61 EUR   ; [2011/03/03]")
+    entry = parser.parse_entry("  Expenses:Books       61 EUR   ; [2011/03/03]")
     entry2 = parser.parse_entry("  Expenses:Books       61 EUR")
 
     assert entry.info(transaction).date == date(2011, 3, 3)

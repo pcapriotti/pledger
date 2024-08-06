@@ -16,9 +16,8 @@ class Entry:
 
     def info(self, transaction):
         return EntryInfo(
-            self.account, self.amount,
-            self.tags, self.date(transaction),
-            transaction)
+            self.account, self.amount, self.tags, self.date(transaction), transaction
+        )
 
     @classmethod
     def from_entry(cls, transaction, entry):

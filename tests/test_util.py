@@ -4,10 +4,16 @@ import pytest
 
 def test_itersplit():
     items = list(range(20))
-    result = [list(range(5)), list(range(6, 10)),
-              list(range(11, 15)), list(range(16, 20))]
+    result = [
+        list(range(5)),
+        list(range(6, 10)),
+        list(range(11, 15)),
+        list(range(16, 20)),
+    ]
 
-    def p(x): return x % 5 == 0
+    def p(x):
+        return x % 5 == 0
+
     assert list(util.itersplit(p, items)) == result
 
 
@@ -34,11 +40,14 @@ def test_observable():
 
 def test_linearized():
     assert util.linearized([(1, []), (2, []), (3, [])]) == [1, 2, 3]
-    assert util.linearized([
-        (1, [(2, []), (3, [(4, [])])]),
-        (5, []),
-        (6, [])]) \
-        == [1, 2, 3, 4, 5, 6]
+    assert util.linearized([(1, [(2, []), (3, [(4, [])])]), (5, []), (6, [])]) == [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+    ]
 
 
 @pytest.fixture

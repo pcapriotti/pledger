@@ -10,10 +10,7 @@ from .directive import Directive, UnsupportedDirective
 from .entry import Entry
 from .util import PledgerException, itersplit
 
-date_formats = {
-    "default": "%Y/%m/%d",
-    "year": "%Y",
-    "month": "%b"}
+date_formats = {"default": "%Y/%m/%d", "year": "%Y", "month": "%b"}
 
 
 class MalformedHeader(PledgerException):
@@ -35,11 +32,14 @@ class Parser(object):
         if str is None:
             str = codecs.open(filename, "r", "utf-8").read()
 
-        def f(number_line): return number_line[1] == ""
+        def f(number_line):
+            return number_line[1] == ""
+
         lines = zip(itertools.count(1), str.split("\n"))
         try:
-            transactions = [self.parse_transaction(
-                group) for group in itersplit(f, lines)]
+            transactions = [
+                self.parse_transaction(group) for group in itersplit(f, lines)
+            ]
         except PledgerException as e:
             e.filename = filename
             raise e
@@ -65,7 +65,7 @@ class Parser(object):
         tags = {}
 
         # discard initial comments
-        while lines and re.match(r'\s*;', lines[0][1]):
+        while lines and re.match(r"\s*;", lines[0][1]):
             lines = lines[1:]
 
         if len(lines) == 0:
@@ -137,14 +137,14 @@ class Parser(object):
         return None
 
     def parse_header(self, str):
-        m = re.match(r'^(\S+)\s+(\*\s+)?(.*)$', str)
+        m = re.match(r"^(\S+)\s+(\*\s+)?(.*)$", str)
         if m:
             return m.group(1), m.group(3), m.group(2)
         else:
             raise MalformedHeader()
 
     def parse_tags(self, str, begin=False):
-        pattern = r'\s*;\s*(.*)$'
+        pattern = r"\s*;\s*(.*)$"
         if begin:
             m = re.match(pattern, str)
         else:
@@ -168,10 +168,10 @@ class Parser(object):
         m = re.match(r":?(\S+):'([^']*)'\s*", str)
         if m:
             return ((m.group(1), m.group(2)), m.end())
-        m = re.match(r':?(\S+):(\S*)\s*', str)
+        m = re.match(r":?(\S+):(\S*)\s*", str)
         if m:
             return ((m.group(1), m.group(2)), m.end())
-        m = re.match(r'\[(\S+)\]\s*', str)
+        m = re.match(r"\[(\S+)\]\s*", str)
         if m:
             try:
                 return (("date", self.parse_date(m.group(1))), m.end())
@@ -179,8 +179,8 @@ class Parser(object):
                 pass
 
     def parse_directive(self, str):
-        if str[0] == '!':
-            args = str[1:].split(' ')
+        if str[0] == "!":
+            args = str[1:].split(" ")
             name = args[0]
             args = args[1:]
             directive_class = Directive.directives.get(name)

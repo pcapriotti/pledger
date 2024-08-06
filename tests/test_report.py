@@ -16,32 +16,29 @@ def registry():
 def test_simple_report(parser, data_file):
     ledger = parser.parse_ledger(data_file("simple.dat"))
     sorting = MapSorting(lambda x: x.date)
-    report = reports.get("register")(parser,
-                                     RuleCollection(),
-                                     Filter.null,
-                                     sorting)
+    report = reports.get("register")(parser, RuleCollection(), Filter.null, sorting)
     records = list(report.generate([ledger]))
 
     assert len(records) == 4
-    assert [(record.entry.account.name,
-             record.entry.amount,
-             record.total) for record in records] == \
-        [('Assets:Bank', Value.parse('1500 EUR'), Value.parse('1500 EUR')),
-         ('Equity:Capital', Value.parse('-1500 EUR'), ZERO),
-         ('Expenses:Books', Value.parse('35 EUR'), Value.parse('35 EUR')),
-         ('Assets:Bank', Value.parse('-35 EUR'), ZERO)]
+    assert [
+        (record.entry.account.name, record.entry.amount, record.total)
+        for record in records
+    ] == [
+        ("Assets:Bank", Value.parse("1500 EUR"), Value.parse("1500 EUR")),
+        ("Equity:Capital", Value.parse("-1500 EUR"), ZERO),
+        ("Expenses:Books", Value.parse("35 EUR"), Value.parse("35 EUR")),
+        ("Assets:Bank", Value.parse("-35 EUR"), ZERO),
+    ]
 
 
 def test_report_ordering(parser, data_file):
     ledger = parser.parse_ledger(data_file("sorting.dat"))
     sorting = MapSorting(lambda x: x.date)
-    report = reports.get("register")(parser,
-                                     RuleCollection(),
-                                     Filter.null,
-                                     sorting)
+    report = reports.get("register")(parser, RuleCollection(), Filter.null, sorting)
 
-    assert [record.transaction.label for record in report.generate([ledger])] == \
-        [str(chr(i)) for i in range(ord('A'), ord('N') + 1) for _ in range(2)]
+    assert [record.transaction.label for record in report.generate([ledger])] == [
+        str(chr(i)) for i in range(ord("A"), ord("N") + 1) for _ in range(2)
+    ]
 
 
 def test_empty_register(parser, data_file):
@@ -57,26 +54,23 @@ def test_empty_register(parser, data_file):
 def test_simple_report(parser, data_file):
     ledger = parser.parse_ledger(data_file("simple.dat"))
     sorting = Sorting(lambda x: x)
-    report = reports.get("balance")(parser,
-                                    RuleCollection(),
-                                    Filter.null,
-                                    sorting)
+    report = reports.get("balance")(parser, RuleCollection(), Filter.null, sorting)
 
-    assert [(record.account, record.amount)
-            for record in report.generate([ledger])
-            if record.account] == \
-        [('Assets:Bank', Value.parse("1465 EUR")),
-         ('Equity:Capital', Value.parse("-1500 EUR")),
-         ('Expenses:Books', Value.parse("35 EUR"))]
+    assert [
+        (record.account, record.amount)
+        for record in report.generate([ledger])
+        if record.account
+    ] == [
+        ("Assets:Bank", Value.parse("1465 EUR")),
+        ("Equity:Capital", Value.parse("-1500 EUR")),
+        ("Expenses:Books", Value.parse("35 EUR")),
+    ]
 
 
 def test_empty_balance(parser):
     ledger = parser.parse_ledger("<test>", "")
     sorting = Sorting(lambda x: x)
-    report = reports.get("balance")(parser,
-                                    RuleCollection(),
-                                    Filter.null,
-                                    sorting)
+    report = reports.get("balance")(parser, RuleCollection(), Filter.null, sorting)
     records = list(report.generate([ledger]))
 
     assert len(records) == 1
@@ -84,20 +78,20 @@ def test_empty_balance(parser):
 
 
 def test_get(registry):
-    registry.add('register', 'register factory')
-    registry.add('balance', 'balance factory')
-    assert registry['register'] == 'register factory'
-    assert registry.get('reg') == 'register factory'
+    registry.add("register", "register factory")
+    registry.add("balance", "balance factory")
+    assert registry["register"] == "register factory"
+    assert registry.get("reg") == "register factory"
 
 
 def test_add_multiple(registry):
-    registry.add('register', 'register factory')
+    registry.add("register", "register factory")
     with pytest.raises(Exception):
-        registry.add('register', 'register factory 2')
+        registry.add("register", "register factory 2")
 
 
 def testAmbiguous(registry):
-    registry.add('register', 'register factory')
-    registry.add('reimbursements', 'reimbursement factory')
+    registry.add("register", "register factory")
+    registry.add("reimbursements", "reimbursement factory")
 
-    assert registry.get('re') is None
+    assert registry.get("re") is None

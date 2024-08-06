@@ -38,14 +38,16 @@ class LedgerProcessor(Observable):
     def filter(self, transaction):
         result = []
         for entry in transaction.entries:
-            entry = Entry(self.account.sub(entry.account.path),
-                          entry.amount,
-                          entry.tags)
+            entry = Entry(
+                self.account.sub(entry.account.path), entry.amount, entry.tags
+            )
             result += self.rules.apply(transaction, entry)
         return self.compact(result)
 
     def process_transaction(self, transaction, entries):
-        return Transaction(entries, transaction.date, transaction.label, transaction.tags)
+        return Transaction(
+            entries, transaction.date, transaction.label, transaction.tags
+        )
 
     def create_child(self):
         child = self.__class__(self.parser, self.rules)

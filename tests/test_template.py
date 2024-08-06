@@ -37,7 +37,7 @@ def test_pad(template):
 
 
 def test_colored_pad(template):
-    text = template.pad("hello", 10, 'red')
+    text = template.pad("hello", 10, "red")
     assert re.search("     .*hello.*", text)
 
 
@@ -47,18 +47,18 @@ def test_lpad(template):
 
 
 def test_colored_lpad(template):
-    text = template.lpad("hello", 10, 'red')
+    text = template.lpad("hello", 10, "red")
     assert re.search(".*hello.*     ", text)
 
 
 def test_print_value(template):
     value = Value.parse("44 EUR")
-    assert re.match(r' *44\.00 EUR$', template.print_value(value))
+    assert re.match(r" *44\.00 EUR$", template.print_value(value))
 
 
 def test_print_negative_value(template):
     value = Value.parse("-44 EUR")
-    assert re.match(r' *\S+-44.00 EUR\S+$', template.print_value(value))
+    assert re.match(r" *\S+-44.00 EUR\S+$", template.print_value(value))
 
 
 def test_print_null_value(template):
@@ -83,7 +83,7 @@ def test_print_label(parser, template, data_file):
     transaction = ledger.transactions[1]
     assert transaction.label == "Bookshop"
     text = template.print_label(transaction, 30)
-    assert re.search(r' *\S+Bookshop', text)
+    assert re.search(r" *\S+Bookshop", text)
 
 
 def test_print_cleared_label(parser, template, data_file):
@@ -92,4 +92,4 @@ def test_print_cleared_label(parser, template, data_file):
     transaction.tags["cleared"] = True
     assert transaction.label == "Bookshop"
     text = template.print_label(transaction, 30)
-    assert re.search(r' *Bookshop', text)
+    assert re.search(r" *Bookshop", text)

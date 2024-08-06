@@ -17,9 +17,11 @@ def expenses(parser):
 
 
 def test_parsing(parser, bank, expenses):
-    str = "2011/04/15 * Bookshop\n" + \
-          "    Assets:Bank       -40 EUR\n" + \
-          "    Expenses:Books"
+    str = (
+        "2011/04/15 * Bookshop\n"
+        + "    Assets:Bank       -40 EUR\n"
+        + "    Expenses:Books"
+    )
     value = parser.parse_value("40 EUR")
     entry1 = Entry(bank, -value)
     entry2 = Entry(expenses, value)
@@ -28,10 +30,12 @@ def test_parsing(parser, bank, expenses):
 
 
 def test_parsing_comments(parser):
-    str = "; gift for wife\n" + \
-          "2011/05/21 * Bookshop\n" + \
-          "    Assets:Bank      -40 EUR\n" + \
-          "    Expenses:Books"
+    str = (
+        "; gift for wife\n"
+        + "2011/05/21 * Bookshop\n"
+        + "    Assets:Bank      -40 EUR\n"
+        + "    Expenses:Books"
+    )
     tr = parser.parse_transaction(str)
 
     value = parser.parse_value("40 EUR")
@@ -50,33 +54,37 @@ def test_empty_transaction(parser):
 
 
 def test_parse_unbalanced(parser):
-    str = "2011/02/05 * Bookshop\n" + \
-          "    Assets:Bank          -40 EUR\n" + \
-          "    Expenses:Book        41 EUR"
+    str = (
+        "2011/02/05 * Bookshop\n"
+        + "    Assets:Bank          -40 EUR\n"
+        + "    Expenses:Book        41 EUR"
+    )
     with pytest.raises(UnbalancedTransaction):
         parser.parse_transaction(str)
 
 
 def test_parse_undefined(parser):
-    str = "2011/02/05 * Bookshop\n" + \
-          "    Assets:Bank\n" + \
-          "    Expenses:Book"
+    str = "2011/02/05 * Bookshop\n" + "    Assets:Bank\n" + "    Expenses:Book"
     with pytest.raises(UndefinedTransaction):
         parser.parse_transaction(str)
 
 
 def test_malformed_header(parser):
-    str = "test 2011/02/05 * Bookshop\n" + \
-          "    Assets:Bank          -40 EUR\n" + \
-          "    Expenses:Book"
+    str = (
+        "test 2011/02/05 * Bookshop\n"
+        + "    Assets:Bank          -40 EUR\n"
+        + "    Expenses:Book"
+    )
     with pytest.raises(MalformedHeader):
         parser.parse_transaction(str)
 
 
 def test_malformed_header2(parser):
-    str = " 2011/02/05 * Bookshop\n" + \
-          "    Assets:Bank          -40 EUR\n" + \
-          "    Expenses:Book"
+    str = (
+        " 2011/02/05 * Bookshop\n"
+        + "    Assets:Bank          -40 EUR\n"
+        + "    Expenses:Book"
+    )
     with pytest.raises(MalformedHeader):
         parser.parse_transaction(str)
 

@@ -33,14 +33,19 @@ class BalanceEntryProcessor(object):
 
     def grouped_accounts(self, root, level, paths, prefix=""):
         children = [path for path in paths if path.parent == root]
-        if len(children) == 1 and root and \
-           root.base_name and \
-           self.sheet[root] == self.sheet[children[0]]:
-            return self.grouped_accounts(children[0], level, paths,
-                                         prefix + root.base_name + ":")
+        if (
+            len(children) == 1
+            and root
+            and root.base_name
+            and self.sheet[root] == self.sheet[children[0]]
+        ):
+            return self.grouped_accounts(
+                children[0], level, paths, prefix + root.base_name + ":"
+            )
         else:
-            result = [self.grouped_accounts(child, level + 1, paths)
-                      for child in children]
+            result = [
+                self.grouped_accounts(child, level + 1, paths) for child in children
+            ]
             if root:
                 return ((root, prefix + str(root.base_name), level), result)
             else:
@@ -51,13 +56,11 @@ class BalanceEntryProcessor(object):
 
     @property
     def result(self):
-        yield self.__class__.Entry(level=None,
-                                   account=None,
-                                   amount=self.total)
+        yield self.__class__.Entry(level=None, account=None, amount=self.total)
         for account, name, level in self.accounts():
-            yield self.__class__.Entry(level=level,
-                                       account=name,
-                                       amount=self.sheet[account])
+            yield self.__class__.Entry(
+                level=level, account=name, amount=self.sheet[account]
+            )
 
 
 class RegisterEntryProcessor(object):
@@ -73,9 +76,8 @@ class RegisterEntryProcessor(object):
 
     def process_entry(self, transaction, entry):
         e = RegisterEntryProcessor.Entry(
-            transaction=transaction,
-            entry=entry,
-            total=ZERO)
+            transaction=transaction, entry=entry, total=ZERO
+        )
         self.unsorted_result.append(e)
 
     def post_process(self):
@@ -110,13 +112,19 @@ class Report(object):
 
     @classmethod
     def balance(cls, parser, rules, filter, sorting):
-        return cls(parser, rules, filter, BalanceEntryProcessor(),
-                   template=BalanceTemplate())
+        return cls(
+            parser, rules, filter, BalanceEntryProcessor(), template=BalanceTemplate()
+        )
 
     @classmethod
     def register(cls, parser, rules, filter, sorting):
-        return cls(parser, rules, filter, RegisterEntryProcessor(sorting),
-                   template=RegisterTemplate())
+        return cls(
+            parser,
+            rules,
+            filter,
+            RegisterEntryProcessor(sorting),
+            template=RegisterTemplate(),
+        )
 
 
 class ReportRegistry(object):
@@ -139,7 +147,4 @@ class ReportRegistry(object):
         self.prefix_tree.insert(name)
 
 
-reports = ReportRegistry({
-    "balance": Report.balance,
-    "register": Report.register
-})
+reports = ReportRegistry({"balance": Report.balance, "register": Report.register})

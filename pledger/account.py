@@ -17,10 +17,10 @@ class AccountPath:
 
     @classmethod
     def parse(cls, name):
-        absolute = name.startswith('::')
+        absolute = name.startswith("::")
         if absolute:
             name = name[2:]
-        return cls(tuple(name.split(':')), absolute)
+        return cls(tuple(name.split(":")), absolute)
 
     @property
     def base_name(self):
@@ -47,21 +47,21 @@ class AccountPath:
         n = len(self.components)
         component_delta = (delta + n - 1) // n
         extra = delta - component_delta * n
-        c1 = [x[:len(x) - component_delta - 1]
-              for x in self.components[:extra]]
-        c2 = [x[:len(x) - component_delta] for x in self.components[extra:-1]]
+        c1 = [x[: len(x) - component_delta - 1] for x in self.components[:extra]]
+        c2 = [x[: len(x) - component_delta] for x in self.components[extra:-1]]
         c3 = [self.components[-1]]
         return ":".join(c1 + c2 + c3)
 
     def is_ancestor(self, other):
-        return all(self.components[i] == other.components[i]
-                   for i in range(len(self.components)))
+        return all(
+            self.components[i] == other.components[i]
+            for i in range(len(self.components))
+        )
 
     def sub(self, path):
         if path.absolute:
             return path
-        return self.__class__(self.components + path.components,
-                              self.absolute)
+        return self.__class__(self.components + path.components, self.absolute)
 
 
 class AccountFactory:
@@ -85,8 +85,7 @@ class Account:
         self.repo = repo
 
     def __eq__(self, other):
-        return (self.path, self.repo) \
-            == (other.path, other.repo)
+        return (self.path, self.repo) == (other.path, other.repo)
 
     @property
     def tags(self):
@@ -120,6 +119,7 @@ class Account:
             gen = entry.account.tags.get(tag)
             if gen:
                 yield from gen(entry)
+
         return Rule(filter, generator)
 
     def __add__(self, value):
@@ -132,4 +132,5 @@ class Account:
         @Filter
         def result(transaction, entry):
             return self.path.is_ancestor(entry.account.path)
+
         return result

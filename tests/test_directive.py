@@ -27,15 +27,15 @@ def processor(parser):
 
 
 def test_directive_registry():
-    assert Directive.directives['account'] == AccountDirective
-    assert Directive.directives.get('non-existing-directive') is None
+    assert Directive.directives["account"] == AccountDirective
+    assert Directive.directives.get("non-existing-directive") is None
 
 
 def test_unsupported_directive(parser):
     with pytest.raises(UnsupportedDirective) as e:
         parser.parse_directive("!nonexisting")
 
-    assert 'nonexisting' == str(e.value)
+    assert "nonexisting" == str(e.value)
 
 
 def test_account_directive(processor):

@@ -97,6 +97,5 @@ def test_parse_precision():
 def test_components():
     value1 = Value({"EUR": Decimal("81.45")})
     value2 = Value({"USD": Decimal("-12.44")})
-    value = Value({"EUR": Decimal("81.45"),
-                   "USD": Decimal("-12.44")})
+    value = Value({"EUR": Decimal("81.45"), "USD": Decimal("-12.44")})
     assert value.components() == [value1, value2]

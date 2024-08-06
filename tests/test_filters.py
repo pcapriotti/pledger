@@ -29,7 +29,7 @@ def transactions(parser):
     tr2 = Transaction.balanced([bank, books, cash])
 
     bank2_account = parser.parse_account("Assets:Bank2")
-    bank2_account.tags['foo'] = 'bar'
+    bank2_account.tags["foo"] = "bar"
 
     bank = bank2_account - parser.parse_value("33 $")
     books = books_account + parser.parse_value("33 $")
@@ -52,8 +52,7 @@ def transactions(parser):
 
 
 def test_filter(transactions):
-    assert not three_entries(transactions[0],
-                             transactions[0].entries[0])
+    assert not three_entries(transactions[0], transactions[0].entries[0])
     assert three_entries(transactions[1], transactions[1].entries[0])
     assert in_euro(transactions[0], transactions[0].entries[0])
     assert not in_euro(transactions[1], transactions[1].entries[0])
@@ -61,8 +60,8 @@ def test_filter(transactions):
 
 def test_filter_parse(parser, transactions):
     filter = Filter.parse(
-        parser,
-        lambda tr, entry: entry.account.name.startswith("Assets"))
+        parser, lambda tr, entry: entry.account.name.startswith("Assets")
+    )
     assert filter(transactions[0], transactions[0].entries[0])
     assert not filter(transactions[0], transactions[0].entries[1])
 
@@ -169,8 +168,7 @@ def test_end_filter(parser, transactions):
 
 
 def test_expression_filter(parser, transactions):
-    filter = ExpressionFilter.parse(
-        parser, "entry.account.name.startswith('Assets')")
+    filter = ExpressionFilter.parse(parser, "entry.account.name.startswith('Assets')")
     assert filter(transactions[3], transactions[3].entries[0])
     assert not filter(transactions[3], transactions[3].entries[1])
 

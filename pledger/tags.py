@@ -14,7 +14,7 @@ def get_tag(obj, tag):
         return None
 
     value = obj.tags.get(tag)
-    if value is None and hasattr(obj, 'parent'):
+    if value is None and hasattr(obj, "parent"):
         return get_tag(obj.parent, tag)
     else:
         return value

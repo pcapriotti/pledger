@@ -53,22 +53,22 @@ class PrefixTree(object):
             self.insert(word)
 
     def insert_aux(self, word, base, index):
-        c = word[index: index + 1]
+        c = word[index : index + 1]
         sub = base.get(c)
         if sub is None:
             base[c] = word
         elif isinstance(sub, dict):
             self.insert_aux(word, sub, index + 1)
         elif sub != word:
-            base[c] = {sub[index + 1: index + 2]: sub}
+            base[c] = {sub[index + 1 : index + 2]: sub}
             self.insert_aux(word, base, index)
 
     def insert(self, word):
         self.insert_aux(word, self.tree, 0)
 
     def from_prefix_aux(self, prefix, base, index):
-        c = prefix[index:index+1]
-        if c == '':
+        c = prefix[index : index + 1]
+        if c == "":
             return self.all_words(base)
         sub = base.get(c)
 

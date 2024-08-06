@@ -38,6 +38,7 @@ class Generator(object):
         @Generator
         def result(*args):
             return itertools.chain(self(*args), other(*args))
+
         return result
 
 
@@ -54,6 +55,7 @@ class Rule(object):
             return self.generator(entry.info(transaction))
         else:
             return []
+
 
 class TransactionRule(Rule):
     def apply(self, transaction):

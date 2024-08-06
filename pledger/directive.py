@@ -1,9 +1,8 @@
 class DirectiveMetaclass(type):
     def __new__(cls, name, bases, attrs):
-        result = super(DirectiveMetaclass, cls).__new__(
-            cls, name, bases, attrs)
+        result = super(DirectiveMetaclass, cls).__new__(cls, name, bases, attrs)
         if name != "Directive":
-            Directive.directives[attrs['keyword']] = result
+            Directive.directives[attrs["keyword"]] = result
         return result
 
 
@@ -23,7 +22,7 @@ Directive.directives = {}
 
 
 class AccountDirective(Directive):
-    keyword = 'account'
+    keyword = "account"
 
     def __init__(self, account):
         self.account = account
@@ -33,7 +32,7 @@ class AccountDirective(Directive):
 
 
 class IncludeDirective(Directive):
-    keyword = 'include'
+    keyword = "include"
 
     def __init__(self, filename):
         self.filename = filename
@@ -43,7 +42,7 @@ class IncludeDirective(Directive):
 
 
 class EndAccountDirective(Directive):
-    keyword = 'end'
+    keyword = "end"
 
     def execute(self, processor):
         processor.remove_account_prefix()

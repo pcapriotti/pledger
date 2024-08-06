@@ -36,7 +36,10 @@ def test_expression_sorting(parser, data):
 
 def test_expression_sorting_with_date(parser):
     s = ExpressionSorting(parser, "abs((record - date('2011/01/01')).days)")
-    data = [date(2011, 2, 1), date(2010, 12, 15),
-            date(2011, 9, 5), date(2010, 10, 2)]
-    assert s(data) == [date(2010, 12, 15), date(2011, 2, 1),
-                       date(2010, 10, 2), date(2011, 9, 5)]
+    data = [date(2011, 2, 1), date(2010, 12, 15), date(2011, 9, 5), date(2010, 10, 2)]
+    assert s(data) == [
+        date(2010, 12, 15),
+        date(2011, 2, 1),
+        date(2010, 10, 2),
+        date(2011, 9, 5),
+    ]

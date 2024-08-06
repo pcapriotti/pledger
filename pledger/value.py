@@ -83,35 +83,37 @@ class Value(object):
 
     def format_value(self, curr, value):
         places = self.precision
-        q = Decimal(10) ** -places      # 2 places --> '0.01'
+        q = Decimal(10) ** -places  # 2 places --> '0.01'
         sign, digits, exp = value.quantize(q).as_tuple()
         result = []
         digits = list(map(str, digits))
         build, next = result.append, digits.pop
         build(" " + curr)
         for i in range(places):
-            build(next() if digits else '0')
-        build('.')
+            build(next() if digits else "0")
+        build(".")
         if not digits:
-            build('0')
+            build("0")
         i = 0
         while digits:
             build(next())
             i += 1
         if sign:
-            build('-')
-        return ''.join(reversed(result))
+            build("-")
+        return "".join(reversed(result))
 
     def __str__(self):
         if self.null():
             return "0"
         else:
-            return ", ".join([self.format_value(curr, value) for
-                              curr, value in self.values.items()])
+            return ", ".join(
+                [self.format_value(curr, value) for curr, value in self.values.items()]
+            )
 
     def __repr__(self):
-        return "<%s>" % " ".join([self.format_value("?", value) for
-                                 curr, value in self.values.items()])
+        return "<%s>" % " ".join(
+            [self.format_value("?", value) for curr, value in self.values.items()]
+        )
 
     def __hash__(self):
         return hash(tuple(sorted(self.values.items())))
@@ -123,7 +125,7 @@ class Value(object):
             try:
                 amount = Decimal(elements[0])
                 if precision is None:
-                    p = elements[0].find('.')
+                    p = elements[0].find(".")
                     if p == -1:
                         precision = 2
                     else:

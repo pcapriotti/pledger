@@ -6,6 +6,7 @@ class Sorting(object):
         @Sorting
         def result(l):
             return list(reversed(self(l)))
+
         return result
 
     def __call__(self, l):
@@ -28,9 +29,7 @@ class ExpressionSorting(MapSorting):
         self.expression = compile(expression, "<commandline>", "eval")
 
     def map(self, entry):
-        context = {
-            "record": entry,
-            "date": self.parse_date}
+        context = {"record": entry, "date": self.parse_date}
         return eval(self.expression, context)
 
     def parse_date(self, str):
