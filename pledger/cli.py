@@ -66,6 +66,9 @@ def run_cli():
         sorting = ~ExpressionSorting(parser, *args.sortb)
 
     report = report_factory(parser, rules, filter, sorting)
-    width = os.get_terminal_size().columns
+    try:
+        width = os.get_terminal_size().columns
+    except OSError:
+        width = 200
     template = default_template
     return template(width, ledgers, report, print)
